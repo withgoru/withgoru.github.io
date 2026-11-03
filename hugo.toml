@@ -1,0 +1,68 @@
+baseURL = 'https://withgoru.github.io/'
+locale = 'ko-kr'
+title = 'withgoru'
+theme = 'PaperMod'
+
+enableRobotsTXT = true
+buildDrafts = false
+buildFuture = false
+buildExpired = false
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[menu]
+  [[menu.main]]
+    identifier = 'posts'
+    name = 'Posts'
+    url = '/posts/'
+    weight = 10
+  [[menu.main]]
+    identifier = 'about'
+    name = 'About'
+    url = '/about/'
+    weight = 20
+
+[params]
+  env = 'production'
+  title = 'withgoru'
+  description = 'Welcome to my blog'
+  defaultTheme = 'auto' # dark, light, auto
+  ShowReadingTime = true
+  ShowShareButtons = false
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+  ShowCodeCopyButtons = true
+  ShowWordCount = true
+  ShowRssButtonInSectionTermList = true
+  UseHugoToc = true
+
+  # 홈 화면 상단 소개 카드 (Home-Info Mode)
+  [params.homeInfoParams]
+    Title = 'withgoru'
+    Content = 'Owner of Kickcode Plus | Web Developer | Lecturer | Contents Creator'
+
+  # /about/ 페이지에서 사용할 Profile Mode 설정 (enabled = false로 두어 홈 화면은 글 목록 유지)
+  [params.profileMode]
+    enabled = false
+    title = 'Wooyoung Choi'
+    subtitle = 'Owner of Kickcode Plus | Web Developer | Lecturer | Contents Creator'
+    imageUrl = 'https://github.com/withgoru.png'
+    imageWidth = 150
+    imageHeight = 150
+    imageTitle = 'withgoru'
+
+    [[params.profileMode.buttons]]
+      name = 'Posts'
+      url = '/posts/'
+    [[params.profileMode.buttons]]
+      name = 'GitHub'
+      url = 'https://github.com/withgoru'
+
+  [[params.socialIcons]]
+    name = 'github'
+    url = 'https://github.com/withgoru'
+    
+  [[params.socialIcons]]
+    name = 'rss'
+    url = 'index.xml'

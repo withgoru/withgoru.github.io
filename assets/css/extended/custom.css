@@ -1,0 +1,112 @@
+/* PaperMod Extended Custom Styles */
+
+/* 1. Profile 랜딩 화면 여백 조정 (아래 본문과 자연스럽게 이어지도록) */
+.profile {
+    min-height: auto !important;
+    padding: 2.5rem 0 1.5rem 0 !important;
+}
+
+.profile .profile_inner {
+    gap: 0.8rem;
+}
+
+/* 뱃지 영역 래퍼 */
+.badge-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.5rem 0 1.2rem 0;
+}
+
+.badge-group a,
+.badge-group img {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0;
+}
+
+.badge-group a {
+    text-decoration: none !important;
+}
+
+/* 2. 본문 및 리스트 타이포그래피 & Line-height / 여백 개선 */
+.post-content,
+.md-content {
+    line-height: 1.75;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+}
+
+/* 제목(Heading) 간격 및 줄높이 */
+.post-content h2,
+.md-content h2 {
+    margin: 2.5rem 0 1rem 0;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.35;
+    font-size: 1.65rem;
+}
+
+.post-content h3,
+.md-content h3 {
+    margin: 2rem 0 0.8rem 0;
+    line-height: 1.4;
+    font-size: 1.3rem;
+}
+
+.post-content h4,
+.md-content h4 {
+    margin: 1.5rem 0 0.6rem 0;
+    line-height: 1.45;
+    font-size: 1.1rem;
+    color: var(--primary);
+}
+
+.post-content h5,
+.md-content h5 {
+    margin: 1.2rem 0 0.5rem 0;
+    font-size: 1rem;
+}
+
+/* 리스트 항목 간격 및 줄높이 */
+.post-content ul,
+.post-content ol,
+.md-content ul,
+.md-content ol {
+    margin: 0.5rem 0 1.2rem 1.4rem;
+    padding: 0;
+}
+
+.post-content li,
+.md-content li {
+    margin: 0.35rem 0;
+    line-height: 1.65;
+}
+
+/* 기술명 등 italic(em) 텍스트 회색 처리 */
+.post-content em,
+.md-content em {
+    color: var(--secondary);
+    font-style: italic;
+}
+
+.post-content li > ul,
+.post-content li > ol {
+    margin: 0.25rem 0 0.4rem 1.2rem;
+}
+
+/* 문단 간격 */
+.post-content p,
+.md-content p {
+    margin: 0.6rem 0 1rem 0;
+    line-height: 1.75;
+}
+
+/* 구분선 (hr) */
+.post-content hr,
+.md-content hr {
+    margin: 2.5rem 0;
+    border: 0;
+    border-top: 1px dashed var(--tertiary);
+}
+
