@@ -1,0 +1,27 @@
+# Hugo build output & temporary files
+/public/
+/resources/_gen/
+.hugo_build.lock
+hugo_stats.json
+
+# Dependency & environment directories
+node_modules/
+.venv/
+env/
+venv/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE & Editor settings
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
