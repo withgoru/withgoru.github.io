@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  schedule:
+    # 매시 정각(UTC 기준 매시간 0분)에 자동 빌드 실행
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 permissions:
