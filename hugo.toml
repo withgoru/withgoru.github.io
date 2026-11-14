@@ -1,4 +1,5 @@
 baseURL = 'https://withgoru.github.io/'
+defaultContentLanguage = 'ko'
 locale = 'ko-kr'
 title = 'withgoru'
 theme = 'PaperMod'
@@ -50,7 +51,7 @@ buildExpired = false
     imageUrl = 'https://github.com/withgoru.png'
     imageWidth = 150
     imageHeight = 150
-    imageTitle = 'withgoru'
+    imageTitle = '최우영 (Wooyoung Choi) 프로필 사진'
 
     [[params.profileMode.buttons]]
       name = 'Posts'

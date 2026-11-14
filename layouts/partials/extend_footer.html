@@ -1,0 +1,41 @@
+<script>
+  (function () {
+    // 1. 네비게이션 랜드마크(nav) 구분 레이블 부여 (WCAG 1.3.1 / 2.4.1)
+    var headerNav = document.querySelector("nav.header-nav");
+    if (headerNav && !headerNav.hasAttribute("aria-label")) {
+      headerNav.setAttribute("aria-label", "주요 메뉴");
+    }
+
+    var tocNav = document.getElementById("TableOfContents");
+    if (tocNav && !tocNav.hasAttribute("aria-label")) {
+      tocNav.setAttribute("aria-label", "목차");
+    }
+
+    var pageNav = document.querySelector("nav.paginav");
+    if (pageNav && !pageNav.hasAttribute("aria-label")) {
+      pageNav.setAttribute("aria-label", "이전 및 다음 글");
+    }
+
+    var paginationNav = document.querySelector("nav.pagination");
+    if (paginationNav && !paginationNav.hasAttribute("aria-label")) {
+      paginationNav.setAttribute("aria-label", "페이지 이동");
+    }
+
+    // 2. 장식용 아이콘 SVG 스크린 리더 숨김 처리 (WCAG 1.1.1)
+    document.querySelectorAll("a svg, button svg, .breadcrumbs svg, .entry-hint svg").forEach(function (svg) {
+      if (!svg.hasAttribute("aria-hidden") && !svg.hasAttribute("aria-label")) {
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("focusable", "false");
+      }
+    });
+
+    // 3. 코드 복사 버튼 접근성 속성 보완 (WCAG 4.1.2)
+    window.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll("button.copy-code").forEach(function (btn) {
+        if (!btn.hasAttribute("type")) btn.setAttribute("type", "button");
+        if (!btn.hasAttribute("aria-label")) btn.setAttribute("aria-label", "코드 복사");
+      });
+    });
+  })();
+</script>
+
