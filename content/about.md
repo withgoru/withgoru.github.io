@@ -1,4 +1,5 @@
 +++
+date = '2026-11-03T09:00:00+09:00'
 title = 'About'
 url = '/about/'
 layout = 'profile'
