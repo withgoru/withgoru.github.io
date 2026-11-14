@@ -11,7 +11,7 @@ summary = 'About me'
 <div class="badge-group">
   <a href="mailto:collab@withgoru.com"><img src="https://shieldcn.dev/badge/Email-collab@withgoru.com-blue.svg?logo=lu:Mail" alt="Email" /></a>
   <a href="https://github.com/withgoru" target="_blank" rel="noopener noreferrer"><img src="https://shieldcn.dev/badge/GitHub-withgoru-black.svg?logo=github" alt="GitHub" /></a>
-  <img src="https://shieldcn.dev/badge/Built%20in-South%20Korea-red.svg?logo=lu:MapPin" alt="Built in South Korea" />
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/flag/kr.svg?theme=blue&amp;mode=dark"><img alt="Built in South Korea" src="https://shieldcn.dev/flag/kr.svg?theme=blue&amp;mode=light"></picture>
 </div>
 
 <div class="badge-group">
@@ -21,13 +21,12 @@ summary = 'About me'
   <img src="https://shieldcn.dev/badge/uv-DE5FE9.svg?logo=astral" alt="uv" />
   <img src="https://shieldcn.dev/badge/Svelte-FF3E00.svg?logo=svelte" alt="Svelte" />
   <img src="https://shieldcn.dev/badge/Tailwind%20CSS-06B6D4.svg?logo=tailwindcss" alt="Tailwind CSS" />
-  <img src="https://shieldcn.dev/badge/OpenAI-412991.svg?logo=openai" alt="OpenAI" />
-  <img src="https://shieldcn.dev/badge/Claude%20Code-D97706.svg?logo=anthropic" alt="Claude Code" />
+  <img src="https://shieldcn.dev/badge/OpenAI-22c55e.svg?variant=branded&brand=openai" alt="OpenAI">
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Claude-Code-D97757.svg?logo=anthropic&amp;variant=outline&amp;mode=dark"><img alt="Claude Code" src="https://shieldcn.dev/badge/Claude-Code-D97757.svg?logo=anthropic&amp;variant=outline&amp;mode=light"></picture>
   <img src="https://shieldcn.dev/badge/Google%20Gemini-8E75B2.svg?logo=googlegemini" alt="Google Gemini" />
   <img src="https://shieldcn.dev/badge/Cloudflare-F38020.svg?logo=cloudflare" alt="Cloudflare" />
   <img src="https://shieldcn.dev/badge/GCP-4285F4.svg?logo=googlecloud" alt="GCP" />
   <img src="https://shieldcn.dev/badge/AWS-232F3E.svg?logo=amazonwebservices" alt="AWS" />
-  <img src="https://shieldcn.dev/badge/Azure-0078D4.svg?logo=microsoftazure" alt="Azure" />
   <img src="https://shieldcn.dev/badge/GitHub%20Pages-222222.svg?logo=githubpages" alt="GitHub Pages" />
   <img src="https://shieldcn.dev/badge/PostgreSQL-4169E1.svg?logo=postgresql" alt="PostgreSQL" />
   <img src="https://shieldcn.dev/badge/MongoDB-47A248.svg?logo=mongodb" alt="MongoDB" />
@@ -36,7 +35,7 @@ summary = 'About me'
 
 ### Professional Summary
 
-Versatile software engineer, IT educator, and owner of Kickcode Plus with over 11 years of hands-on experience bridging full-stack web development, agentic AI workflows, and digital business automation. Proven track record of architecting scalable systems with Go and Python, executing marketing engineering (GA4/GTM), and delivering high-impact corporate training for premier tech firms—including Samsung Electronics, Kakao Tech Campus, and 11st—as well as lecturing at Kookmin University's Digital Marketing MBA program. Adept at turning complex business challenges into production-ready software solutions with end-to-end ownership.
+Versatile software engineer, NCS-certified IT educator, and owner of Kickcode Plus with over 11 years of hands-on experience bridging full-stack web development, agentic AI workflows, and digital business automation. Proven track record of architecting scalable systems with Go and Python, executing marketing engineering (GA4/GTM), and delivering high-impact corporate training for premier tech firms—including Samsung Electronics, Kakao Tech Campus, and 11st—as well as lecturing at Kookmin University's Digital Marketing MBA program. Adept at turning complex business challenges into production-ready software solutions with end-to-end ownership.
 
 ### Years of Work Experience
 
@@ -71,6 +70,8 @@ Versatile software engineer, IT educator, and owner of Kickcode Plus with over 1
 ### Education & Professional Qualifications
 
 - **B.S. in Electrical and Electronic Engineering**, University of Ulsan _(Mar. 2008 – Feb. 2016, 울산대2015(학)1657)_
+- **NCS Certified Instructor (NCS 확인강사)**, HRD-Net / Ministry of Employment and Labor _(Nov. 25, 2020)_
+  - Certified Fields: **IT Development (정보기술개발, 200102)**, **Artificial Intelligence (인공지능, 200107)**
 - **Industrial Engineer Information Processing (정보처리산업기사)**, HRD Korea _(Sep. 2, 2011)_
 
 ---
@@ -85,7 +86,8 @@ Versatile software engineer, IT educator, and owner of Kickcode Plus with over 1
 - **Kookmin University** _(Aug. 2022 – Present)_
   - Instruct Digital Marketing Programming for the Digital Marketing MBA program.
 - **Freelance IT Instructor** _(Sep. 2016 – Present)_
-  - Design and deliver intensive programming and data courses for major bootcamps and corporate clients.
+  - Registered NCS (National Competency Standards) Certified Instructor _(since Nov. 2020; 200102 IT Development, 200107 AI)_ for national vocational and K-Digital Training programs.
+  - Design and deliver intensive programming, AI, and data courses for major bootcamps and corporate clients.
 - **Fast Campus** _(Mar. 2016 – Aug. 2016)_
   - Executed performance marketing and business planning for educational programs.
 
