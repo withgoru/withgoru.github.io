@@ -3,6 +3,7 @@
 /resources/_gen/
 .hugo_build.lock
 hugo_stats.json
+.archives/
 
 # Dependency & environment directories
 node_modules/
