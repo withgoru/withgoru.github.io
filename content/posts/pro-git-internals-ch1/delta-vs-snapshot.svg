@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 560" width="820" height="560" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">기존 VCS(Delta 기반)와 Git(Snapshot 기반)의 데이터 저장 방식 비교</title>
+  <desc id="diagram-desc">기존 VCS는 파일별 기준 버전에 변경분(Delta)을 누적하여 저장하는 반면, Git은 매 커밋마다 전체 프로젝트의 스냅샷을 저장하고 변경되지 않은 파일은 이전 버전 파일에 대한 포인터만 연결한다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .section-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; fill: #475569; }
+      .col-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: 600; fill: #334155; text-anchor: middle; }
+      .row-label { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #334155; text-anchor: end; }
+      .time-label { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; font-weight: 600; fill: #64748b; }
+
+      /* Delta boxes */
+      .box-base { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.5; rx: 6; }
+      .text-base { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; font-weight: 700; fill: #0369a1; text-anchor: middle; dominant-baseline: central; }
+      .box-delta { fill: #fef3c7; stroke: #d97706; stroke-width: 1.5; rx: 6; }
+      .text-delta { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; font-weight: 700; fill: #b45309; text-anchor: middle; dominant-baseline: central; }
+
+      /* Snapshot boxes */
+      .box-snap-new { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; rx: 6; }
+      .text-snap-new { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; font-weight: 700; fill: #15803d; text-anchor: middle; dominant-baseline: central; }
+      .box-snap-link { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 4 3; rx: 6; }
+      .text-snap-link { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; font-weight: 500; fill: #64748b; text-anchor: middle; dominant-baseline: central; }
+
+      /* Arrows & connectors */
+      .arrow-solid { stroke: #94a3b8; stroke-width: 1.5; fill: none; }
+      .arrow-link { stroke: #64748b; stroke-width: 1.5; stroke-dasharray: 3 3; fill: none; }
+      .time-line { stroke: #94a3b8; stroke-width: 1.5; fill: none; }
+    </style>
+
+    <marker id="head-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+    </marker>
+    <marker id="head-light" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+    </marker>
+  </defs>
+
+  <!-- Outer Card Background -->
+  <rect x="1" y="1" width="818" height="558" rx="12" class="bg" />
+
+  <!-- ==================== SECTION 1: DELTA-BASED ==================== -->
+  <text x="32" y="38" class="section-title">1. 기존 VCS (Delta 기반: CVS, Subversion, Perforce 등)</text>
+  <text x="32" y="58" class="section-sub">각 파일의 기준 버전(Base)과 시간순 변경 이력(Δ)을 저장한다.</text>
+
+  <!-- Column Headers -->
+  <text x="175" y="92" class="col-header">Version 1</text>
+  <text x="305" y="92" class="col-header">Version 2</text>
+  <text x="435" y="92" class="col-header">Version 3</text>
+  <text x="565" y="92" class="col-header">Version 4</text>
+  <text x="695" y="92" class="col-header">Version 5</text>
+
+  <!-- Row Labels -->
+  <text x="108" y="128" class="row-label">File A</text>
+  <text x="108" y="176" class="row-label">File B</text>
+  <text x="108" y="224" class="row-label">File C</text>
+
+  <!-- File A: Base A -> Δ1 -> Δ2 -->
+  <rect x="140" y="106" width="70" height="34" class="box-base" />
+  <text x="175" y="123" class="text-base">A</text>
+  <line x1="210" y1="123" x2="266" y2="123" class="arrow-solid" marker-end="url(#head-light)" />
+  <rect x="270" y="106" width="70" height="34" class="box-delta" />
+  <text x="305" y="123" class="text-delta">Δ1</text>
+  <line x1="340" y1="123" x2="526" y2="123" class="arrow-solid" marker-end="url(#head-light)" />
+  <rect x="530" y="106" width="70" height="34" class="box-delta" />
+  <text x="565" y="123" class="text-delta">Δ2</text>
+
+  <!-- File B: Base B -> Δ1 -> Δ2 -->
+  <rect x="140" y="154" width="70" height="34" class="box-base" />
+  <text x="175" y="171" class="text-base">B</text>
+  <line x1="210" y1="171" x2="396" y2="171" class="arrow-solid" marker-end="url(#head-light)" />
+  <rect x="400" y="154" width="70" height="34" class="box-delta" />
+  <text x="435" y="171" class="text-delta">Δ1</text>
+  <line x1="470" y1="171" x2="656" y2="171" class="arrow-solid" marker-end="url(#head-light)" />
+  <rect x="660" y="154" width="70" height="34" class="box-delta" />
+  <text x="695" y="171" class="text-delta">Δ2</text>
+
+  <!-- File C: Base C -> Δ1 -> Δ2 -> Δ3 -->
+  <rect x="140" y="202" width="70" height="34" class="box-base" />
+  <text x="175" y="219" class="text-base">C</text>
+  <line x1="210" y1="219" x2="266" y2="219" class="arrow-solid" marker-end="url(#head-light)" />
+  <rect x="270" y="202" width="70" height="34" class="box-delta" />
+  <text x="305" y="219" class="text-delta">Δ1</text>
+  <line x1="340" y1="219" x2="396" y2="219" class="arrow-solid" marker-end="url(#head-light)" />
+  <rect x="400" y="202" width="70" height="34" class="box-delta" />
+  <text x="435" y="219" class="text-delta">Δ2</text>
+  <line x1="470" y1="219" x2="656" y2="219" class="arrow-solid" marker-end="url(#head-light)" />
+  <rect x="660" y="202" width="70" height="34" class="box-delta" />
+  <text x="695" y="219" class="text-delta">Δ3</text>
+
+  <!-- Divider -->
+  <line x1="28" y1="268" x2="792" y2="268" class="divider" />
+
+  <!-- ==================== SECTION 2: SNAPSHOT-BASED ==================== -->
+  <text x="32" y="302" class="section-title">2. Git (Snapshot 스트림)</text>
+  <text x="32" y="322" class="section-sub">매 커밋마다 전체 스냅샷을 기록하되, 변경되지 않은 파일(점선)은 이전 파일의 링크(포인터)만 참조한다.</text>
+
+  <!-- Column Headers -->
+  <text x="175" y="356" class="col-header">Version 1</text>
+  <text x="305" y="356" class="col-header">Version 2</text>
+  <text x="435" y="356" class="col-header">Version 3</text>
+  <text x="565" y="356" class="col-header">Version 4</text>
+  <text x="695" y="356" class="col-header">Version 5</text>
+
+  <!-- Row Labels -->
+  <text x="108" y="392" class="row-label">File A</text>
+  <text x="108" y="440" class="row-label">File B</text>
+  <text x="108" y="488" class="row-label">File C</text>
+
+  <!-- File A: A -> A1 -> (A1) -> A2 -> (A2) -->
+  <rect x="140" y="370" width="70" height="34" class="box-snap-new" />
+  <text x="175" y="387" class="text-snap-new">A</text>
+
+  <rect x="270" y="370" width="70" height="34" class="box-snap-new" />
+  <text x="305" y="387" class="text-snap-new">A1</text>
+
+  <rect x="400" y="370" width="70" height="34" class="box-snap-link" />
+  <text x="435" y="387" class="text-snap-link">A1</text>
+  <line x1="400" y1="387" x2="344" y2="387" class="arrow-link" marker-end="url(#head-gray)" />
+
+  <rect x="530" y="370" width="70" height="34" class="box-snap-new" />
+  <text x="565" y="387" class="text-snap-new">A2</text>
+
+  <rect x="660" y="370" width="70" height="34" class="box-snap-link" />
+  <text x="695" y="387" class="text-snap-link">A2</text>
+  <line x1="660" y1="387" x2="604" y2="387" class="arrow-link" marker-end="url(#head-gray)" />
+
+  <!-- File B: B -> (B) -> B1 -> (B1) -> B2 -->
+  <rect x="140" y="418" width="70" height="34" class="box-snap-new" />
+  <text x="175" y="435" class="text-snap-new">B</text>
+
+  <rect x="270" y="418" width="70" height="34" class="box-snap-link" />
+  <text x="305" y="435" class="text-snap-link">B</text>
+  <line x1="270" y1="435" x2="214" y2="435" class="arrow-link" marker-end="url(#head-gray)" />
+
+  <rect x="400" y="418" width="70" height="34" class="box-snap-new" />
+  <text x="435" y="435" class="text-snap-new">B1</text>
+
+  <rect x="530" y="418" width="70" height="34" class="box-snap-link" />
+  <text x="565" y="435" class="text-snap-link">B1</text>
+  <line x1="530" y1="435" x2="474" y2="435" class="arrow-link" marker-end="url(#head-gray)" />
+
+  <rect x="660" y="418" width="70" height="34" class="box-snap-new" />
+  <text x="695" y="435" class="text-snap-new">B2</text>
+
+  <!-- File C: C -> C1 -> C2 -> (C2) -> C3 -->
+  <rect x="140" y="466" width="70" height="34" class="box-snap-new" />
+  <text x="175" y="483" class="text-snap-new">C</text>
+
+  <rect x="270" y="466" width="70" height="34" class="box-snap-new" />
+  <text x="305" y="483" class="text-snap-new">C1</text>
+
+  <rect x="400" y="466" width="70" height="34" class="box-snap-new" />
+  <text x="435" y="483" class="text-snap-new">C2</text>
+
+  <rect x="530" y="466" width="70" height="34" class="box-snap-link" />
+  <text x="565" y="483" class="text-snap-link">C2</text>
+  <line x1="530" y1="483" x2="474" y2="483" class="arrow-link" marker-end="url(#head-gray)" />
+
+  <rect x="660" y="466" width="70" height="34" class="box-snap-new" />
+  <text x="695" y="483" class="text-snap-new">C3</text>
+
+  <!-- Time Axis -->
+  <line x1="140" y1="528" x2="726" y2="528" class="time-line" marker-end="url(#head-light)" />
+  <text x="435" y="546" class="time-label" text-anchor="middle">Checkins over time (시간의 흐름) →</text>
+</svg>
