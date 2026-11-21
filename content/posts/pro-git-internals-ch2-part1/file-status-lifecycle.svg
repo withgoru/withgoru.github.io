@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 480" width="820" height="480" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Git 파일 상태 생명주기와 diff 비교 범위</title>
+  <desc id="diagram-desc">Untracked, Unmodified, Modified, Staged 네 가지 상태 간 전이 흐름과 git diff 및 git diff --staged가 비교하는 영역을 나타낸 다이어그램이다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .section-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; fill: #475569; }
+
+      .state-title { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13.5px; font-weight: 700; text-anchor: middle; }
+      .state-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; text-anchor: middle; }
+      .edge-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; font-weight: 600; fill: #334155; text-anchor: middle; }
+      .edge-label-warn { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 600; fill: #b45309; text-anchor: middle; }
+      .edge-label-muted { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 600; fill: #475569; text-anchor: middle; }
+
+      .box-untracked { fill: #f1f5f9; stroke: #64748b; stroke-width: 1.5; rx: 8; }
+      .txt-untracked { fill: #334155; }
+
+      .box-unmodified { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.5; rx: 8; }
+      .txt-unmodified { fill: #0369a1; }
+
+      .box-modified { fill: #fef3c7; stroke: #d97706; stroke-width: 1.5; rx: 8; }
+      .txt-modified { fill: #b45309; }
+
+      .box-staged { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; rx: 8; }
+      .txt-staged { fill: #15803d; }
+
+      .arrow-main { stroke: #475569; stroke-width: 1.6; fill: none; }
+      .arrow-undo { stroke: #d97706; stroke-width: 1.4; stroke-dasharray: 4 3; fill: none; }
+      .arrow-commit { stroke: #0284c7; stroke-width: 1.6; fill: none; }
+      .bracket-diff { stroke: #d97706; stroke-width: 1.8; fill: none; }
+      .bracket-staged { stroke: #16a34a; stroke-width: 1.8; fill: none; }
+      .pill-diff { fill: #fef3c7; stroke: #d97706; stroke-width: 1.2; rx: 10; }
+      .pill-staged { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.2; rx: 10; }
+    </style>
+
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706" />
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+  </defs>
+
+  <!-- Outer Card Background -->
+  <rect x="1" y="1" width="818" height="478" rx="12" class="bg" />
+
+  <!-- ==================== SECTION 1: LIFECYCLE ==================== -->
+  <text x="32" y="36" class="section-title">1. 파일 상태의 생명주기 (The Lifecycle of File Status)</text>
+
+  <!-- Top Arc: Untracked -> Staged -->
+  <path d="M 103 108 C 103 44, 716 44, 716 105" class="arrow-main" marker-end="url(#arrow-gray)" />
+  <text x="410" y="53" class="edge-label">git add (새 파일 추적 시작)</text>
+
+  <!-- State Boxes -->
+  <rect x="36" y="108" width="134" height="48" class="box-untracked" />
+  <text x="103" y="128" class="state-title txt-untracked">Untracked</text>
+  <text x="103" y="145" class="state-sub txt-untracked">미추적 파일</text>
+
+  <rect x="240" y="108" width="134" height="48" class="box-unmodified" />
+  <text x="307" y="128" class="state-title txt-unmodified">Unmodified</text>
+  <text x="307" y="145" class="state-sub txt-unmodified">변경 없음</text>
+
+  <rect x="444" y="108" width="134" height="48" class="box-modified" />
+  <text x="511" y="128" class="state-title txt-modified">Modified</text>
+  <text x="511" y="145" class="state-sub txt-modified">수정됨</text>
+
+  <rect x="648" y="108" width="136" height="48" class="box-staged" />
+  <text x="716" y="128" class="state-title txt-staged">Staged</text>
+  <text x="716" y="145" class="state-sub txt-staged">커밋 대기</text>
+
+  <!-- Horizontal Edges -->
+  <!-- Unmodified -> Untracked -->
+  <line x1="240" y1="132" x2="174" y2="132" class="arrow-main" marker-end="url(#arrow-gray)" />
+  <text x="205" y="122" class="edge-label">git rm</text>
+
+  <!-- Unmodified -> Modified -->
+  <line x1="374" y1="132" x2="440" y2="132" class="arrow-main" marker-end="url(#arrow-gray)" />
+  <text x="409" y="122" class="edge-label">파일 수정</text>
+
+  <!-- Modified -> Staged -->
+  <line x1="578" y1="132" x2="644" y2="132" class="arrow-main" marker-end="url(#arrow-gray)" />
+  <text x="613" y="122" class="edge-label">git add</text>
+
+  <!-- Undo Dashed Arcs (Middle-Bottom) -->
+  <!-- Modified -> Unmodified -->
+  <path d="M 495 156 Q 409 194 326 159" class="arrow-undo" marker-end="url(#arrow-amber)" />
+  <text x="410" y="192" class="edge-label-warn">git restore (폐기)</text>
+
+  <!-- Staged -> Modified -->
+  <path d="M 695 156 Q 613 194 532 159" class="arrow-undo" marker-end="url(#arrow-amber)" />
+  <text x="614" y="192" class="edge-label-warn">git restore --staged</text>
+
+  <!-- Commit Arc: Staged -> Unmodified -->
+  <path d="M 738 156 C 738 242, 286 242, 286 159" class="arrow-commit" marker-end="url(#arrow-blue)" />
+  <text x="512" y="238" class="edge-label" style="fill: #0369a1;">git commit (새 스냅샷 영구 저장)</text>
+
+  <!-- Divider -->
+  <line x1="28" y1="264" x2="792" y2="264" class="divider" />
+
+  <!-- ==================== SECTION 2: DIFF BOUNDARIES ==================== -->
+  <text x="32" y="296" class="section-title">2. git diff vs git diff --staged (--cached) 비교 경계</text>
+  <text x="32" y="316" class="section-sub">모든 변경 사항을 git add로 스테이징하고 나면, Working Tree와 Index가 같아져 git diff는 아무것도 출력하지 않는다.</text>
+
+  <!-- Three Areas -->
+  <rect x="52" y="340" width="196" height="56" class="box-modified" />
+  <text x="150" y="363" class="state-title txt-modified">Working Tree</text>
+  <text x="150" y="381" class="state-sub txt-modified">현재 디스크의 작업 디렉토리</text>
+
+  <rect x="312" y="340" width="196" height="56" class="box-staged" />
+  <text x="410" y="363" class="state-title txt-staged">Staging Area (Index)</text>
+  <text x="410" y="381" class="state-sub txt-staged">다음 커밋에 포함될 스냅샷</text>
+
+  <rect x="572" y="340" width="196" height="56" class="box-unmodified" />
+  <text x="670" y="363" class="state-title txt-unmodified">Git Directory (HEAD)</text>
+  <text x="670" y="381" class="state-sub txt-unmodified">마지막으로 커밋된 스냅샷</text>
+
+  <!-- Bracket 1: Working Tree <-> Staging Area -->
+  <path d="M 150 400 L 150 422 L 396 422 L 396 400" class="bracket-diff" marker-start="url(#arrow-amber)" marker-end="url(#arrow-amber)" />
+  <rect x="178" y="430" width="190" height="26" class="pill-diff" />
+  <text x="273" y="447" class="edge-label-warn">git diff (Unstaged)</text>
+
+  <!-- Bracket 2: Staging Area <-> Git Directory -->
+  <path d="M 424 400 L 424 422 L 670 422 L 670 400" class="bracket-staged" marker-start="url(#arrow-green)" marker-end="url(#arrow-green)" />
+  <rect x="442" y="430" width="210" height="26" class="pill-staged" />
+  <text x="547" y="447" class="edge-label" style="fill: #15803d;">git diff --staged / --cached</text>
+</svg>
