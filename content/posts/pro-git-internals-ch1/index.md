@@ -60,7 +60,7 @@ Git의 탄생 배경은 오픈소스 역사에서 가장 유명한 일화 중 �
 
 Pro Git 1.3에서 가장 강조하는 대목이다. 다른 VCS(Subversion, CVS, Perforce 등)를 써본 개발자일수록 Git의 CLI가 비슷해 보여서 같은 방식으로 동작할 것이라 착각하기 쉽다. 하지만 **Git이 내부적으로 데이터를 저장하고 사고하는 방식은 기존 VCS와 완전히 다르다.**
 
-{{< figure src="delta-vs-snapshot.svg" alt="기존 VCS(Delta 기반)와 Git(Snapshot 기반)의 데이터 저장 방식 비교 다이어그램" caption="기존 VCS(Delta 기반)와 Git(Snapshot 스트림)의 데이터 저장 구조 비교 (Pro Git 1.3 도식 재구성)" align="center" >}}
+{{< figure src="delta-vs-snapshot.svg" alt="기존 VCS(Delta 기반)와 Git(Snapshot 기반)의 데이터 저장 방식 비교 다이어그램" caption="기존 VCS(Delta 기반)와 Git(Snapshot 스트림)의 데이터 저장 구조 비교 (Pro Git 1.3 도식 재구성)" width="820" height="560" >}}
 
 ### 기존 VCS: Delta 기반 (파일별 변경 이력 저장)
 
