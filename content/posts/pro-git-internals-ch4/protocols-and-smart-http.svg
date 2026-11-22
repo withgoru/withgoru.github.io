@@ -1,0 +1,172 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" width="820" height="520" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Git Dumb HTTP와 Smart HTTP 동작 비교 및 4대 전송 프로토콜 아키텍처</title>
+  <desc id="diagram-desc">상단은 정적 파일을 순회하는 Dumb HTTP와 git-http-backend가 upload-pack 및 receive-pack으로 Packfile을 협상하는 Smart HTTP의 동작 차이를 비교하고, 하단은 Local, Git 데몬, SSH, Smart HTTPS 4대 프로토콜의 특징과 현대적 위상을 정리한다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .box-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: 700; text-anchor: middle; }
+      .mono-title { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10.5px; text-anchor: middle; }
+      .mono-sub { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; text-anchor: middle; }
+      .edge-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; font-weight: 700; text-anchor: middle; }
+
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .card-local { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.4; rx: 8; }
+      .card-legacy { fill: #fff1f2; stroke: #e11d48; stroke-width: 1.4; rx: 8; }
+      .card-ssh { fill: #eff6ff; stroke: #3b82f6; stroke-width: 1.4; rx: 8; }
+      .card-https { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.7; rx: 8; }
+
+      .node-client { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.4; rx: 6; }
+      .node-server { fill: #f1f5f9; stroke: #64748b; stroke-width: 1.4; rx: 6; }
+      .node-smart { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; rx: 6; }
+      .node-bare { fill: #fef3c7; stroke: #d97706; stroke-width: 1.4; rx: 6; }
+
+      .pill-note { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 6; }
+      .pill-warn { fill: #fee2e2; stroke: #dc2626; stroke-width: 1.1; rx: 5; }
+      .pill-good { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.1; rx: 5; }
+      .pill-info { fill: #dbeafe; stroke: #2563eb; stroke-width: 1.1; rx: 5; }
+      .pill-neutral { fill: #e2e8f0; stroke: #64748b; stroke-width: 1.1; rx: 5; }
+
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+      .txt-blue { fill: #0369a1; }
+      .txt-green { fill: #15803d; }
+      .txt-amber { fill: #b45309; }
+      .txt-red { fill: #be123c; }
+
+      .arrow-slate { stroke: #475569; stroke-width: 1.4; fill: none; }
+      .arrow-red { stroke: #dc2626; stroke-width: 1.4; stroke-dasharray: 4 3; fill: none; }
+      .arrow-green { stroke: #16a34a; stroke-width: 1.5; fill: none; }
+      .arrow-blue { stroke: #0284c7; stroke-width: 1.5; fill: none; }
+    </style>
+
+    <marker id="head-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+    <marker id="head-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+    </marker>
+    <marker id="head-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+    <marker id="head-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+  </defs>
+
+  <!-- Outer Card Background -->
+  <rect x="1" y="1" width="818" height="518" rx="12" class="bg" />
+
+  <!-- SECTION 1: DUMB HTTP VS SMART HTTP -->
+  <text x="26" y="30" class="section-title">1. Dumb HTTP (정적 파일 순회) vs Smart HTTP / SSH (동적 Packfile 협상)</text>
+
+  <!-- Left Panel: Dumb HTTP -->
+  <rect x="24" y="44" width="376" height="206" class="panel-card" />
+  <text x="38" y="64" class="panel-title">A. Dumb HTTP (Git 1.6.6 이전 · 정적 웹 서빙)</text>
+
+  <rect x="38" y="78" width="112" height="80" class="node-client" />
+  <text x="94" y="98" class="box-title txt-blue">Git Client</text>
+  <text x="94" y="118" class="mono-sub txt-slate">GET info/refs</text>
+  <text x="94" y="133" class="mono-sub txt-slate">GET objects/...</text>
+  <text x="94" y="148" class="sub-txt txt-red">직접 순회 요청</text>
+
+  <line x1="150" y1="102" x2="216" y2="102" class="arrow-red" marker-end="url(#head-red)" />
+  <text x="184" y="94" class="edge-label txt-red">반복 GET</text>
+
+  <line x1="220" y1="136" x2="154" y2="136" class="arrow-slate" marker-end="url(#head-slate)" />
+  <text x="184" y="152" class="edge-label txt-slate">정적 파일</text>
+
+  <rect x="220" y="78" width="166" height="80" class="node-server" />
+  <text x="303" y="98" class="box-title txt-slate">단순 정적 웹 서버</text>
+  <text x="303" y="116" class="mono-sub txt-slate">post-update 훅 실행:</text>
+  <text x="303" y="131" class="mono-sub txt-blue">git update-server-info</text>
+  <text x="303" y="148" class="sub-txt txt-muted">(Git 프로세스 미동작)</text>
+
+  <rect x="38" y="174" width="348" height="62" class="pill-note" />
+  <text x="212" y="196" class="sub-txt txt-slate" style="font-weight: 700;">읽기 전용(Read-Only)이며 서버와 필요한 커밋 협상 불가</text>
+  <text x="212" y="216" class="sub-txt txt-muted">클라이언트가 직접 참조·객체 경로를 일일이 HTTP GET으로 추적</text>
+
+  <!-- Right Panel: Smart HTTP / SSH -->
+  <rect x="416" y="44" width="380" height="206" class="panel-card" />
+  <text x="430" y="64" class="panel-title">B. Smart HTTP / SSH (현대 동적 협상 표준)</text>
+
+  <rect x="428" y="78" width="90" height="80" class="node-client" />
+  <text x="473" y="100" class="box-title txt-blue">Git Client</text>
+  <text x="473" y="120" class="mono-sub txt-blue">clone / fetch</text>
+  <text x="473" y="136" class="mono-sub txt-blue">push</text>
+
+  <line x1="518" y1="104" x2="544" y2="104" class="arrow-blue" marker-end="url(#head-blue)" />
+  <line x1="548" y1="134" x2="522" y2="134" class="arrow-green" marker-end="url(#head-green)" />
+
+  <rect x="548" y="78" width="124" height="80" class="node-smart" />
+  <text x="610" y="96" class="mono-title txt-green">git-http-backend</text>
+  <text x="610" y="112" class="sub-txt txt-slate">(또는 sshd 게이트)</text>
+  <text x="610" y="130" class="mono-sub txt-green">git-upload-pack</text>
+  <text x="610" y="145" class="mono-sub txt-green">git-receive-pack</text>
+
+  <line x1="672" y1="118" x2="692" y2="118" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="696" y="78" width="88" height="80" class="node-bare" />
+  <text x="740" y="100" class="box-title txt-amber">Bare Repo</text>
+  <text x="740" y="118" class="mono-sub txt-amber">project.git</text>
+  <text x="740" y="138" class="sub-txt txt-slate">Packfile 압축</text>
+
+  <rect x="428" y="174" width="356" height="62" class="pill-note" />
+  <text x="606" y="196" class="sub-txt txt-green" style="font-weight: 700;">양쪽 보유 커밋(have/want)을 협상해 부족분만 1회 압축 전송</text>
+  <text x="606" y="216" class="sub-txt txt-slate">단일 URL로 익명 읽기(upload-pack) + 인증 쓰기(receive-pack) 통합</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="266" x2="796" y2="266" class="divider" />
+
+  <!-- SECTION 2: FOUR PROTOCOLS -->
+  <text x="26" y="294" class="section-title">2. Git 4대 전송 프로토콜 아키텍처와 현대적 위상 비교 (Pro Git 4.1, 4.5, 4.6)</text>
+
+  <!-- Card 1: Local -->
+  <rect x="24" y="310" width="182" height="194" class="card-local" />
+  <text x="115" y="334" class="box-title txt-slate">1. Local</text>
+  <text x="115" y="352" class="mono-sub txt-blue">/srv/git vs file://</text>
+  <rect x="36" y="366" width="158" height="24" class="pill-neutral" />
+  <text x="115" y="382" class="sub-txt txt-slate" style="font-weight: 700;">공유 디스크 / NFS 환경</text>
+  <text x="115" y="410" class="sub-txt txt-slate">경로 지정: 하드링크 고속 복사</text>
+  <text x="115" y="428" class="sub-txt txt-slate">file://: 네트워크 프로세스</text>
+  <text x="115" y="446" class="sub-txt txt-slate">거쳐 불필요 객체 정리</text>
+  <text x="115" y="484" class="sub-txt txt-muted">디스크 직접 훼손 위험</text>
+
+  <!-- Card 2: Git Daemon (Legacy) -->
+  <rect x="220" y="310" width="182" height="194" class="card-legacy" />
+  <text x="311" y="334" class="box-title txt-red">2. Git (git://)</text>
+  <text x="311" y="352" class="mono-sub txt-red">TCP Port 9418</text>
+  <rect x="232" y="366" width="158" height="24" class="pill-warn" />
+  <text x="311" y="382" class="sub-txt txt-red" style="font-weight: 700;">레거시 · 2022년 GitHub 폐기</text>
+  <text x="311" y="410" class="sub-txt txt-slate">git-daemon-export-ok</text>
+  <text x="311" y="428" class="sub-txt txt-slate">암호화(TLS)·인증 전혀 없음</text>
+  <text x="311" y="446" class="sub-txt txt-slate">MITM 코드 변조 위험</text>
+  <text x="311" y="484" class="sub-txt txt-red">사내 방화벽 포트 차단 빈번</text>
+
+  <!-- Card 3: SSH -->
+  <rect x="416" y="310" width="182" height="194" class="card-ssh" />
+  <text x="507" y="334" class="box-title txt-blue">3. SSH</text>
+  <text x="507" y="352" class="mono-sub txt-blue">git@host (Port 22)</text>
+  <rect x="428" y="366" width="158" height="24" class="pill-info" />
+  <text x="507" y="382" class="sub-txt txt-blue" style="font-weight: 700;">키 기반 강력한 인증·암호화</text>
+  <text x="507" y="410" class="sub-txt txt-slate">authorized_keys 공개키 인증</text>
+  <text x="507" y="428" class="sub-txt txt-slate">git-shell로 대화형 셸 차단</text>
+  <text x="507" y="446" class="sub-txt txt-slate">익명 공개 클론 지원 불가</text>
+  <text x="507" y="484" class="sub-txt txt-muted">키 범위가 계정 전체로 넓음</text>
+
+  <!-- Card 4: Smart HTTPS -->
+  <rect x="612" y="310" width="184" height="194" class="card-https" />
+  <text x="704" y="334" class="box-title txt-green">4. Smart HTTPS</text>
+  <text x="704" y="352" class="mono-sub txt-green">https:// (Port 443)</text>
+  <rect x="624" y="366" width="160" height="24" class="pill-good" />
+  <text x="704" y="382" class="sub-txt txt-green" style="font-weight: 700;">현대 표준 · GitHub 권장</text>
+  <text x="704" y="410" class="sub-txt txt-slate">익명 읽기 + 인증 쓰기 단일 URL</text>
+  <text x="704" y="428" class="sub-txt txt-slate">방화벽 443 포트 100% 통과</text>
+  <text x="704" y="446" class="sub-txt txt-slate">GCM · Fine-grained PAT</text>
+  <text x="704" y="484" class="sub-txt txt-green" style="font-weight: 700;">Zero Trust·CI 자동화 최적</text>
+</svg>
