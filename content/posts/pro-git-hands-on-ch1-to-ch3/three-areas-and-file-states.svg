@@ -1,0 +1,200 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 540" width="820" height="540" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Git 3대 영역과 실습 파일 상태 전이 생명주기</title>
+  <desc id="diagram-desc">상단은 Working Tree, Staging Area(Index), .git Directory 간의 add, commit, restore, diff 범위를 나타내고, 하단은 Untracked에서 Staged, Unmodified, Modified, 그리고 MM(Partially Staged)까지 파일 상태 전이와 git status -s 코드를 보여준다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .box-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; text-anchor: middle; }
+      .state-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: 700; text-anchor: middle; }
+      .mono-title { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; font-weight: 700; text-anchor: middle; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10.5px; text-anchor: middle; }
+      .mono-sub { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; text-anchor: middle; }
+      .mono-left { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; text-anchor: start; font-weight: 700; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10.5px; text-anchor: start; }
+      .edge-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+
+      .area-work { fill: #fef3c7; stroke: #d97706; stroke-width: 1.6; rx: 8; }
+      .area-index { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.6; rx: 8; }
+      .area-git { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.6; rx: 8; }
+
+      .state-untracked { fill: #f1f5f9; stroke: #64748b; stroke-width: 1.5; rx: 6; }
+      .state-staged { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; rx: 6; }
+      .state-clean { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.5; rx: 6; }
+      .state-mod { fill: #fef3c7; stroke: #d97706; stroke-width: 1.5; rx: 6; }
+      .state-mm { fill: #ffffff; stroke: #e11d48; stroke-width: 1.5; rx: 6; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .mm-box { fill: #fff1f2; stroke: #e11d48; stroke-width: 1.5; rx: 8; }
+      .diff-pill { fill: #f3e8ff; stroke: #7c3aed; stroke-width: 1.1; rx: 5; }
+
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+      .txt-amber { fill: #b45309; }
+      .txt-blue { fill: #0369a1; }
+      .txt-green { fill: #15803d; }
+      .txt-red { fill: #be123c; }
+      .txt-purple { fill: #6d28d9; }
+
+      .arrow-green { stroke: #16a34a; stroke-width: 1.7; fill: none; }
+      .arrow-blue { stroke: #0284c7; stroke-width: 1.7; fill: none; }
+      .arrow-red { stroke: #dc2626; stroke-width: 1.5; stroke-dasharray: 5 3; fill: none; }
+      .arrow-slate { stroke: #475569; stroke-width: 1.5; fill: none; }
+      .bracket-purple { stroke: #7c3aed; stroke-width: 1.5; fill: none; }
+    </style>
+
+    <marker id="head-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+    <marker id="head-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+    <marker id="head-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+    </marker>
+    <marker id="head-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <!-- Outer Card Background -->
+  <rect x="1" y="1" width="818" height="538" rx="12" class="bg" />
+
+  <!-- SECTION 1: THREE AREAS -->
+  <text x="26" y="30" class="section-title">1. Git 3대 영역(Working Tree · Index · .git)과 명령어별 데이터 이동</text>
+
+  <!-- Area 1: Working Tree -->
+  <rect x="28" y="54" width="198" height="122" class="area-work" />
+  <text x="127" y="78" class="box-title txt-amber">Working Tree</text>
+  <text x="127" y="96" class="sub-txt txt-amber">(작업 디렉토리)</text>
+  <text x="127" y="122" class="sub-txt txt-slate">Vim으로 파일을 직접</text>
+  <text x="127" y="138" class="sub-txt txt-slate">작성·수정하는 공간</text>
+  <text x="127" y="160" class="mono-sub txt-amber">calc.py / README.md</text>
+
+  <!-- Area 2: Staging Area (Index) -->
+  <rect x="311" y="54" width="198" height="122" class="area-index" />
+  <text x="410" y="78" class="box-title txt-blue">Staging Area (Index)</text>
+  <text x="410" y="96" class="mono-sub txt-blue">.git/index</text>
+  <text x="410" y="122" class="sub-txt txt-slate">다음 커밋에 포함될</text>
+  <text x="410" y="138" class="sub-txt txt-slate">스냅샷 후보 대기열</text>
+  <text x="410" y="160" class="mono-sub txt-blue">Blob 해시 목록 유지</text>
+
+  <!-- Area 3: .git Directory -->
+  <rect x="594" y="54" width="198" height="122" class="area-git" />
+  <text x="693" y="78" class="box-title txt-green">.git Directory (Repo)</text>
+  <text x="693" y="96" class="mono-sub txt-green">.git/objects 및 refs</text>
+  <text x="693" y="122" class="sub-txt txt-slate">SHA-1 해시로 영구 저장된</text>
+  <text x="693" y="138" class="sub-txt txt-slate">커밋·트리·블롭 객체 DB</text>
+  <text x="693" y="160" class="mono-sub txt-green">HEAD → refs/heads/main</text>
+
+  <!-- Forward arrows: add and commit -->
+  <line x1="226" y1="90" x2="306" y2="90" class="arrow-green" marker-end="url(#head-green)" />
+  <text x="268" y="82" class="edge-label txt-green">git add</text>
+
+  <line x1="509" y1="90" x2="589" y2="90" class="arrow-green" marker-end="url(#head-green)" />
+  <text x="551" y="82" class="edge-label txt-green">git commit</text>
+
+  <!-- Reverse arrows: restore and unstage -->
+  <line x1="311" y1="142" x2="231" y2="142" class="arrow-red" marker-end="url(#head-red)" />
+  <text x="268" y="134" class="edge-label txt-red">git restore</text>
+  <text x="268" y="156" class="sub-txt txt-red">(변경 폐기)</text>
+
+  <line x1="594" y1="142" x2="514" y2="142" class="arrow-blue" marker-end="url(#head-blue)" />
+  <text x="551" y="132" class="edge-label txt-blue">git restore</text>
+  <text x="551" y="156" class="mono-sub txt-blue">--staged</text>
+
+  <!-- Diff comparison brackets -->
+  <path d="M 127 182 L 127 204 L 402 204 L 402 182" class="bracket-purple" />
+  <rect x="158" y="193" width="212" height="20" class="diff-pill" />
+  <text x="264" y="207" class="edge-label txt-purple">git diff (Working vs Index)</text>
+
+  <path d="M 418 182 L 418 232 L 693 232 L 693 182" class="bracket-purple" />
+  <rect x="434" y="221" width="242" height="20" class="diff-pill" />
+  <text x="555" y="235" class="edge-label txt-purple">git diff --staged (Index vs HEAD)</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="260" x2="796" y2="260" class="divider" />
+
+  <!-- SECTION 2: FILE LIFECYCLE AND STATUS -S -->
+  <text x="26" y="288" class="section-title">2. 실습 파일 상태 전이 생명주기와 git status -s 2열 코드</text>
+
+  <!-- 5 State Nodes -->
+  <rect x="28" y="306" width="116" height="62" class="state-untracked" />
+  <text x="86" y="326" class="state-title txt-slate">Untracked</text>
+  <text x="86" y="343" class="mono-title txt-muted">?? 파일명</text>
+  <text x="86" y="359" class="sub-txt txt-slate">추적 안 됨</text>
+
+  <line x1="144" y1="337" x2="180" y2="337" class="arrow-green" marker-end="url(#head-green)" />
+  <text x="164" y="328" class="mono-sub txt-green" style="font-weight: 700;">add</text>
+
+  <rect x="184" y="306" width="116" height="62" class="state-staged" />
+  <text x="242" y="326" class="state-title txt-green">Staged (New)</text>
+  <text x="242" y="343" class="mono-title txt-green">A  파일명</text>
+  <text x="242" y="359" class="sub-txt txt-green">Index 첫 등록</text>
+
+  <line x1="300" y1="337" x2="336" y2="337" class="arrow-blue" marker-end="url(#head-blue)" />
+  <text x="320" y="328" class="mono-sub txt-blue" style="font-weight: 700;">commit</text>
+
+  <rect x="340" y="306" width="132" height="62" class="state-clean" />
+  <text x="406" y="326" class="state-title txt-blue">Unmodified</text>
+  <text x="406" y="343" class="sub-txt txt-blue">(커밋 완료)</text>
+  <text x="406" y="359" class="mono-sub txt-slate">Work = Index = HEAD</text>
+
+  <line x1="472" y1="337" x2="508" y2="337" class="arrow-slate" marker-end="url(#head-slate)" />
+  <text x="492" y="328" class="mono-sub txt-slate" style="font-weight: 700;">vim</text>
+
+  <rect x="512" y="306" width="116" height="62" class="state-mod" />
+  <text x="570" y="326" class="state-title txt-amber">Modified</text>
+  <text x="570" y="343" class="mono-title txt-amber"> M 파일명</text>
+  <text x="570" y="359" class="sub-txt txt-amber">Working만 수정</text>
+
+  <line x1="628" y1="337" x2="664" y2="337" class="arrow-green" marker-end="url(#head-green)" />
+  <text x="648" y="328" class="mono-sub txt-green" style="font-weight: 700;">add</text>
+
+  <rect x="668" y="306" width="124" height="62" class="state-staged" />
+  <text x="730" y="326" class="state-title txt-green">Staged (Mod)</text>
+  <text x="730" y="343" class="mono-title txt-green">M  파일명</text>
+  <text x="730" y="359" class="sub-txt txt-green">다음 커밋 대기</text>
+
+  <!-- Lower Panel Left: MM (Partially Staged) -->
+  <rect x="28" y="392" width="466" height="130" class="mm-box" />
+  <text x="44" y="414" class="panel-title txt-red">핵심 함정: 동시에 Staged이자 Modified (MM 상태)</text>
+
+  <rect x="44" y="428" width="128" height="44" class="state-staged" />
+  <text x="108" y="446" class="mono-title txt-green">git add calc.py</text>
+  <text x="108" y="462" class="sub-txt txt-green">Index = v1 저장</text>
+
+  <line x1="172" y1="450" x2="196" y2="450" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="200" y="428" width="132" height="44" class="state-mod" />
+  <text x="266" y="446" class="mono-title txt-amber">vim calc.py</text>
+  <text x="266" y="462" class="sub-txt txt-amber">Working = v2 수정</text>
+
+  <line x1="332" y1="450" x2="356" y2="450" class="arrow-red" marker-end="url(#head-red)" />
+
+  <rect x="360" y="428" width="118" height="44" class="state-mm" />
+  <text x="419" y="446" class="mono-title txt-red">MM calc.py</text>
+  <text x="419" y="462" class="sub-txt txt-red">왼쪽 Index / 우 Work</text>
+
+  <text x="261" y="492" class="sub-txt txt-slate" style="font-weight: 700;">이때 바로 git commit 하면 v1만 커밋됨 → 최신본(v2)은 다시 git add 필수!</text>
+  <text x="261" y="509" class="mono-sub txt-muted">git status -s 2열 규칙: [1열 = Staging Area(Index)] [2열 = Working Tree]</text>
+
+  <!-- Lower Panel Right: Control and Undo -->
+  <rect x="510" y="392" width="282" height="130" class="panel-card" />
+  <text x="524" y="414" class="panel-title">추적 제어 및 되돌리기 실습</text>
+
+  <rect x="524" y="426" width="254" height="26" class="state-untracked" />
+  <text x="534" y="443" class="mono-left txt-blue">.gitignore</text>
+  <text x="614" y="443" class="sub-left txt-slate">: *.log 등 추적 원천 차단</text>
+
+  <rect x="524" y="457" width="254" height="26" class="state-untracked" />
+  <text x="534" y="474" class="mono-left txt-green">git rm --cached</text>
+  <text x="638" y="474" class="sub-left txt-slate">: 디스크 유지, Index 제거</text>
+
+  <rect x="524" y="488" width="254" height="26" class="state-untracked" />
+  <text x="534" y="505" class="mono-left txt-amber">commit --amend</text>
+  <text x="636" y="505" class="sub-left txt-slate">: 새 커밋으로 교체</text>
+</svg>
