@@ -239,3 +239,12 @@ git config --global alias.lg "log --color --graph --pretty=format:'%Cred%h%Crese
 이로써 **Pro Git 2장**(Git Basics)의 전체 여정을 마무리했다. 원격 저장소와의 동기화는 단순히 코드를 주고받는 것이 아니라 로컬 `.git` 안의 **리모트 트래킹 브랜치(`origin/master`)와 로컬 작업 브랜치(`master`)를 분리해 관리**하는 구조에서 출발하며, 태그 역시 **독립 객체**(Annotated)와 **단순 포인터**(Lightweight)라는 Git의 객체 철학을 그대로 따른다.
 
 다음 편에서는 Git을 여타 버전 관리 도구와 완전히 갈라놓는 핵심 무기이자 Pro Git에서 가장 빛나는 챕터인 **3장**(Git Branching)을 통해 브랜치와 HEAD 포인터가 실제로 `.git` 내부에서 어떻게 움직이는지 파헤쳐 본다.
+
+---
+
+## 참고 자료
+
+- [Scott Chacon & Ben Straub, *Pro Git* 2nd Edition - 2.5 Git Basics - Working with Remotes](https://git-scm.com/book/en/v2/Git-Basics-Working-with-Remotes)
+- [Scott Chacon & Ben Straub, *Pro Git* 2nd Edition - 2.6 Git Basics - Tagging](https://git-scm.com/book/en/v2/Git-Basics-Tagging)
+- [Scott Chacon & Ben Straub, *Pro Git* 2nd Edition - 2.7 Git Basics - Git Aliases](https://git-scm.com/book/en/v2/Git-Basics-Git-Aliases)
+- [Johan Meiring - Pretty git log alias (`git lg`) Gist](https://gist.github.com/johanmeiring/3002458)

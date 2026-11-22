@@ -337,3 +337,12 @@ Pro Git 2.4가 마지막으로 남기는 경고는 실무에서 반드시 기억
 결국 2장의 앞부분을 관통하는 핵심은 1장에서 정리한 **세 영역(Working Tree, Index, `.git`)의 상호작용**이다. `git add`는 Index에 현재 시점의 스냅샷을 올리는 행위이고, `git diff`와 `git diff --staged`는 각 영역 사이의 경계를 비교하며, `git restore --staged`와 `git restore`는 각각 Index와 Working Tree를 이전 상태로 되돌리는 명령이다.
 
 다음 편에서는 2장의 후반부(2.5~2.7)를 통해 원격 저장소(`git remote`, `fetch`, `pull`, `push`)와 태그(Tagging), 그리고 실무 생산성을 높여주는 Git Alias를 살펴본다.
+
+---
+
+## 참고 자료
+
+- [Scott Chacon & Ben Straub, *Pro Git* 2nd Edition - 2.1 Git Basics - Getting a Git Repository](https://git-scm.com/book/en/v2/Git-Basics-Getting-a-Git-Repository)
+- [Scott Chacon & Ben Straub, *Pro Git* 2nd Edition - 2.2 Git Basics - Recording Changes to the Repository](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository)
+- [Scott Chacon & Ben Straub, *Pro Git* 2nd Edition - 2.3 Git Basics - Viewing the Commit History](https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History)
+- [Scott Chacon & Ben Straub, *Pro Git* 2nd Edition - 2.4 Git Basics - Undoing Things](https://git-scm.com/book/en/v2/Git-Basics-Undoing-Things)
