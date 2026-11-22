@@ -1,0 +1,275 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 560" width="820" height="560" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Git Rebase 내부 동작(--onto)과 공개 커밋 강제 푸시 참사 및 patch-id 기반 복구</title>
+  <desc id="diagram-desc">상단은 기본 Rebase의 패치 재적용(C4에서 C4')과 --onto 옵션을 이용한 다중 토픽 브랜치 분리를 보여주며, 하단은 공개 커밋이 강제 푸시되었을 때 일반 Merge로 인한 중복 커밋 참사와 patch-id 기반 git pull --rebase 복구 과정을 비교한다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+      .panel-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; fill: #475569; text-anchor: middle; }
+
+      .mono-title { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; font-weight: 700; text-anchor: middle; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10.5px; text-anchor: middle; }
+      .mono-sub { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; text-anchor: middle; }
+      .edge-label { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10.5px; font-weight: 700; text-anchor: middle; }
+
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .drop-zone { fill: #f8fafc; stroke: #94a3b8; stroke-width: 1.2; stroke-dasharray: 4 3; rx: 6; }
+      .node-commit { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.4; rx: 5; }
+      .node-base { fill: #fef3c7; stroke: #d97706; stroke-width: 1.5; rx: 5; }
+      .node-rebased { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.6; rx: 5; }
+      .node-server { fill: #ede9fe; stroke: #7c3aed; stroke-width: 1.4; rx: 5; }
+      .node-discard { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.3; stroke-dasharray: 4 2; rx: 5; }
+      .node-conflict { fill: #fee2e2; stroke: #dc2626; stroke-width: 1.5; rx: 5; }
+
+      .badge-green { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.4; rx: 5; }
+      .badge-amber { fill: #fef3c7; stroke: #d97706; stroke-width: 1.4; rx: 5; }
+      .badge-purple { fill: #ede9fe; stroke: #7c3aed; stroke-width: 1.4; rx: 5; }
+      .badge-red { fill: #fee2e2; stroke: #dc2626; stroke-width: 1.4; rx: 5; }
+      .pill-note { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 5; }
+
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+      .txt-blue { fill: #0369a1; }
+      .txt-green { fill: #15803d; }
+      .txt-amber { fill: #b45309; }
+      .txt-purple { fill: #6d28d9; }
+      .txt-red { fill: #b91c1c; }
+
+      .arrow-slate { stroke: #475569; stroke-width: 1.4; fill: none; }
+      .arrow-muted { stroke: #94a3b8; stroke-width: 1.3; stroke-dasharray: 4 2; fill: none; }
+      .arrow-green { stroke: #16a34a; stroke-width: 1.5; fill: none; }
+      .arrow-green-dash { stroke: #16a34a; stroke-width: 1.6; stroke-dasharray: 5 3; fill: none; }
+      .arrow-amber { stroke: #d97706; stroke-width: 1.5; fill: none; }
+      .arrow-red { stroke: #dc2626; stroke-width: 1.5; fill: none; }
+    </style>
+
+    <marker id="head-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+    <marker id="head-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+    </marker>
+    <marker id="head-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+    <marker id="head-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706" />
+    </marker>
+    <marker id="head-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+    </marker>
+  </defs>
+
+  <!-- Outer Card Background -->
+  <rect x="1" y="1" width="818" height="558" rx="12" class="bg" />
+
+  <!-- SECTION 1: BASIC REBASE AND ONTO -->
+  <text x="26" y="30" class="section-title">1. 기본 Rebase 패치 재적용(C4 → C4')과 --onto 다중 분기 분리 (Pro Git 3.6)</text>
+
+  <!-- Left Panel: Basic Rebase -->
+  <rect x="24" y="44" width="376" height="220" class="panel-card" />
+  <text x="38" y="64" class="panel-title">A. 기본 Rebase (git rebase master)</text>
+  <text x="212" y="80" class="panel-sub">C4의 diff를 추출해 C3 위에 재적용(C4') 후 Fast-forward</text>
+
+  <!-- Main Chain: C1 <- C2 <- C3 <- C4' -->
+  <rect x="40" y="114" width="38" height="32" class="node-commit" />
+  <text x="59" y="134" class="mono-title txt-blue">C1</text>
+
+  <rect x="98" y="114" width="44" height="32" class="node-base" />
+  <text x="120" y="129" class="mono-title txt-amber">C2</text>
+  <text x="120" y="142" class="sub-txt txt-amber">조상</text>
+  <line x1="98" y1="130" x2="82" y2="130" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="162" y="114" width="40" height="32" class="node-commit" />
+  <text x="182" y="134" class="mono-title txt-blue">C3</text>
+  <line x1="162" y1="130" x2="146" y2="130" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="234" y="114" width="52" height="32" class="node-rebased" />
+  <text x="260" y="134" class="mono-title txt-green">C4'</text>
+  <line x1="234" y1="130" x2="206" y2="130" class="arrow-green" marker-end="url(#head-green)" />
+
+  <!-- Branch badges pointing to C4' -->
+  <rect x="306" y="102" width="82" height="22" class="badge-amber" />
+  <text x="347" y="117" class="mono-sub txt-amber" style="font-weight: 700;">experiment</text>
+  <line x1="306" y1="113" x2="290" y2="124" class="arrow-amber" marker-end="url(#head-amber)" />
+
+  <rect x="306" y="134" width="82" height="22" class="badge-green" />
+  <text x="347" y="149" class="mono-sub txt-green" style="font-weight: 700;">master</text>
+  <line x1="306" y1="145" x2="290" y2="136" class="arrow-green" marker-end="url(#head-green)" />
+
+  <!-- Old C4 (discarded) -->
+  <rect x="140" y="178" width="88" height="28" class="node-discard" />
+  <text x="184" y="196" class="mono-sub txt-muted">C4 (폐기됨)</text>
+  <line x1="140" y1="190" x2="122" y2="150" class="arrow-muted" marker-end="url(#head-muted)" />
+
+  <!-- Replay arrow C4 -> C4' -->
+  <path d="M 228 192 Q 262 188 260 150" class="arrow-green-dash" marker-end="url(#head-green)" />
+  <text x="314" y="188" class="edge-label txt-green">diff 패치 재적용</text>
+
+  <!-- Note pill -->
+  <rect x="38" y="224" width="348" height="26" class="pill-note" />
+  <text x="212" y="241" class="sub-txt txt-slate" style="font-weight: 600;">C4' 스냅샷 = 3-Way Merge 커밋 C5 스냅샷과 동일 (선형 이력)</text>
+
+  <!-- Right Panel: rebase onto -->
+  <rect x="416" y="44" width="380" height="220" class="panel-card" />
+  <text x="430" y="64" class="panel-title">B. 선택적 리플레이 (git rebase --onto master server client)</text>
+
+  <!-- Row 1: master + rebased client C8', C9' -->
+  <rect x="430" y="86" width="32" height="26" class="node-commit" />
+  <text x="446" y="103" class="mono-title txt-blue">C1</text>
+
+  <rect x="476" y="86" width="32" height="26" class="node-commit" />
+  <text x="492" y="103" class="mono-title txt-blue">C2</text>
+  <line x1="476" y1="99" x2="466" y2="99" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="522" y="86" width="32" height="26" class="node-commit" />
+  <text x="538" y="103" class="mono-title txt-blue">C5</text>
+  <line x1="522" y1="99" x2="512" y2="99" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="568" y="86" width="34" height="26" class="node-commit" />
+  <text x="585" y="103" class="mono-title txt-blue">C6</text>
+  <line x1="568" y1="99" x2="558" y2="99" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="622" y="86" width="38" height="26" class="node-rebased" />
+  <text x="641" y="103" class="mono-title txt-green">C8'</text>
+  <line x1="622" y1="99" x2="606" y2="99" class="arrow-green" marker-end="url(#head-green)" />
+
+  <rect x="674" y="86" width="38" height="26" class="node-rebased" />
+  <text x="693" y="103" class="mono-title txt-green">C9'</text>
+  <line x1="674" y1="99" x2="664" y2="99" class="arrow-green" marker-end="url(#head-green)" />
+
+  <rect x="728" y="88" width="56" height="22" class="badge-green" />
+  <text x="756" y="103" class="mono-sub txt-green" style="font-weight: 700;">client</text>
+  <line x1="728" y1="99" x2="716" y2="99" class="arrow-green" marker-end="url(#head-green)" />
+
+  <!-- Row 2: server branch C3 <- C4 <- C10 -->
+  <rect x="506" y="136" width="34" height="26" class="node-server" />
+  <text x="523" y="153" class="mono-title txt-purple">C3</text>
+  <line x1="506" y1="145" x2="493" y2="115" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="554" y="136" width="34" height="26" class="node-server" />
+  <text x="571" y="153" class="mono-title txt-purple">C4</text>
+  <line x1="554" y1="149" x2="544" y2="149" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="602" y="136" width="76" height="26" class="node-server" />
+  <text x="640" y="153" class="mono-sub txt-purple" style="font-weight: 700;">C10 server</text>
+  <line x1="602" y1="149" x2="592" y2="149" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <!-- Row 3: discarded client C8 <- C9 -->
+  <rect x="550" y="182" width="38" height="26" class="node-discard" />
+  <text x="569" y="199" class="mono-sub txt-muted">C8</text>
+  <line x1="550" y1="192" x2="526" y2="165" class="arrow-muted" marker-end="url(#head-muted)" />
+
+  <rect x="602" y="182" width="44" height="26" class="node-discard" />
+  <text x="624" y="199" class="mono-sub txt-muted">C9 (구)</text>
+  <line x1="602" y1="195" x2="592" y2="195" class="arrow-muted" marker-end="url(#head-muted)" />
+
+  <!-- Curved arrow C9 -> C8'..C9' -->
+  <path d="M 646 195 Q 724 180 694 116" class="arrow-green-dash" marker-end="url(#head-green)" />
+  <text x="742" y="164" class="edge-label txt-green">패치 분리</text>
+  <text x="742" y="177" class="edge-label txt-green">재적용</text>
+
+  <!-- Note pill -->
+  <rect x="430" y="224" width="352" height="26" class="pill-note" />
+  <text x="606" y="241" class="sub-txt txt-slate" style="font-weight: 600;">server와 분기한 C8~C9 패치만 떼어 master(C6) 위로 이동</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="278" x2="796" y2="278" class="divider" />
+
+  <!-- SECTION 2: PERILS OF REBASING AND RECOVERY -->
+  <text x="26" y="304" class="section-title">2. 공개 커밋 강제 푸시(C4') 참사와 patch-id 기반 git pull --rebase 복구</text>
+
+  <!-- Left Panel: Normal git pull disaster -->
+  <rect x="24" y="318" width="376" height="226" class="panel-card" />
+  <text x="38" y="338" class="panel-title">A. 강제 푸시 후 일반 git pull(merge) 실행 시 참사</text>
+  <text x="212" y="354" class="panel-sub">폐기된 C4·C6이 로컬과 연결돼 있어 중복 커밋(C4, C4')이 공존</text>
+
+  <!-- C1 root -->
+  <rect x="38" y="422" width="34" height="28" class="node-commit" />
+  <text x="55" y="440" class="mono-title txt-blue">C1</text>
+
+  <!-- Top row: force pushed C4' (teamone/master) -->
+  <rect x="118" y="368" width="46" height="28" class="node-base" />
+  <text x="141" y="386" class="mono-title txt-amber">C4'</text>
+  <line x1="118" y1="382" x2="73" y2="420" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="176" y="370" width="114" height="22" class="badge-amber" />
+  <text x="233" y="385" class="mono-sub txt-amber" style="font-weight: 700;">teamone/master</text>
+  <line x1="176" y1="381" x2="167" y2="381" class="arrow-amber" marker-end="url(#head-amber)" />
+
+  <!-- Middle row: abandoned C4 <- C6 -->
+  <rect x="96" y="422" width="36" height="28" class="node-conflict" />
+  <text x="114" y="440" class="mono-title txt-red">C4</text>
+  <line x1="96" y1="436" x2="76" y2="436" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="150" y="422" width="36" height="28" class="node-discard" />
+  <text x="168" y="440" class="mono-title txt-muted">C6</text>
+  <line x1="150" y1="436" x2="136" y2="436" class="arrow-muted" marker-end="url(#head-muted)" />
+
+  <!-- Lower row: local C2 <- C3 <- C7 -->
+  <rect x="132" y="468" width="34" height="26" class="node-commit" />
+  <text x="149" y="485" class="mono-title txt-blue">C2</text>
+  <line x1="132" y1="478" x2="115" y2="453" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="180" y="468" width="34" height="26" class="node-commit" />
+  <text x="197" y="485" class="mono-title txt-blue">C3</text>
+  <line x1="180" y1="481" x2="170" y2="481" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="228" y="468" width="38" height="26" class="node-commit" />
+  <text x="247" y="485" class="mono-title txt-blue">C7</text>
+  <line x1="228" y1="481" x2="218" y2="481" class="arrow-slate" marker-end="url(#head-slate)" />
+  <line x1="228" y1="472" x2="188" y2="444" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <!-- Disaster Merge C8 -->
+  <rect x="306" y="410" width="80" height="44" class="node-conflict" />
+  <text x="346" y="429" class="mono-title txt-red">C8 (병합)</text>
+  <text x="346" y="445" class="sub-txt txt-red">C4 + C4' 중복!</text>
+  <line x1="306" y1="424" x2="167" y2="395" class="arrow-red" marker-end="url(#head-red)" />
+  <line x1="306" y1="444" x2="269" y2="478" class="arrow-red" marker-end="url(#head-red)" />
+
+  <!-- Bottom note -->
+  <rect x="38" y="508" width="348" height="26" class="pill-note" />
+  <text x="212" y="525" class="sub-txt txt-red" style="font-weight: 600;">같은 작성자·메시지 커밋이 중복 기록되고 원격에 재유입됨</text>
+
+  <!-- Right Panel: Recovery via patch-id -->
+  <rect x="416" y="318" width="380" height="226" class="panel-card" />
+  <text x="430" y="338" class="panel-title">B. git pull --rebase (patch-id 중복 제거 복구)</text>
+  <text x="606" y="354" class="panel-sub">C4와 C4'의 patch-id 일치를 감지해 C2'·C3'만 깔끔히 재적용</text>
+
+  <!-- teamone/master above C4' -->
+  <rect x="480" y="366" width="110" height="20" class="badge-amber" />
+  <text x="535" y="380" class="mono-sub txt-amber" style="font-weight: 700;">teamone/master</text>
+  <line x1="523" y1="386" x2="523" y2="399" class="arrow-amber" marker-end="url(#head-amber)" />
+
+  <!-- Linear clean history: C1 <- C4' <- C2' <- C3' -->
+  <rect x="432" y="402" width="38" height="28" class="node-commit" />
+  <text x="451" y="420" class="mono-title txt-blue">C1</text>
+
+  <rect x="500" y="402" width="46" height="28" class="node-base" />
+  <text x="523" y="420" class="mono-title txt-amber">C4'</text>
+  <line x1="500" y1="416" x2="474" y2="416" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="576" y="402" width="42" height="28" class="node-rebased" />
+  <text x="597" y="420" class="mono-title txt-green">C2'</text>
+  <line x1="576" y1="416" x2="550" y2="416" class="arrow-green" marker-end="url(#head-green)" />
+
+  <rect x="644" y="402" width="42" height="28" class="node-rebased" />
+  <text x="665" y="420" class="mono-title txt-green">C3'</text>
+  <line x1="644" y1="416" x2="622" y2="416" class="arrow-green" marker-end="url(#head-green)" />
+
+  <rect x="706" y="405" width="70" height="22" class="badge-green" />
+  <text x="741" y="420" class="mono-sub txt-green" style="font-weight: 700;">master</text>
+  <line x1="706" y1="416" x2="690" y2="416" class="arrow-green" marker-end="url(#head-green)" />
+
+  <!-- Drop zone showing discarded C4, C6, C7 -->
+  <rect x="432" y="446" width="348" height="48" class="drop-zone" />
+  <text x="606" y="464" class="sub-txt txt-slate" style="font-weight: 700;">Git이 자동으로 건너뛴 커밋들</text>
+  <text x="606" y="482" class="mono-sub txt-muted">C4 (C4'와 patch-id 동일)  ·  C7 (병합 커밋 제외)  ·  C6</text>
+
+  <!-- Bottom note -->
+  <rect x="432" y="508" width="348" height="26" class="pill-note" />
+  <text x="606" y="525" class="sub-txt txt-green" style="font-weight: 600;">git pull --rebase 실행 시 중복 없이 선형 히스토리로 복구</text>
+</svg>
