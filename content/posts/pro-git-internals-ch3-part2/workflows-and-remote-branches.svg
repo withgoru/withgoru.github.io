@@ -1,0 +1,305 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 540" width="820" height="540" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Git 브랜칭 워크플로우와 리모트 트래킹 브랜치 동작 원리</title>
+  <desc id="diagram-desc">상단은 Long-Running 브랜치의 안정성 단계별 포인터 진급과 Topic 브랜치의 격리 작업 및 선택적 병합을 보여주며, 하단은 git fetch와 merge 시 리모트 트래킹 브랜치(origin/master)가 이동하고 통합되는 구조를 나타낸다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+      .panel-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; fill: #475569; text-anchor: middle; }
+      .sub-box-title { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; fill: #334155; }
+
+      .mono-title { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; font-weight: 700; text-anchor: middle; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10.5px; text-anchor: middle; }
+      .mono-sub { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; text-anchor: middle; }
+      .edge-label { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10.5px; font-weight: 700; text-anchor: middle; }
+
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .sub-remote { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.2; rx: 6; }
+      .sub-local { fill: #eff6ff; stroke: #93c5fd; stroke-width: 1.2; rx: 6; }
+
+      .node-commit { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.4; rx: 5; }
+      .node-topic { fill: #fef3c7; stroke: #d97706; stroke-width: 1.4; rx: 5; }
+      .node-discard { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.3; stroke-dasharray: 4 2; rx: 5; }
+      .node-merge { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.6; rx: 5; }
+
+      .badge-green { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.4; rx: 5; }
+      .badge-blue { fill: #dbeafe; stroke: #2563eb; stroke-width: 1.4; rx: 5; }
+      .badge-amber { fill: #fef3c7; stroke: #d97706; stroke-width: 1.4; rx: 5; }
+      .badge-purple { fill: #ede9fe; stroke: #7c3aed; stroke-width: 1.4; rx: 5; }
+      .badge-red { fill: #fee2e2; stroke: #dc2626; stroke-width: 1.4; rx: 5; }
+      .pill-note { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 5; }
+
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+      .txt-blue { fill: #0369a1; }
+      .txt-royal { fill: #1d4ed8; }
+      .txt-green { fill: #15803d; }
+      .txt-amber { fill: #b45309; }
+      .txt-purple { fill: #6d28d9; }
+      .txt-red { fill: #b91c1c; }
+
+      .arrow-slate { stroke: #475569; stroke-width: 1.4; fill: none; }
+      .arrow-muted { stroke: #94a3b8; stroke-width: 1.3; stroke-dasharray: 4 2; fill: none; }
+      .arrow-green { stroke: #16a34a; stroke-width: 1.5; fill: none; }
+      .arrow-blue { stroke: #2563eb; stroke-width: 1.5; fill: none; }
+      .arrow-amber { stroke: #d97706; stroke-width: 1.5; fill: none; }
+      .arrow-purple { stroke: #7c3aed; stroke-width: 1.5; fill: none; }
+      .arrow-red { stroke: #dc2626; stroke-width: 1.5; fill: none; }
+    </style>
+
+    <marker id="head-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+    <marker id="head-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+    </marker>
+    <marker id="head-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+    <marker id="head-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb" />
+    </marker>
+    <marker id="head-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706" />
+    </marker>
+    <marker id="head-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#7c3aed" />
+    </marker>
+    <marker id="head-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+    </marker>
+  </defs>
+
+  <!-- Outer Card Background -->
+  <rect x="1" y="1" width="818" height="538" rx="12" class="bg" />
+
+  <!-- ==================== SECTION 1: BRANCHING WORKFLOWS ==================== -->
+  <text x="26" y="30" class="section-title">1. 브랜칭 워크플로우: Long-Running 안정성 단계와 Topic 브랜치 (Pro Git 3.4)</text>
+
+  <!-- Left Panel: Long-Running Branches -->
+  <rect x="24" y="44" width="376" height="206" class="panel-card" />
+  <text x="38" y="64" class="panel-title">A. Long-Running Branches (안정성 단계 진급)</text>
+
+  <!-- Pointer labels above -->
+  <text x="177" y="84" class="sub-txt txt-green" style="font-weight: 700;">안정 (Stable)</text>
+  <rect x="142" y="90" width="70" height="24" class="badge-green" />
+  <text x="177" y="106" class="mono-title txt-green">master</text>
+  <line x1="177" y1="114" x2="177" y2="136" class="arrow-green" marker-end="url(#head-green)" />
+
+  <text x="293" y="84" class="sub-txt txt-royal" style="font-weight: 700;">통합 테스트</text>
+  <rect x="255" y="90" width="76" height="24" class="badge-blue" />
+  <text x="293" y="106" class="mono-title txt-royal">develop</text>
+  <line x1="293" y1="114" x2="293" y2="136" class="arrow-blue" marker-end="url(#head-blue)" />
+
+  <!-- Commit Chain C1..C6 -->
+  <rect x="40" y="140" width="42" height="32" class="node-commit" />
+  <text x="61" y="160" class="mono-title txt-blue">C1</text>
+
+  <rect x="98" y="140" width="42" height="32" class="node-commit" />
+  <text x="119" y="160" class="mono-title txt-blue">C2</text>
+  <line x1="98" y1="156" x2="86" y2="156" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="156" y="140" width="42" height="32" class="node-commit" />
+  <text x="177" y="160" class="mono-title txt-blue">C3</text>
+  <line x1="156" y1="156" x2="144" y2="156" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="214" y="140" width="42" height="32" class="node-commit" />
+  <text x="235" y="160" class="mono-title txt-blue">C4</text>
+  <line x1="214" y1="156" x2="202" y2="156" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="272" y="140" width="42" height="32" class="node-commit" />
+  <text x="293" y="160" class="mono-title txt-blue">C5</text>
+  <line x1="272" y1="156" x2="260" y2="156" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="330" y="140" width="42" height="32" class="node-commit" />
+  <text x="351" y="160" class="mono-title txt-blue">C6</text>
+  <line x1="330" y1="156" x2="318" y2="156" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <!-- pu (proposed) pointer below C6 -->
+  <rect x="314" y="192" width="74" height="24" class="badge-purple" />
+  <text x="351" y="208" class="mono-title txt-purple">pu</text>
+  <line x1="351" y1="192" x2="351" y2="176" class="arrow-purple" marker-end="url(#head-purple)" />
+  <text x="351" y="232" class="sub-txt txt-purple">신규 실험</text>
+
+  <!-- Note pill bottom-left -->
+  <rect x="38" y="194" width="256" height="36" class="pill-note" />
+  <text x="166" y="210" class="sub-txt txt-slate" style="font-weight: 600;">안정성이 검증된 커밋만 상위 브랜치로 진급</text>
+  <text x="166" y="224" class="mono-sub txt-muted">(pu → develop → master 포인터 이동)</text>
+
+  <!-- Right Panel: Topic Branches -->
+  <rect x="416" y="44" width="380" height="206" class="panel-card" />
+  <text x="430" y="64" class="panel-title">B. Topic Branches (독립 작업 후 선택적 병합)</text>
+
+  <!-- Row 0 (TOP): dumbidea (C9) -->
+  <rect x="530" y="76" width="76" height="26" class="node-topic" />
+  <text x="568" y="93" class="mono-sub txt-amber" style="font-weight: 700;">C9 dumbidea</text>
+
+  <!-- Row 1 (MIDDLE): master line C1 <- C2 <- C3 <- C10 <- C11 -->
+  <rect x="430" y="118" width="36" height="28" class="node-commit" />
+  <text x="448" y="136" class="mono-title txt-blue">C1</text>
+
+  <rect x="484" y="118" width="36" height="28" class="node-commit" />
+  <text x="502" y="136" class="mono-title txt-blue">C2</text>
+  <line x1="484" y1="132" x2="470" y2="132" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="538" y="118" width="36" height="28" class="node-commit" />
+  <text x="556" y="136" class="mono-title txt-blue">C3</text>
+  <line x1="538" y1="132" x2="524" y2="132" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="616" y="118" width="42" height="28" class="node-merge" />
+  <text x="637" y="136" class="mono-title txt-green">C10</text>
+  <line x1="616" y1="132" x2="578" y2="132" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="680" y="118" width="42" height="28" class="node-merge" />
+  <text x="701" y="136" class="mono-title txt-green">C11</text>
+  <line x1="680" y1="132" x2="662" y2="132" class="arrow-green" marker-end="url(#head-green)" />
+
+  <!-- master badge -->
+  <rect x="736" y="121" width="52" height="22" class="badge-green" />
+  <text x="762" y="136" class="mono-sub txt-green" style="font-weight: 700;">master</text>
+  <line x1="736" y1="132" x2="726" y2="132" class="arrow-green" marker-end="url(#head-green)" />
+
+  <!-- dumbidea parent/merge connectors -->
+  <line x1="530" y1="92" x2="508" y2="115" class="arrow-slate" marker-end="url(#head-slate)" />
+  <line x1="634" y1="118" x2="609" y2="95" class="arrow-green" marker-end="url(#head-green)" />
+
+  <!-- Row 2: C4 -> iss91 (C5, discarded) -->
+  <rect x="542" y="164" width="38" height="26" class="node-topic" />
+  <text x="561" y="181" class="mono-title txt-amber">C4</text>
+  <line x1="561" y1="164" x2="561" y2="150" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="602" y="164" width="96" height="26" class="node-discard" />
+  <text x="650" y="181" class="mono-sub txt-muted">C5~C6 iss91 (폐기)</text>
+  <line x1="602" y1="177" x2="584" y2="177" class="arrow-muted" marker-end="url(#head-muted)" />
+
+  <!-- Row 3: iss91v2 (C7 <- C8) merged into C11 -->
+  <rect x="598" y="206" width="38" height="26" class="node-topic" />
+  <text x="617" y="223" class="mono-title txt-amber">C7</text>
+  <line x1="598" y1="216" x2="568" y2="192" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="654" y="206" width="84" height="26" class="node-topic" />
+  <text x="696" y="223" class="mono-sub txt-amber" style="font-weight: 700;">C8 iss91v2</text>
+  <line x1="654" y1="219" x2="640" y2="219" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <!-- Merge arrow C11 -> C8 -->
+  <line x1="704" y1="146" x2="704" y2="202" class="arrow-green" marker-end="url(#head-green)" />
+
+  <!-- Note bottom-left in Topic panel -->
+  <rect x="428" y="206" width="144" height="26" class="pill-note" />
+  <text x="500" y="223" class="sub-txt txt-slate" style="font-weight: 600;">iss91은 폐기, v2만 채택</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="266" x2="796" y2="266" class="divider" />
+
+  <!-- ==================== SECTION 2: REMOTE-TRACKING BRANCHES ==================== -->
+  <text x="26" y="294" class="section-title">2. 리모트 트래킹 브랜치(origin/master)의 분기와 동기화 (Pro Git 3.5)</text>
+
+  <!-- Left Panel: Before git fetch -->
+  <rect x="24" y="310" width="376" height="216" class="panel-card" />
+  <text x="38" y="330" class="panel-title">A. Fetch 이전: 원격과 로컬의 독자 진행</text>
+
+  <!-- Remote Repo Sub-box -->
+  <rect x="38" y="340" width="348" height="72" class="sub-remote" />
+  <text x="50" y="357" class="sub-box-title">Remote (git.ourcompany.com)</text>
+
+  <rect x="48" y="368" width="40" height="28" class="node-commit" />
+  <text x="68" y="386" class="mono-title txt-blue">C1</text>
+
+  <rect x="104" y="368" width="40" height="28" class="node-commit" />
+  <text x="124" y="386" class="mono-title txt-blue">C2</text>
+  <line x1="104" y1="382" x2="92" y2="382" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="160" y="368" width="40" height="28" class="node-commit" />
+  <text x="180" y="386" class="mono-title txt-blue">C3</text>
+  <line x1="160" y1="382" x2="148" y2="382" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="218" y="368" width="44" height="28" class="node-topic" />
+  <text x="240" y="386" class="mono-title txt-amber">C4</text>
+  <line x1="218" y1="382" x2="204" y2="382" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="280" y="370" width="60" height="24" class="badge-green" />
+  <text x="310" y="386" class="mono-sub txt-green" style="font-weight: 700;">master</text>
+  <line x1="280" y1="382" x2="266" y2="382" class="arrow-green" marker-end="url(#head-green)" />
+
+  <!-- Local Repo Sub-box -->
+  <rect x="38" y="424" width="348" height="90" class="sub-local" />
+  <text x="50" y="440" class="sub-box-title">Local .git (네트워크 통신 전)</text>
+
+  <rect x="48" y="448" width="40" height="28" class="node-commit" />
+  <text x="68" y="466" class="mono-title txt-blue">C1</text>
+
+  <rect x="104" y="448" width="40" height="28" class="node-commit" />
+  <text x="124" y="466" class="mono-title txt-blue">C2</text>
+  <line x1="104" y1="462" x2="92" y2="462" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="160" y="448" width="40" height="28" class="node-commit" />
+  <text x="180" y="466" class="mono-title txt-blue">C3</text>
+  <line x1="160" y1="462" x2="148" y2="462" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="218" y="448" width="44" height="28" class="node-commit" />
+  <text x="240" y="466" class="mono-title txt-blue">C5</text>
+  <line x1="218" y1="462" x2="204" y2="462" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <!-- origin/master bookmark at C3 -->
+  <rect x="132" y="486" width="96" height="22" class="badge-amber" />
+  <text x="180" y="501" class="mono-sub txt-amber" style="font-weight: 700;">origin/master</text>
+  <line x1="180" y1="486" x2="180" y2="479" class="arrow-amber" marker-end="url(#head-amber)" />
+
+  <!-- HEAD -> master at C5 -->
+  <rect x="280" y="450" width="94" height="24" class="badge-red" />
+  <text x="327" y="466" class="mono-sub txt-red" style="font-weight: 700;">HEAD -> master</text>
+  <line x1="280" y1="462" x2="266" y2="462" class="arrow-red" marker-end="url(#head-red)" />
+
+  <!-- Right Panel: After git fetch + merge -->
+  <rect x="416" y="310" width="380" height="216" class="panel-card" />
+  <text x="430" y="330" class="panel-title">B. git fetch origin 및 병합(merge) 후</text>
+  <text x="606" y="346" class="panel-sub">fetch로 C4를 수신해 origin/master를 옮긴 뒤 merge로 통합</text>
+
+  <!-- Local .git inner box -->
+  <rect x="430" y="356" width="352" height="158" class="sub-local" />
+
+  <!-- Shared history C1 <- C2 <- C3 -->
+  <rect x="442" y="400" width="38" height="28" class="node-commit" />
+  <text x="461" y="418" class="mono-title txt-blue">C1</text>
+
+  <rect x="492" y="400" width="38" height="28" class="node-commit" />
+  <text x="511" y="418" class="mono-title txt-blue">C2</text>
+  <line x1="492" y1="414" x2="484" y2="414" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="542" y="400" width="38" height="28" class="node-commit" />
+  <text x="561" y="418" class="mono-title txt-blue">C3</text>
+  <line x1="542" y1="414" x2="534" y2="414" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <!-- Top fetched commit C4 + origin/master -->
+  <rect x="600" y="366" width="44" height="28" class="node-topic" />
+  <text x="622" y="384" class="mono-title txt-amber">C4</text>
+  <line x1="600" y1="380" x2="582" y2="404" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="664" y="368" width="104" height="24" class="badge-amber" />
+  <text x="716" y="384" class="mono-sub txt-amber" style="font-weight: 700;">origin/master</text>
+  <line x1="664" y1="380" x2="648" y2="380" class="arrow-amber" marker-end="url(#head-amber)" />
+
+  <!-- Bottom local commit C5 -->
+  <rect x="600" y="434" width="44" height="28" class="node-commit" />
+  <text x="622" y="452" class="mono-title txt-blue">C5</text>
+  <line x1="600" y1="448" x2="582" y2="424" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <!-- Merge commit C6 -->
+  <rect x="688" y="412" width="80" height="38" class="node-merge" />
+  <text x="728" y="429" class="mono-title txt-green">C6</text>
+  <text x="728" y="443" class="sub-txt txt-green">Merge 커밋</text>
+  <line x1="688" y1="422" x2="646" y2="386" class="arrow-green" marker-end="url(#head-green)" />
+  <line x1="688" y1="438" x2="648" y2="448" class="arrow-green" marker-end="url(#head-green)" />
+
+  <!-- HEAD -> master below C6 -->
+  <rect x="680" y="476" width="96" height="24" class="badge-red" />
+  <text x="728" y="492" class="mono-sub txt-red" style="font-weight: 700;">HEAD -> master</text>
+  <line x1="728" y1="476" x2="728" y2="454" class="arrow-red" marker-end="url(#head-red)" />
+
+  <!-- Explanation pill bottom-left -->
+  <rect x="442" y="476" width="222" height="26" class="pill-note" />
+  <text x="553" y="493" class="sub-txt txt-slate" style="font-weight: 600;">git merge @{u} 실행 시 C6 생성</text>
+</svg>
