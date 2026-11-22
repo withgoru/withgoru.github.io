@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 440" width="820" height="440" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Vim 3가지 모드 전이와 Git config 3계층 우선순위</title>
+  <desc id="diagram-desc">상단은 Git 커밋·충돌·리베이스 편집 시 사용하는 Vim의 Normal, Insert, Command-Line 모드 전이를 나타내고, 하단은 git config의 System, Global, Local 3계층 우선순위와 실습용 필수 초기 설정을 보여준다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .box-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; font-weight: 700; text-anchor: middle; }
+      .mono-title { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; font-weight: 700; text-anchor: middle; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10.5px; text-anchor: middle; }
+      .mono-sub { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; text-anchor: middle; }
+      .mono-left { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; text-anchor: start; font-weight: 700; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10.5px; text-anchor: start; }
+      .edge-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .mode-normal { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.6; rx: 8; }
+      .mode-insert { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.6; rx: 8; }
+      .mode-cmd { fill: #fef3c7; stroke: #d97706; stroke-width: 1.6; rx: 8; }
+
+      .tier-sys { fill: #f1f5f9; stroke: #64748b; stroke-width: 1.4; rx: 6; }
+      .tier-global { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.6; rx: 6; }
+      .tier-local { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.7; rx: 6; }
+
+      .pill-item { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.1; rx: 6; }
+      .pill-note { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 6; }
+
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+      .txt-blue { fill: #0369a1; }
+      .txt-green { fill: #15803d; }
+      .txt-amber { fill: #b45309; }
+      .txt-red { fill: #b91c1c; }
+
+      .arrow-green { stroke: #16a34a; stroke-width: 1.6; fill: none; }
+      .arrow-blue { stroke: #0284c7; stroke-width: 1.6; fill: none; }
+      .arrow-amber { stroke: #d97706; stroke-width: 1.6; fill: none; }
+      .arrow-slate { stroke: #475569; stroke-width: 1.5; fill: none; }
+    </style>
+
+    <marker id="head-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+    <marker id="head-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+    <marker id="head-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706" />
+    </marker>
+    <marker id="head-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <!-- Outer Card Background -->
+  <rect x="1" y="1" width="818" height="438" rx="12" class="bg" />
+
+  <!-- SECTION 1: VIM MODES -->
+  <text x="26" y="30" class="section-title">1. Vim 3가지 모드 상태 전이 (Normal / Insert / Command-Line)</text>
+
+  <!-- Left Panel: Vim State Machine -->
+  <rect x="24" y="44" width="524" height="162" class="panel-card" />
+
+  <!-- Normal Mode -->
+  <rect x="38" y="86" width="164" height="78" class="mode-normal" />
+  <text x="120" y="108" class="box-title txt-blue">Normal Mode</text>
+  <text x="120" y="124" class="sub-txt txt-slate">(시작 기본 상태)</text>
+  <text x="120" y="142" class="mono-sub txt-blue">h j k l 이동</text>
+  <text x="120" y="156" class="mono-sub txt-blue">dd 삭제 · u 취소</text>
+
+  <!-- Insert Mode -->
+  <rect x="308" y="54" width="224" height="62" class="mode-insert" />
+  <text x="420" y="74" class="box-title txt-green">Insert Mode (입력 모드)</text>
+  <text x="420" y="91" class="sub-txt txt-slate">텍스트 직접 입력 및 수정</text>
+  <text x="420" y="106" class="mono-sub txt-green">INSERT 표시</text>
+
+  <!-- Command-Line Mode -->
+  <rect x="308" y="132" width="224" height="64" class="mode-cmd" />
+  <text x="420" y="152" class="box-title txt-amber">Command-Line Mode</text>
+  <text x="420" y="170" class="mono-sub txt-amber">:w (저장) · :wq (저장+종료)</text>
+  <text x="420" y="185" class="mono-sub txt-red">:q! (저장 없이 강제 종료)</text>
+
+  <!-- Arrows: Normal and Insert -->
+  <path d="M 188 86 Q 246 56 304 70" class="arrow-green" marker-end="url(#head-green)" />
+  <text x="248" y="61" class="edge-label txt-green">i / a / o</text>
+
+  <path d="M 308 98 Q 254 106 206 114" class="arrow-blue" marker-end="url(#head-blue)" />
+  <text x="256" y="119" class="edge-label txt-blue">ESC</text>
+
+  <!-- Arrows: Normal and Command-Line -->
+  <path d="M 188 164 Q 246 192 304 176" class="arrow-amber" marker-end="url(#head-amber)" />
+  <text x="248" y="196" class="edge-label txt-amber">: (콜론)</text>
+
+  <path d="M 308 150 Q 254 142 206 134" class="arrow-blue" marker-end="url(#head-blue)" />
+  <text x="256" y="138" class="edge-label txt-blue">ESC</text>
+
+  <!-- Right Panel: When Git uses Vim -->
+  <rect x="562" y="44" width="234" height="162" class="panel-card" />
+  <text x="576" y="65" class="panel-title">Git이 Vim을 띄우는 순간</text>
+
+  <rect x="576" y="78" width="206" height="34" class="pill-item" />
+  <text x="586" y="94" class="mono-left txt-blue">git commit</text>
+  <text x="586" y="107" class="sub-left txt-slate">COMMIT_EDITMSG 작성 후 :wq</text>
+
+  <rect x="576" y="120" width="206" height="34" class="pill-item" />
+  <text x="586" y="136" class="mono-left txt-green">git merge (충돌 해결 후)</text>
+  <text x="586" y="149" class="sub-left txt-slate">MERGE_MSG 확인 후 :wq 저장</text>
+
+  <rect x="576" y="162" width="206" height="34" class="pill-item" />
+  <text x="586" y="178" class="mono-left txt-amber">git rebase / --amend</text>
+  <text x="586" y="191" class="sub-left txt-slate">기존 커밋 메시지 및 순서 편집</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="220" x2="796" y2="220" class="divider" />
+
+  <!-- SECTION 2: GIT CONFIG HIERARCHY -->
+  <text x="26" y="246" class="section-title">2. Git 환경설정(git config) 3계층 우선순위와 핵심 초기 설정</text>
+
+  <!-- Left Panel: Config Priority -->
+  <rect x="24" y="260" width="388" height="162" class="panel-card" />
+  <text x="38" y="280" class="panel-title">설정 파일 3계층 우선순위 (오른쪽이 덮어씀)</text>
+
+  <rect x="38" y="294" width="102" height="72" class="tier-sys" />
+  <text x="89" y="314" class="box-title txt-slate">1. System</text>
+  <text x="89" y="331" class="mono-sub txt-muted">/etc/gitconfig</text>
+  <text x="89" y="350" class="sub-txt txt-slate">OS 모든 사용자</text>
+
+  <line x1="140" y1="330" x2="164" y2="330" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="168" y="294" width="106" height="72" class="tier-global" />
+  <text x="221" y="314" class="box-title txt-blue">2. Global</text>
+  <text x="221" y="331" class="mono-sub txt-blue">~/.gitconfig</text>
+  <text x="221" y="350" class="sub-txt txt-blue">--global (실습 기본)</text>
+
+  <line x1="274" y1="330" x2="298" y2="330" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="302" y="294" width="96" height="72" class="tier-local" />
+  <text x="350" y="314" class="box-title txt-green">3. Local</text>
+  <text x="350" y="331" class="mono-sub txt-green">.git/config</text>
+  <text x="350" y="350" class="sub-txt txt-green">저장소 최우선</text>
+
+  <rect x="38" y="380" width="360" height="28" class="pill-note" />
+  <text x="218" y="398" class="mono-sub txt-slate" style="font-weight: 700;">git config --list --show-origin 으로 출처 파일 확인</text>
+
+  <!-- Right Panel: Essential Settings -->
+  <rect x="428" y="260" width="368" height="162" class="panel-card" />
+  <text x="442" y="280" class="panel-title">실습 시작 전 필수 설정 (--global)</text>
+
+  <rect x="442" y="292" width="340" height="26" class="pill-item" />
+  <text x="452" y="309" class="mono-left txt-blue">user.name / email</text>
+  <text x="582" y="309" class="sub-left txt-slate">커밋 Author·Committer 서명</text>
+
+  <rect x="442" y="324" width="340" height="26" class="pill-item" />
+  <text x="452" y="341" class="mono-left txt-green">core.editor "vim"</text>
+  <text x="582" y="341" class="sub-left txt-slate">커밋·충돌·리베이스 기본 편집기</text>
+
+  <rect x="442" y="356" width="340" height="26" class="pill-item" />
+  <text x="452" y="373" class="mono-left txt-amber">init.defaultBranch</text>
+  <text x="582" y="373" class="sub-left txt-slate">git init 기본 브랜치를 main 고정</text>
+
+  <rect x="442" y="388" width="340" height="26" class="pill-item" />
+  <text x="452" y="405" class="mono-left txt-slate">alias.lg</text>
+  <text x="582" y="405" class="sub-left txt-slate">브랜치·그래프·작성자 한 줄 로그</text>
+</svg>

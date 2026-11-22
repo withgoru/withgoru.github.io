@@ -1,0 +1,230 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 560" width="820" height="560" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">브랜치·머지·리베이스 실습 및 원격 저장소 동기화·태그 흐름</title>
+  <desc id="diagram-desc">상단은 .git/HEAD와 41바이트 브랜치 포인터 파일의 실체, Fast-forward 및 3-Way Merge(충돌 해결), Rebase 실습 흐름을 보여주고, 하단은 내 로컬 저장소와 원격 Bare 저장소 및 동료 저장소 간의 push, fetch, origin/main 추적, merge @{u}, 태그 배포 과정을 나타낸다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .box-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; font-weight: 700; text-anchor: middle; }
+      .mono-title { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10.5px; text-anchor: middle; }
+      .mono-sub { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; text-anchor: middle; }
+      .edge-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; text-anchor: middle; }
+
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .sub-local { fill: #eff6ff; stroke: #93c5fd; stroke-width: 1.3; rx: 8; }
+      .sub-remote { fill: #f1f5f9; stroke: #64748b; stroke-width: 1.3; rx: 8; }
+      .sub-peer { fill: #fefce8; stroke: #ca8a04; stroke-width: 1.3; rx: 8; }
+
+      .node-commit { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.4; rx: 5; }
+      .node-hotfix { fill: #fef3c7; stroke: #d97706; stroke-width: 1.4; rx: 5; }
+      .node-merge { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.6; rx: 5; }
+      .node-discard { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.3; stroke-dasharray: 4 2; rx: 5; }
+
+      .badge-head { fill: #fee2e2; stroke: #dc2626; stroke-width: 1.3; rx: 5; }
+      .badge-main { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.4; rx: 5; }
+      .badge-amber { fill: #fef3c7; stroke: #d97706; stroke-width: 1.4; rx: 5; }
+      .badge-purple { fill: #ede9fe; stroke: #7c3aed; stroke-width: 1.4; rx: 5; }
+      .pill-note { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 5; }
+
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+      .txt-blue { fill: #0369a1; }
+      .txt-green { fill: #15803d; }
+      .txt-amber { fill: #b45309; }
+      .txt-red { fill: #b91c1c; }
+      .txt-purple { fill: #6d28d9; }
+
+      .arrow-slate { stroke: #475569; stroke-width: 1.4; fill: none; }
+      .arrow-muted { stroke: #94a3b8; stroke-width: 1.3; stroke-dasharray: 4 2; fill: none; }
+      .arrow-green { stroke: #16a34a; stroke-width: 1.5; fill: none; }
+      .arrow-green-dash { stroke: #16a34a; stroke-width: 1.6; stroke-dasharray: 5 3; fill: none; }
+      .arrow-blue { stroke: #0284c7; stroke-width: 1.5; fill: none; }
+      .arrow-amber { stroke: #d97706; stroke-width: 1.5; fill: none; }
+      .arrow-red { stroke: #dc2626; stroke-width: 1.5; fill: none; }
+    </style>
+
+    <marker id="head-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+    <marker id="head-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+    </marker>
+    <marker id="head-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+    <marker id="head-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+    <marker id="head-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706" />
+    </marker>
+    <marker id="head-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+    </marker>
+  </defs>
+
+  <!-- Outer Card Background -->
+  <rect x="1" y="1" width="818" height="558" rx="12" class="bg" />
+
+  <!-- SECTION 1: BRANCHES, MERGE AND REBASE -->
+  <text x="26" y="30" class="section-title">1. 41바이트 브랜치 포인터와 Merge(Fast-forward · 3-Way) · Rebase 실습 흐름</text>
+
+  <!-- Left Panel: 41-byte pointers, FF and 3-Way Merge -->
+  <rect x="24" y="44" width="444" height="222" class="panel-card" />
+  <text x="38" y="64" class="panel-title">A. .git 물리 파일 확인 + Fast-forward 및 3-Way Merge</text>
+
+  <!-- Physical pointer strip -->
+  <rect x="38" y="74" width="164" height="32" class="badge-head" />
+  <text x="120" y="88" class="mono-sub txt-red" style="font-weight: 700;">.git/HEAD</text>
+  <text x="120" y="101" class="mono-sub txt-slate">ref: refs/heads/main</text>
+
+  <line x1="202" y1="90" x2="226" y2="90" class="arrow-red" marker-end="url(#head-red)" />
+
+  <rect x="230" y="74" width="224" height="32" class="badge-main" />
+  <text x="342" y="88" class="mono-sub txt-green" style="font-weight: 700;">.git/refs/heads/main</text>
+  <text x="342" y="101" class="mono-sub txt-slate">40자 SHA-1 + 개행 = 41 bytes</text>
+
+  <!-- Commit flow inside left panel -->
+  <rect x="38" y="146" width="38" height="30" class="node-commit" />
+  <text x="57" y="165" class="mono-title txt-blue">C1</text>
+
+  <rect x="92" y="146" width="38" height="30" class="node-commit" />
+  <text x="111" y="165" class="mono-title txt-blue">C2</text>
+  <line x1="92" y1="161" x2="80" y2="161" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="146" y="146" width="46" height="30" class="node-hotfix" />
+  <text x="169" y="160" class="mono-title txt-amber">C4</text>
+  <text x="169" y="172" class="sub-txt txt-amber">hotfix FF</text>
+  <line x1="146" y1="161" x2="134" y2="161" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <!-- Diverged: C5 (main) and C6 (feature/login) -->
+  <rect x="214" y="122" width="46" height="30" class="node-commit" />
+  <text x="237" y="141" class="mono-title txt-blue">C5</text>
+  <line x1="214" y1="137" x2="195" y2="152" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="208" y="182" width="70" height="30" class="node-hotfix" />
+  <text x="243" y="196" class="mono-title txt-amber">C6</text>
+  <text x="243" y="208" class="mono-sub txt-amber">login</text>
+  <line x1="208" y1="194" x2="192" y2="174" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <!-- 3-Way Merge Commit C7 -->
+  <rect x="306" y="142" width="84" height="40" class="node-merge" />
+  <text x="348" y="159" class="mono-title txt-green">C7 (Merge)</text>
+  <text x="348" y="174" class="sub-txt txt-green">부모: C5, C6</text>
+  <line x1="306" y1="154" x2="264" y2="139" class="arrow-green" marker-end="url(#head-green)" />
+  <line x1="306" y1="172" x2="282" y2="192" class="arrow-green" marker-end="url(#head-green)" />
+
+  <rect x="404" y="150" width="50" height="24" class="badge-main" />
+  <text x="429" y="166" class="mono-sub txt-green" style="font-weight: 700;">main</text>
+  <line x1="404" y1="162" x2="394" y2="162" class="arrow-green" marker-end="url(#head-green)" />
+
+  <!-- Conflict guide pill -->
+  <rect x="38" y="224" width="416" height="30" class="pill-note" />
+  <text x="246" y="243" class="sub-txt txt-slate" style="font-weight: 600;">충돌 시 MERGE_HEAD 생성 → Vim 마커 제거 → git add → git commit (C7)</text>
+
+  <!-- Right Panel: Rebase Lab -->
+  <rect x="484" y="44" width="312" height="222" class="panel-card" />
+  <text x="498" y="64" class="panel-title">B. git rebase main (선형 히스토리화)</text>
+
+  <!-- Main chain C4 to C7 to C8' -->
+  <rect x="498" y="102" width="40" height="30" class="node-commit" />
+  <text x="518" y="121" class="mono-title txt-blue">C4</text>
+
+  <rect x="558" y="102" width="44" height="30" class="node-commit" />
+  <text x="580" y="121" class="mono-title txt-blue">C7</text>
+  <line x1="558" y1="117" x2="542" y2="117" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="632" y="102" width="54" height="30" class="node-merge" />
+  <text x="659" y="121" class="mono-title txt-green">C8'</text>
+  <line x1="632" y1="117" x2="606" y2="117" class="arrow-green" marker-end="url(#head-green)" />
+
+  <rect x="704" y="105" width="76" height="24" class="badge-main" />
+  <text x="742" y="121" class="mono-sub txt-green" style="font-weight: 700;">main · ui</text>
+  <line x1="704" y1="117" x2="690" y2="117" class="arrow-green" marker-end="url(#head-green)" />
+
+  <!-- Discarded C8 off C4 -->
+  <rect x="556" y="166" width="84" height="30" class="node-discard" />
+  <text x="598" y="185" class="mono-sub txt-muted">C8 (feature/ui)</text>
+  <line x1="556" y1="176" x2="524" y2="136" class="arrow-muted" marker-end="url(#head-muted)" />
+
+  <!-- Replay curve C8 to C8' -->
+  <path d="M 640 181 Q 668 176 662 136" class="arrow-green-dash" marker-end="url(#head-green)" />
+  <text x="724" y="168" class="edge-label txt-green">패치 재적용</text>
+  <text x="724" y="182" class="mono-sub txt-green">(새 SHA-1)</text>
+
+  <!-- Note pill -->
+  <rect x="498" y="224" width="284" height="30" class="pill-note" />
+  <text x="640" y="243" class="sub-txt txt-slate" style="font-weight: 600;">과거 분기(C8)를 C7 위로 옮긴 뒤 main Fast-forward</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="280" x2="796" y2="280" class="divider" />
+
+  <!-- SECTION 2: REMOTE SYNC AND TAGS -->
+  <text x="26" y="308" class="section-title">2. 원격 저장소 동기화(push · fetch · merge @{u})와 태그 릴리즈(v1.0.0)</text>
+
+  <!-- Left Col: My Local Repo -->
+  <rect x="24" y="324" width="242" height="222" class="sub-local" />
+  <text x="145" y="346" class="box-title txt-blue">내 로컬 (git-practice)</text>
+
+  <rect x="38" y="362" width="214" height="44" class="panel-card" />
+  <text x="145" y="380" class="mono-sub txt-green" style="font-weight: 700;">refs/heads/main (로컬)</text>
+  <text x="145" y="396" class="sub-txt txt-slate">내 작업 브랜치 (C8' → C9 병합)</text>
+
+  <rect x="38" y="418" width="214" height="50" class="badge-amber" />
+  <text x="145" y="436" class="mono-sub txt-amber" style="font-weight: 700;">refs/remotes/origin/main</text>
+  <text x="145" y="451" class="sub-txt txt-slate">fetch 후 C9로 이동 (behind 1)</text>
+  <text x="145" y="463" class="mono-sub txt-amber">git branch -vv 확인</text>
+
+  <rect x="38" y="482" width="214" height="48" class="badge-purple" />
+  <text x="145" y="500" class="mono-sub txt-purple" style="font-weight: 700;">Annotated Tag: v1.0.0</text>
+  <text x="145" y="517" class="mono-sub txt-slate">git merge @{u} 통합 후 태깅</text>
+
+  <!-- Center Col: Remote Bare Repo -->
+  <rect x="318" y="324" width="184" height="222" class="sub-remote" />
+  <text x="410" y="346" class="box-title txt-slate">원격 (origin)</text>
+  <text x="410" y="362" class="mono-sub txt-muted">remote-repo.git (--bare)</text>
+
+  <rect x="334" y="382" width="152" height="62" class="panel-card" />
+  <text x="410" y="402" class="mono-sub txt-blue" style="font-weight: 700;">refs/heads/main</text>
+  <text x="410" y="419" class="sub-txt txt-slate">1) 내 push → C8' 수신</text>
+  <text x="410" y="434" class="sub-txt txt-amber">2) 동료 push → C9 갱신</text>
+
+  <rect x="334" y="466" width="152" height="56" class="panel-card" />
+  <text x="410" y="486" class="mono-sub txt-purple" style="font-weight: 700;">refs/tags/v1.0.0</text>
+  <text x="410" y="503" class="sub-txt txt-slate">--follow-tags로</text>
+  <text x="410" y="516" class="sub-txt txt-slate">Annotated 태그만 전송</text>
+
+  <!-- Right Col: Colleague Repo -->
+  <rect x="554" y="324" width="242" height="222" class="sub-peer" />
+  <text x="675" y="346" class="box-title txt-amber">동료 로컬 (colleague-repo)</text>
+
+  <rect x="568" y="366" width="214" height="54" class="panel-card" />
+  <text x="675" y="385" class="mono-sub txt-slate" style="font-weight: 700;">git clone remote-repo.git</text>
+  <text x="675" y="402" class="sub-txt txt-slate">동일한 원격을 복제해</text>
+  <text x="675" y="415" class="sub-txt txt-slate">독립적인 로컬 환경 구성</text>
+
+  <rect x="568" y="434" width="214" height="52" class="panel-card" />
+  <text x="675" y="453" class="mono-sub txt-amber" style="font-weight: 700;">Vim 수정 → 커밋 C9</text>
+  <text x="675" y="471" class="sub-txt txt-slate">원격 main을 먼저 앞질러 푸시</text>
+
+  <rect x="568" y="498" width="214" height="34" class="pill-note" />
+  <text x="675" y="519" class="sub-txt txt-slate">충돌·동기화 시나리오 재현</text>
+
+  <!-- Transfer Arrows -->
+  <line x1="252" y1="384" x2="330" y2="396" class="arrow-blue" marker-end="url(#head-blue)" />
+  <text x="292" y="378" class="edge-label txt-blue">push -u</text>
+
+  <line x1="568" y1="448" x2="490" y2="430" class="arrow-amber" marker-end="url(#head-amber)" />
+  <text x="528" y="424" class="edge-label txt-amber">push C9</text>
+
+  <line x1="334" y1="432" x2="256" y2="444" class="arrow-green" marker-end="url(#head-green)" />
+  <text x="292" y="458" class="edge-label txt-green">fetch</text>
+
+  <line x1="252" y1="504" x2="330" y2="498" class="arrow-slate" marker-end="url(#head-slate)" />
+  <text x="292" y="520" class="edge-label txt-purple">--follow-tags</text>
+</svg>
