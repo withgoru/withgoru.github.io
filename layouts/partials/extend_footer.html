@@ -36,6 +36,117 @@
         if (!btn.hasAttribute("aria-label")) btn.setAttribute("aria-label", "코드 복사");
       });
     });
+
+    // 4. 포스트 목차(TOC) 데스크탑 열림 동기화 및 스크롤 스파이 (Scrollspy)
+    var mainEl = document.getElementById("main-content");
+    var articleEl = mainEl ? mainEl.querySelector(":scope > article.post-single") : null;
+    var tocDetails = articleEl ? articleEl.querySelector(":scope > details.toc") : null;
+
+    if (mainEl && articleEl && tocDetails && tocNav) {
+      mainEl.classList.add("has-toc");
+      articleEl.classList.add("has-toc");
+
+      var desktopMq = window.matchMedia("(min-width: 1024px)");
+      if (desktopMq.matches) {
+        tocDetails.open = true;
+      }
+
+      if (desktopMq.addEventListener) {
+        desktopMq.addEventListener("change", function (e) {
+          if (e.matches) tocDetails.open = true;
+        });
+      } else if (desktopMq.addListener) {
+        desktopMq.addListener(function (e) {
+          if (e.matches) tocDetails.open = true;
+        });
+      }
+
+      var tocItems = [];
+      tocNav.querySelectorAll('a[href^="#"]').forEach(function (link) {
+        var href = link.getAttribute("href");
+        if (!href || href.length < 2) return;
+        var targetId;
+        try {
+          targetId = decodeURIComponent(href.slice(1));
+        } catch (err) {
+          targetId = href.slice(1);
+        }
+        var targetHeading = document.getElementById(targetId);
+        if (targetHeading) {
+          tocItems.push({ link: link, heading: targetHeading });
+        }
+      });
+
+      if (tocItems.length > 0) {
+        var activeLink = null;
+        var rafPending = false;
+
+        var keepActiveInTocView = function (link) {
+          if (!desktopMq.matches || tocDetails.scrollHeight <= tocDetails.clientHeight) {
+            return;
+          }
+          var tocRect = tocDetails.getBoundingClientRect();
+          var linkRect = link.getBoundingClientRect();
+          var padding = 24;
+          if (linkRect.top < tocRect.top + padding) {
+            tocDetails.scrollTo({
+              top: Math.max(0, tocDetails.scrollTop + (linkRect.top - tocRect.top) - padding),
+              behavior: "auto"
+            });
+          } else if (linkRect.bottom > tocRect.bottom - padding) {
+            tocDetails.scrollTo({
+              top: tocDetails.scrollTop + (linkRect.bottom - tocRect.bottom) + padding,
+              behavior: "auto"
+            });
+          }
+        };
+
+        var updateActiveToc = function () {
+          var offset = 120;
+          var currentItem = tocItems[0];
+
+          if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 10) {
+            currentItem = tocItems[tocItems.length - 1];
+          } else {
+            for (var i = 0; i < tocItems.length; i++) {
+              if (tocItems[i].heading.getBoundingClientRect().top <= offset) {
+                currentItem = tocItems[i];
+              }
+            }
+          }
+
+          if (activeLink === currentItem.link) return;
+          activeLink = currentItem.link;
+
+          tocItems.forEach(function (item) {
+            var isMatch = item.link === activeLink;
+            item.link.classList.toggle("active", isMatch);
+            if (isMatch) {
+              item.link.setAttribute("aria-current", "location");
+            } else {
+              item.link.removeAttribute("aria-current");
+            }
+          });
+
+          keepActiveInTocView(activeLink);
+        };
+
+        var scheduleTocUpdate = function () {
+          if (rafPending) return;
+          rafPending = true;
+          window.requestAnimationFrame(function () {
+            rafPending = false;
+            updateActiveToc();
+          });
+        };
+
+        window.addEventListener("scroll", scheduleTocUpdate, { passive: true });
+        window.addEventListener("resize", scheduleTocUpdate);
+        window.addEventListener("hashchange", updateActiveToc);
+        window.addEventListener("load", updateActiveToc);
+        updateActiveToc();
+      }
+    }
   })();
 </script>
 
