@@ -183,3 +183,96 @@ summary:focus-visible,
     line-height: 1.5;
 }
 
+/* 3. 포스트 목차(TOC) 반응형 우측 고정(Sticky) 및 스크롤 위치 동기화(Scrollspy) */
+details.toc a {
+    transition: color 0.15s ease;
+}
+
+details.toc a.active {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+@media (min-width: 1024px) {
+    .main:has(> article.post-single > details.toc),
+    .main.has-toc {
+        max-width: calc(var(--nav-width) + var(--gap) * 2);
+    }
+
+    article.post-single:has(> details.toc),
+    article.post-single.has-toc {
+        display: grid;
+        grid-template-columns: minmax(0, var(--main-width)) minmax(240px, 1fr);
+        column-gap: 2rem;
+        align-items: start;
+    }
+
+    article.post-single:has(> details.toc) > :not(details.toc),
+    article.post-single.has-toc > :not(details.toc) {
+        grid-column: 1;
+        min-width: 0;
+        width: 100%;
+    }
+
+    article.post-single > details.toc {
+        grid-column: 2;
+        grid-row: 1 / span 10;
+        position: sticky;
+        top: 2rem;
+        max-height: calc(100vh - 4rem);
+        overflow-y: auto;
+        margin-top: 24px;
+        margin-bottom: 0;
+        padding: 0.85rem 1rem;
+        font-size: 0.88rem;
+        line-height: 1.45;
+    }
+
+    article.post-single > details.toc summary {
+        padding: 0.2rem 0.3rem;
+        margin-bottom: 0.35rem;
+    }
+
+    article.post-single > details.toc .inner {
+        margin: 0;
+        padding: 0 0.2rem;
+    }
+
+    article.post-single > details.toc #TableOfContents ul {
+        list-style: none;
+        margin: 0;
+        padding-left: 0;
+    }
+
+    article.post-single > details.toc #TableOfContents li ul {
+        margin-inline-start: 0.6rem;
+        padding-left: 0.6rem;
+        border-left: 1px solid var(--border);
+    }
+
+    article.post-single > details.toc #TableOfContents li {
+        margin: 0.2rem 0;
+    }
+
+    article.post-single > details.toc #TableOfContents a {
+        display: block;
+        padding: 0.18rem 0.35rem;
+        color: var(--secondary);
+        text-decoration: none;
+        border-radius: 4px;
+        word-break: keep-all;
+        overflow-wrap: break-word;
+    }
+
+    article.post-single > details.toc #TableOfContents a:hover {
+        color: var(--primary);
+        text-decoration: none;
+    }
+
+    article.post-single > details.toc #TableOfContents a.active {
+        font-weight: 700;
+        color: var(--primary);
+        background: rgba(128, 128, 128, 0.1);
+    }
+}
+
