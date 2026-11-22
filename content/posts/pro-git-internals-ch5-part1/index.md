@@ -63,7 +63,7 @@ CVCS에서는 모든 개발자가 중앙 허브의 소비자(Consumer)로만 존
 
 어떤 워크플로우를 쓰든, 코드를 다른 개발자나 메인테이너에게 넘기기 전에 반드시 지켜야 할 기본 규율이 있다. 핵심은 "**리뷰어가 내 변경 사항을 가장 적은 인지 부하로 검토하고 안전하게 되돌릴 수 있게 만드는 것**"이다.
 
-{{< figure src="commit-guidelines-and-fork-workflow.svg" alt="Atomic Commit과 Tim Pope 50/72 커밋 메시지 규율 및 공개 Fork 프로젝트 이중 리모트 Topic 브랜치 격리 다이어그램" caption="기여자 커밋 체크리스트(공백 점검·원자적 분리·50/72 템플릿)와 공개 프로젝트 Fork(origin, myfork)에서의 Topic별 Rebase·Squash 전략 (Pro Git 5.2 재구성)" width="820" height="540" >}}
+{{< figure src="commit-guidelines-and-fork-workflow.svg" alt="Atomic Commit, 50/72 및 Conventional Commits 1.0.0 커밋 규율과 공개 Fork 프로젝트 이중 리모트 Topic 브랜치 격리 다이어그램" caption="기여자 커밋 체크리스트(공백 점검·원자적 분리·50/72 및 Conventional Commits 1.0.0)와 공개 프로젝트 Fork(origin, myfork)에서의 Topic별 Rebase·Squash 전략 (Pro Git 5.2 및 Conventional Commits 1.0.0 재구성)" width="820" height="540" >}}
 
 ### ① 공백 오류 검증(`git diff --check`)과 원자적 커밋(Atomic Commit)
 
@@ -95,6 +95,69 @@ by commands like git merge and git revert.
 - **첫 줄 (50자 이내 명령형 요약)**: `"Fixed bug"`(과거형)나 `"Fixes bug"`(3인칭 단수)가 아니라 `"Fix bug"`처럼 **명령형**(Imperative)으로 적는다. `git merge`나 `git revert`가 자동 생성하는 메시지와 문체를 맞추기 위함이다.
 - **두 번째 줄 (필수 빈 줄)**: 본문이 있다면 첫 줄과 본문 사이에 **반드시 빈 줄 1개**를 넣어야 `git log --oneline`이나 `git rebase` 같은 도구가 제목과 본문을 정확히 분리한다.
 - **본문 (72자 줄바꿈)**: *무엇을 고쳤는가*보다 **왜 이 변경이 필요한가(Motivation)와 기존 동작 대비 무엇이 달라졌는가**를 적는다.
+
+### ③ 기계와 사람이 함께 읽는 현대 표준: Conventional Commits (v1.0.0)
+
+50/72 규약이 사람(리뷰어)과 `git log --oneline` 같은 기본 도구를 위한 **가독성 규약**이라면, 현대 오픈소스와 CI/CD 파이프라인은 커밋 메시지를 한 단계 더 나아가 **기계가 파싱할 수 있는 구조화된 데이터**로 다룬다. 그 사실상의 표준 명세가 [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)이다.
+
+```text
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+Conventional Commits는 50/72 템플릿을 대체하는 것이 아니라 **첫 줄과 푸터(Footer)에 명시적인 스키마를 덧입히는 확장 규칙**이다.
+
+- **`<type>` (필수 접두사)**: 변경의 의도를 나타내는 소문자 타입 토큰이다. 타입(및 선택적 스코프) 뒤에는 반드시 콜론(`:`)과 공백 1칸이 뒤따르고, 이어서 50/72 규약과 같은 간결한 명령형 요약(`<description>`)을 적는다.
+- **`[optional scope]` (선택적 범위)**: `feat(parser): ...` 또는 `fix(auth): ...`처럼 변경이 영향을 미치는 모듈·컴포넌트 이름을 괄호로 감싸 명시한다.
+- **`[optional body]` 및 `[optional footer(s)]`**: 제목 다음 **빈 줄 1개** 뒤에 본문(72자 줄바꿈 권장)을 적고, 본문이 끝난 뒤 다시 빈 줄 1개를 띄워 Git 트레일러(Git trailer) 규격(`Token: value` 또는 `Token #value`)에 맞춘 푸터를 붙인다.
+
+#### SemVer(유의적 버전 관리)와의 1:1 매핑
+
+Conventional Commits v1.0.0이 강력한 이유는 커밋 타입을 [SemVer 2.0.0](https://semver.org/)의 버전 증가 규칙(`MAJOR.MINOR.PATCH`)과 직접 연결하기 때문이다.
+
+| 커밋 표기 요소 | 명세상 의미 | SemVer 버전 영향 | 작성 예시 |
+| :--- | :--- | :--- | :--- |
+| `fix:` | 코드베이스의 버그 수정 | **PATCH** (`x.y.Z`) | `fix: prevent racing of requests` |
+| `feat:` | 코드베이스에 새로운 기능 추가 | **MINOR** (`x.Y.z`) | `feat(lang): add Polish language` |
+| `!` 또는 `BREAKING CHANGE:` | 하위 호환성을 깨는 API·동작 변경 | **MAJOR** (`X.y.z`) | `feat(api)!: send an email...` |
+
+명세상 `fix`와 `feat` 외의 타입은 SemVer 버전에 직접적인 영향을 주지 않지만, 목적을 더 세분화하기 위해 Angular 컨벤션에서 유래한 `@commitlint/config-conventional` 권장 타입들이 널리 쓰인다.
+
+- **보조 타입 확장**: `docs:`(문서), `style:`(포맷팅·세미콜론 등 동작 무관 변경), `refactor:`(리팩토링), `perf:`(성능 개선), `test:`(테스트 추가·수정), `build:`(빌드·외부 의존성), `ci:`(CI 설정·스크립트), `chore:`(기타 유지보수), 그리고 이전 커밋을 되돌릴 때 `Refs:` 푸터와 함께 사용하는 `revert:` 등이 대표적이다.
+- **Breaking Change 표기 규칙**: 하위 호환성이 깨지는 변경은 어떤 `<type>`에서든 발생할 수 있으므로, 콜론 바로 앞에 `!` 기호를 붙이거나(예: `refactor!: ...`, `feat(api)!: ...`) 푸터에 **반드시 대문자**로 `BREAKING CHANGE: <설명>`(동의어 `BREAKING-CHANGE:` 허용)을 적으면 자동으로 **MAJOR** 변경으로 판정된다.
+
+#### 실전 작성 예시와 Pro Git 5.2 원칙과의 시너지
+
+```text
+fix: prevent racing of requests
+
+Introduce a request id and a reference to latest request. Dismiss
+incoming responses other than latest request.
+
+Remove obsolete timeouts which were used to mitigate the racing pattern.
+
+Reviewed-by: Z
+Refs: #123
+```
+
+하위 호환성 파괴(`!`)와 다중 푸터가 결합된 실전 커밋은 다음과 같은 형태가 된다.
+
+```text
+feat(api)!: send an email to the customer when a product is shipped
+
+BREAKING CHANGE: shipping notifications now trigger an email by default.
+Refs: #412
+```
+
+이처럼 50/72 위에 Conventional Commits를 결합하면 실무 협업에서 네 가지 실질적인 자동화 이점을 얻는다.
+
+1. **CHANGELOG 자동 생성 및 SemVer 자동 산출**: 릴리즈 시점에 커밋 히스토리를 파싱해 `feat`, `fix`, `BREAKING CHANGE`를 분류하고, 다음 배포 버전 번호(`MAJOR`/`MINOR`/`PATCH`)와 릴리즈 노트를 자동으로 생성한다.
+2. **CI/CD 및 리뷰 파이프라인 트리거**: `docs:` 변경은 앱 빌드를 건너뛰거나, `!`가 포함된 커밋에만 아키텍트 승인을 필수로 거는 식의 조건부 자동화가 쉬워진다.
+3. **`git add -p` 원자적 커밋과의 시너지**: 하나의 커밋에 버그 수정(`fix`)과 문서 수정(`docs`), 신규 기능(`feat`)이 섞여 있다면 어떤 접두사를 붙여야 할지 자체가 모호해진다. 따라서 Conventional Commits는 기여자가 **논리 단위로 커밋을 쪼개도록 강제하는 설계 안전장치**로도 작동한다.
+4. **기여자 진입 장벽과의 균형 (`--squash` 활용)**: Conventional Commits 공식 FAQ에서도 짚고 있듯, 모든 일회성 외부 기여자(casual contributor)에게까지 엄격한 커밋 포맷을 강요해 기여 의욕을 꺾을 필요는 없다. 리뷰 후 메인테이너가 PR을 **`git merge --squash`** 로 통합하면서 최종 병합 커밋 메시지 한 줄을 Conventional Commits 형식으로 정리하는 것만으로도 자동화 이점을 그대로 유지할 수 있다.
 
 ---
 
@@ -178,7 +241,7 @@ $ git push myfork featureBv2
 
 - Git의 중앙 서버는 기술적 마스터가 아닌 **합의된 피어**(Blessed Repo)이며, `Commit`과 `Push`의 분리와 Non-Fast-Forward Push 거절이 로컬 선(先)병합을 강제한다.
 - 단일 공유 저장소 모델(**Centralized**), Fork & PR의 원형인 **Integration-Manager**, 초대규모 계층형 **Dictator & Lieutenants**까지 프로젝트 규모에 맞춰 구조를 유연하게 선택할 수 있다.
-- 기여자는 **`git diff --check`**, **`git add -p` 원자적 분리**, **50/72 명령형 커밋 메시지**, 그리고 **`master`를 더럽히지 않는 Topic 브랜치 격리**를 지킬 때 가장 리뷰받기 좋은 코드를 만들 수 있다.
+- 기여자는 **`git diff --check`**, **`git add -p` 원자적 분리**, **50/72 명령형 커밋 및 Conventional Commits v1.0.0**(`feat`, `fix`, `!` / `BREAKING CHANGE:`), 그리고 **`master`를 더럽히지 않는 Topic 브랜치 격리**를 지킬 때 사람과 CI/CD 모두에게 가장 리뷰받기 좋은 코드를 만들 수 있다.
 
 다음 2부(`[Pro Git 톺아보기 #9]`)에서는 시선을 반대편인 **메인테이너(Maintainer)와 시니어 리뷰어**로 돌려, 기여받은 코드를 정교하게 검증하고 통합하는 기술인 **이중 점(`A..B`) vs 삼중 점(`A...B`)**, **`git cherry-pick`**, **`git rerere`**, 그리고 **`git describe`** 릴리즈 빌드 식별자까지 파헤쳐 본다.
 
@@ -188,4 +251,6 @@ $ git push myfork featureBv2
 
 - [Scott Chacon & Ben Straub, *Pro Git* 2nd Edition - 5.1 Distributed Git - Distributed Workflows](https://git-scm.com/book/en/v2/Distributed-Git-Distributed-Workflows)
 - [Scott Chacon & Ben Straub, *Pro Git* 2nd Edition - 5.2 Distributed Git - Contributing to a Project](https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project)
+- [Conventional Commits v1.0.0 Specification](https://www.conventionalcommits.org/en/v1.0.0/)
+- [Semantic Versioning 2.0.0 (SemVer)](https://semver.org/)
 - [Martin Fowler - Patterns for Managing Source Code Branches](https://martinfowler.com/articles/branching-patterns.html)

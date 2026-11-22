@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 540" width="820" height="540" role="img" aria-labelledby="diagram-title diagram-desc">
-  <title id="diagram-title">Atomic Commit과 50/72 메시지 규율 및 이중 리모트 Topic 브랜치 격리</title>
-  <desc id="diagram-desc">상단은 git diff --check, git add -p 논리 분리, Tim Pope의 50/72 커밋 메시지 규율을 정리하고, 하단은 공개 Fork 프로젝트에서 origin과 myfork 이중 리모트를 두고 featureA 리베이스와 featureBv2 squash 통합을 수행하는 흐름을 보여준다.</desc>
+  <title id="diagram-title">Atomic Commit, 50/72 및 Conventional Commits 1.0.0과 이중 리모트 Topic 브랜치 격리</title>
+  <desc id="diagram-desc">상단은 git diff --check, git add -p 논리 분리, 50/72 및 Conventional Commits v1.0.0 커밋 규율과 SemVer 매핑을 정리하고, 하단은 공개 Fork 프로젝트에서 origin과 myfork 이중 리모트를 두고 featureA 리베이스와 featureBv2 squash 통합을 수행하는 흐름을 보여준다.</desc>
 
   <defs>
     <style>
@@ -59,8 +59,8 @@
   <!-- Outer Card Background -->
   <rect x="1" y="1" width="818" height="538" rx="12" class="bg" />
 
-  <!-- SECTION 1: COMMIT GUIDELINES AND 50/72 RULE -->
-  <text x="26" y="30" class="section-title">1. 기여자의 커밋 엔지니어링 규율: Atomic Commit과 50/72 템플릿 (Pro Git 5.2)</text>
+  <!-- SECTION 1: COMMIT GUIDELINES, 50/72 AND CONVENTIONAL COMMITS -->
+  <text x="26" y="30" class="section-title">1. 기여자의 커밋 규율: Atomic Commit · 50/72 · Conventional Commits (v1.0.0)</text>
 
   <!-- Left Panel: 3 Checklists -->
   <rect x="24" y="44" width="344" height="208" class="panel-card" />
@@ -78,22 +78,32 @@
   <text x="48" y="211" class="mono-left txt-amber">3. 명령형 현재 시제 (Imperative Mood)</text>
   <text x="48" y="229" class="sub-left txt-slate">"Fixed bug"(X) → "Fix bug"(O) · git revert 스타일 일치</text>
 
-  <!-- Right Panel: 50/72 Template -->
+  <!-- Right Panel: 50/72 Template and Conventional Commits -->
   <rect x="384" y="44" width="412" height="208" class="panel-card" />
-  <text x="398" y="64" class="panel-title">B. Tim Pope 표준 50/72 커밋 메시지 구조</text>
+  <text x="398" y="64" class="panel-title">B. 50/72 템플릿과 Conventional Commits 1.0.0</text>
 
-  <rect x="398" y="76" width="384" height="32" class="pill-green" />
-  <text x="408" y="96" class="mono-left txt-green">1행 (50자 이내):</text>
-  <text x="524" y="96" class="sub-left txt-slate">대문자 시작 명령형 요약 (이메일 제목 역할)</text>
+  <rect x="398" y="74" width="384" height="40" class="pill-green" />
+  <text x="408" y="90" class="mono-left txt-green">1행 (50자): type[scope][!]: description</text>
+  <text x="408" y="106" class="sub-left txt-slate">명령형 요약 · 50자 이내 (예: feat(auth): add token refresh)</text>
 
-  <rect x="398" y="116" width="384" height="28" class="pill-red" />
-  <text x="590" y="134" class="sub-txt txt-red" style="font-weight: 700;">2행 (필수 빈 줄): 요약과 본문을 분리해야 rebase · log가 정상 파싱됨</text>
+  <rect x="398" y="119" width="384" height="24" class="pill-red" />
+  <text x="590" y="135" class="sub-txt txt-red" style="font-weight: 700;">2행 (필수 빈 줄): 제목과 본문 분리 (rebase · log 정상 파싱)</text>
 
-  <rect x="398" y="152" width="384" height="88" class="pill-blue" />
-  <text x="408" y="172" class="mono-left txt-blue">3행~ (72자 줄바꿈 상세 본문):</text>
-  <text x="408" y="192" class="sub-left txt-slate">· 변경 동기(Motivation / Why)와 이전 동작 대비 차이점 서술</text>
-  <text x="408" y="210" class="sub-left txt-slate">· 문단 사이는 빈 줄로 구분하고 하이픈(-) 불릿 목록 활용 가능</text>
-  <text x="408" y="228" class="sub-left txt-muted">· -m 1줄 커밋보다 Vim 편집기로 맥락을 남기는 습관이 핵심</text>
+  <rect x="398" y="148" width="384" height="44" class="pill-blue" />
+  <text x="408" y="164" class="mono-left txt-blue">3행~ (72자 본문 + Git 푸터):</text>
+  <text x="408" y="182" class="sub-left txt-slate">Why 중심 본문 서술 · 빈 줄 후 Refs: #123 / BREAKING CHANGE:</text>
+
+  <rect x="398" y="197" width="112" height="43" class="pill-blue" />
+  <text x="454" y="215" class="mono-title txt-blue">fix: ...</text>
+  <text x="454" y="232" class="sub-txt txt-slate">SemVer PATCH (Z)</text>
+
+  <rect x="518" y="197" width="112" height="43" class="pill-green" />
+  <text x="574" y="215" class="mono-title txt-green">feat: ...</text>
+  <text x="574" y="232" class="sub-txt txt-slate">SemVer MINOR (Y)</text>
+
+  <rect x="638" y="197" width="144" height="43" class="pill-amber" />
+  <text x="710" y="215" class="mono-sub txt-amber" style="font-weight: 700;">! / BREAKING CHANGE:</text>
+  <text x="710" y="232" class="sub-txt txt-slate">SemVer MAJOR (X)</text>
 
   <!-- Divider -->
   <line x1="24" y1="268" x2="796" y2="268" class="divider" />
