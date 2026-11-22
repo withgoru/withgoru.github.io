@@ -1,0 +1,194 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 540" width="820" height="540" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">중앙 집중형(CVCS) vs 분산형(DVCS) 아키텍처와 Git 3대 분산 워크플로우</title>
+  <desc id="diagram-desc">상단은 중앙 DB 서버에 종속된 CVCS와 모든 노드가 전체 저장소(.git)를 보유하는 DVCS의 구조 차이를 비교하고, 하단은 Centralized, Integration-Manager, Dictator and Lieutenants 3대 분산 워크플로우 토폴로지를 나타낸다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .box-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: 700; text-anchor: middle; }
+      .mono-title { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10.5px; text-anchor: middle; }
+      .mono-sub { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; text-anchor: middle; }
+      .edge-label { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; font-weight: 700; text-anchor: middle; }
+
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .card-highlight { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.6; rx: 8; }
+
+      .node-master { fill: #fee2e2; stroke: #dc2626; stroke-width: 1.5; rx: 6; }
+      .node-blessed { fill: #fef3c7; stroke: #d97706; stroke-width: 1.5; stroke-dasharray: 5 3; rx: 6; }
+      .node-copy { fill: #f1f5f9; stroke: #64748b; stroke-width: 1.4; rx: 6; }
+      .node-peer { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.5; rx: 6; }
+      .node-green { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; rx: 6; }
+      .node-purple { fill: #ede9fe; stroke: #7c3aed; stroke-width: 1.4; rx: 6; }
+
+      .pill-note { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 6; }
+      .pill-blue { fill: #dbeafe; stroke: #2563eb; stroke-width: 1.1; rx: 5; }
+      .pill-green { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.1; rx: 5; }
+      .pill-amber { fill: #fef3c7; stroke: #d97706; stroke-width: 1.1; rx: 5; }
+
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+      .txt-blue { fill: #0369a1; }
+      .txt-green { fill: #15803d; }
+      .txt-amber { fill: #b45309; }
+      .txt-red { fill: #b91c1c; }
+      .txt-purple { fill: #6d28d9; }
+
+      .arrow-slate { stroke: #475569; stroke-width: 1.4; fill: none; }
+      .arrow-red { stroke: #dc2626; stroke-width: 1.4; fill: none; }
+      .arrow-blue { stroke: #0284c7; stroke-width: 1.5; fill: none; }
+      .arrow-green { stroke: #16a34a; stroke-width: 1.5; fill: none; }
+      .arrow-amber { stroke: #d97706; stroke-width: 1.4; stroke-dasharray: 4 2; fill: none; }
+    </style>
+
+    <marker id="head-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+    <marker id="head-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+    </marker>
+    <marker id="head-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+    <marker id="head-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+    <marker id="head-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706" />
+    </marker>
+  </defs>
+
+  <!-- Outer Card Background -->
+  <rect x="1" y="1" width="818" height="538" rx="12" class="bg" />
+
+  <!-- SECTION 1: CVCS VS DVCS -->
+  <text x="26" y="30" class="section-title">1. 중앙 집중형(CVCS) vs 분산형(DVCS): 똑같이 중앙 서버를 써도 다른 이유</text>
+
+  <!-- Left Panel: CVCS -->
+  <rect x="24" y="44" width="376" height="210" class="panel-card" />
+  <text x="38" y="64" class="panel-title">A. 중앙 집중형 저장소 (CVCS: SVN · Perforce)</text>
+
+  <rect x="108" y="76" width="208" height="46" class="node-master" />
+  <text x="212" y="96" class="box-title txt-red">중앙 DB 서버 (단일 마스터)</text>
+  <text x="212" y="112" class="sub-txt txt-slate">전체 히스토리 단독 보관 · SPOF</text>
+
+  <rect x="40" y="158" width="154" height="46" class="node-copy" />
+  <text x="117" y="177" class="box-title txt-slate">John (Working Copy)</text>
+  <text x="117" y="194" class="sub-txt txt-muted">체크아웃된 사본만 보유</text>
+
+  <rect x="230" y="158" width="154" height="46" class="node-copy" />
+  <text x="307" y="177" class="box-title txt-slate">Jessica (Working Copy)</text>
+  <text x="307" y="194" class="sub-txt txt-muted">오프라인 커밋 불가</text>
+
+  <line x1="117" y1="158" x2="156" y2="125" class="arrow-red" marker-end="url(#head-red)" marker-start="url(#head-slate)" />
+  <line x1="307" y1="158" x2="268" y2="125" class="arrow-red" marker-end="url(#head-red)" marker-start="url(#head-slate)" />
+  <text x="212" y="146" class="edge-label txt-red">Commit = 서버 즉시 반영</text>
+
+  <rect x="38" y="214" width="348" height="28" class="pill-note" />
+  <text x="212" y="232" class="sub-txt txt-slate" style="font-weight: 600;">다른 파일 동시 수정 시 서버가 자동 병합 (노드는 소비자에 불과)</text>
+
+  <!-- Right Panel: DVCS -->
+  <rect x="416" y="44" width="380" height="210" class="panel-card" />
+  <text x="430" y="64" class="panel-title">B. 분산형 저장소 (DVCS: Git)</text>
+
+  <rect x="500" y="76" width="212" height="46" class="node-blessed" />
+  <text x="606" y="96" class="box-title txt-amber">기준 저장소 (Blessed Repo)</text>
+  <text x="606" y="112" class="sub-txt txt-amber">기술적 마스터가 아닌 사회적 합의</text>
+
+  <rect x="430" y="158" width="162" height="46" class="node-peer" />
+  <text x="511" y="177" class="box-title txt-blue">John (.git 전체 DB)</text>
+  <text x="511" y="194" class="sub-txt txt-blue">Node이자 Hub (오프라인 OK)</text>
+
+  <rect x="620" y="158" width="162" height="46" class="node-peer" />
+  <text x="701" y="177" class="box-title txt-blue">Jessica (.git 전체 DB)</text>
+  <text x="701" y="194" class="sub-txt txt-blue">100% 풀 히스토리 복제본</text>
+
+  <line x1="511" y1="158" x2="554" y2="125" class="arrow-blue" marker-end="url(#head-blue)" marker-start="url(#head-blue)" />
+  <line x1="701" y1="158" x2="658" y2="125" class="arrow-blue" marker-end="url(#head-blue)" marker-start="url(#head-blue)" />
+  <line x1="592" y1="181" x2="616" y2="181" class="arrow-amber" marker-end="url(#head-amber)" marker-start="url(#head-amber)" />
+  <text x="606" y="146" class="edge-label txt-blue">Commit(로컬)과 Push 분리</text>
+
+  <rect x="430" y="214" width="352" height="28" class="pill-note" />
+  <text x="606" y="232" class="sub-txt txt-blue" style="font-weight: 600;">충돌 시 Non-Fast-Forward 거절 → 클라이언트 선(先)병합·검증 강제</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="268" x2="796" y2="268" class="divider" />
+
+  <!-- SECTION 2: 3 DISTRIBUTED WORKFLOWS -->
+  <text x="26" y="296" class="section-title">2. Git의 3대 분산 워크플로우 토폴로지 비교 (Pro Git 5.1)</text>
+
+  <!-- Workflow 1: Centralized -->
+  <rect x="24" y="312" width="248" height="214" class="panel-card" />
+  <text x="148" y="334" class="box-title txt-slate">1. Centralized Workflow</text>
+
+  <rect x="78" y="346" width="140" height="36" class="node-blessed" />
+  <text x="148" y="368" class="mono-title txt-amber">Shared Hub (origin)</text>
+
+  <rect x="38" y="420" width="96" height="36" class="node-peer" />
+  <text x="86" y="442" class="box-title txt-blue">개발자 A</text>
+
+  <rect x="162" y="420" width="96" height="36" class="node-peer" />
+  <text x="210" y="442" class="box-title txt-blue">개발자 B</text>
+
+  <line x1="86" y1="420" x2="118" y2="386" class="arrow-blue" marker-end="url(#head-blue)" marker-start="url(#head-slate)" />
+  <line x1="210" y1="420" x2="178" y2="386" class="arrow-blue" marker-end="url(#head-blue)" marker-start="url(#head-slate)" />
+  <text x="148" y="408" class="sub-txt txt-muted">직접 Push/Pull</text>
+
+  <rect x="38" y="470" width="220" height="44" class="pill-blue" />
+  <text x="148" y="488" class="sub-txt txt-blue" style="font-weight: 700;">소규모 팀 · 동일 저장소 쓰기 권한</text>
+  <text x="148" y="504" class="sub-txt txt-slate">뒤처지면 fetch + 로컬 merge 후 push</text>
+
+  <!-- Workflow 2: Integration-Manager -->
+  <rect x="286" y="312" width="248" height="214" class="card-highlight" />
+  <text x="410" y="334" class="box-title txt-green">2. Integration-Manager</text>
+
+  <rect x="342" y="346" width="136" height="34" class="node-green" />
+  <text x="410" y="367" class="mono-title txt-green">Blessed Repo</text>
+
+  <rect x="300" y="418" width="96" height="38" class="node-blessed" />
+  <text x="348" y="435" class="box-title txt-amber">내 Fork</text>
+  <text x="348" y="449" class="mono-sub txt-amber">(myfork · 쓰기)</text>
+
+  <rect x="424" y="418" width="96" height="38" class="node-peer" />
+  <text x="472" y="435" class="box-title txt-blue">개발자 로컬</text>
+  <text x="472" y="449" class="sub-txt txt-blue">Topic 브랜치</text>
+
+  <line x1="424" y1="437" x2="400" y2="437" class="arrow-blue" marker-end="url(#head-blue)" />
+  <line x1="348" y1="418" x2="378" y2="384" class="arrow-green" marker-end="url(#head-green)" />
+  <line x1="442" y1="384" x2="472" y2="418" class="arrow-slate" marker-end="url(#head-slate)" />
+  <text x="346" y="399" class="sub-txt txt-green" style="font-weight: 700;">PR 통합</text>
+  <text x="480" y="399" class="sub-txt txt-slate">fetch</text>
+
+  <rect x="300" y="470" width="220" height="44" class="pill-green" />
+  <text x="410" y="488" class="sub-txt txt-green" style="font-weight: 700;">GitHub · GitLab Fork 및 PR 원형</text>
+  <text x="410" y="504" class="sub-txt txt-slate">메인테이너가 검증 후 공식 저장소 반영</text>
+
+  <!-- Workflow 3: Dictator and Lieutenants -->
+  <rect x="548" y="312" width="248" height="214" class="panel-card" />
+  <text x="672" y="334" class="box-title txt-purple">3. Dictator and Lieutenants</text>
+
+  <rect x="612" y="344" width="120" height="28" class="node-purple" />
+  <text x="672" y="362" class="box-title txt-purple">Benevolent Dictator</text>
+
+  <rect x="562" y="390" width="98" height="30" class="node-peer" />
+  <text x="611" y="409" class="sub-txt txt-blue" style="font-weight: 700;">부관 A (네트워크)</text>
+
+  <rect x="684" y="390" width="98" height="30" class="node-peer" />
+  <text x="733" y="409" class="sub-txt txt-blue" style="font-weight: 700;">부관 B (파일시스템)</text>
+
+  <rect x="562" y="436" width="220" height="24" class="node-copy" />
+  <text x="672" y="452" class="sub-txt txt-slate">수천 명의 일반 개발자 (Topic 작업)</text>
+
+  <line x1="611" y1="390" x2="646" y2="375" class="arrow-slate" marker-end="url(#head-slate)" />
+  <line x1="733" y1="390" x2="698" y2="375" class="arrow-slate" marker-end="url(#head-slate)" />
+  <line x1="611" y1="436" x2="611" y2="423" class="arrow-slate" marker-end="url(#head-slate)" />
+  <line x1="733" y1="436" x2="733" y2="423" class="arrow-slate" marker-end="url(#head-slate)" />
+
+  <rect x="562" y="470" width="220" height="44" class="pill-amber" />
+  <text x="672" y="488" class="sub-txt txt-amber" style="font-weight: 700;">리눅스 커널급 초대규모 계층 통합</text>
+  <text x="672" y="504" class="sub-txt txt-slate">부관들이 1차 통합 → 독재자 최종 병합</text>
+</svg>
