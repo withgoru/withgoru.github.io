@@ -24,7 +24,7 @@
       .box-snap-link { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 4 3; rx: 6; }
       .text-snap-link { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; font-weight: 500; fill: #64748b; text-anchor: middle; dominant-baseline: central; }
 
-      /* Arrows & connectors */
+      /* Arrows and connectors */
       .arrow-solid { stroke: #94a3b8; stroke-width: 1.5; fill: none; }
       .arrow-link { stroke: #64748b; stroke-width: 1.5; stroke-dasharray: 3 3; fill: none; }
       .time-line { stroke: #94a3b8; stroke-width: 1.5; fill: none; }
