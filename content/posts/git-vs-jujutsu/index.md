@@ -157,3 +157,12 @@ jj new ntt ym tx
 Jujutsu는 기존 Git 생태계를 파괴하는 도구가 아니라, Git이라는 강력한 엔진 위에 개발자 친화적인 최신식 운전석을 얹어준 도구야.
 
 LFS를 쓰는 특수한 프로젝트가 아니라면, 지금 작업 중인 사이드 프로젝트나 회사 로컬 저장소에 가볍게 jj를 연동해서 써보는 건 어떨까? 한 번이라도 `jj undo`와 `jj squash`의 손맛을 보고 나면, 다시는 예전의 빡빡했던 Git 명령어로 돌아가기 쉽지 않을 거야.
+
+---
+
+## 참고 자료
+
+- [Jujutsu (`jj`) 공식 문서](https://jj-vcs.github.io/jj/latest/)
+- [Jujutsu GitHub 저장소 (`jj-vcs/jj`)](https://github.com/jj-vcs/jj)
+- [Jujutsu Docs - Git 호환성 및 Colocated 워크스페이스](https://jj-vcs.github.io/jj/latest/git-compatibility/)
+- [Steve Klabnik - Jujutsu 튜토리얼](https://steveklabnik.github.io/jujutsu-tutorial/)

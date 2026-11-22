@@ -103,3 +103,12 @@ AI 시대에 엔지니어가 경계해야 할 대상은 AI 도구의 적극적�
 4. **추적 가능한 변경 이력과 에이전트 규칙 (Conventional Commits & `AGENTS.md`)**: 슬롭이 복리로 쌓이지 않도록 일관된 히스토리와 프로젝트 규칙을 코드베이스에 명문화하여 다음 에이전트가 올바른 컨텍스트를 학습하게 만든다.
 
 결국 AI는 인간의 판단력을 대체하지 않는다. 우리의 판단력—혹은 판단력의 부재—을 증폭시킬 뿐이다. 코드 생성의 한계 비용이 0에 수렴하는 시대일수록 **무엇을 만들지 정의하고, 무엇을 거절할지 결정하며, 시스템의 가드레일을 설계해 결과물에 책임을 지는 엔지니어링의 기본기**가 그 어느 때보다 결정적인 경쟁력이 된다.
+
+---
+
+## 참고 자료
+
+- [No AI Slop: A Manifesto (원문)](https://www.slopmanifesto.com/)
+- [No AI Slop 선언문 한국어 번역본 (DaleSeo Gist)](https://gist.github.com/DaleSeo/e647dabfd4cd5df386dbd6e62b3a9985)
+- [Hacker News - No AI Slop: A Manifesto 토론 스레드](https://news.ycombinator.com/item?id=50488769)
+- [애자일 소프트웨어 개발 선언 (Agile Manifesto, 2001)](https://agilemanifesto.org/)

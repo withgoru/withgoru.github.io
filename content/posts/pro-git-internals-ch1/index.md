@@ -142,3 +142,11 @@ Git이 관리하는 파일은 다음 세 가지 상태 중 하나에 놓인다.
 1장만 제대로 이해해도 Git에 대한 막연한 두려움의 절반은 사라진다. Git이 파일을 diff 덩어리가 아니라 **내용의 SHA-1 해시로 인덱싱된 스냅샷 스트림**으로 저장하며, **Working Tree – Index – `.git` 디렉토리**라는 세 영역을 통해 상태를 전이시킨다는 점만 명확히 잡아두면 복잡한 명령어들도 자연스럽게 논리적으로 연결된다.
 
 다음 편에서는 Pro Git 2장과 이후 챕터들을 따라가며, 실제로 로컬에 저장소를 초기화하고 파일의 생명주기를 추적할 때 `.git` 디렉토리와 Index 내부에서 무슨 일이 벌어지는지 더 깊게 들여다본다.
+
+---
+
+## 참고 자료
+
+- [Scott Chacon & Ben Straub, *Pro Git* 2nd Edition - 1.1 Getting Started - About Version Control](https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control)
+- [Scott Chacon & Ben Straub, *Pro Git* 2nd Edition - 1.2 Getting Started - A Short History of Git](https://git-scm.com/book/en/v2/Getting-Started-A-Short-History-of-Git)
+- [Scott Chacon & Ben Straub, *Pro Git* 2nd Edition - 1.3 Getting Started - What is Git?](https://git-scm.com/book/en/v2/Getting-Started-What-is-Git%3F)

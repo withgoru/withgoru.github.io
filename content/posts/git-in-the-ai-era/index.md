@@ -188,3 +188,13 @@ AI에게 PR 템플릿을 채우도록 강제하면, 코드를 짤 때 미처 생
 '딸깍' 한 번으로 코드가 완성되는 시대가 왔지만, 그 코드를 관리하고 프로젝트가 올바른 방향으로 굴러가게 만드는 버전 관리의 본질은 변하지 않았어.
 
 직접 터미널에 `git commit`을 타이핑하지 않더라도, 오늘 소개한 규칙들을 너의 AI 에이전트에게 적용해 봐. AI라는 뛰어난 주니어 개발자를 완벽하게 리드하는 든든한 시니어 디렉터가 될 수 있을 거야.
+
+---
+
+## 참고 자료
+
+- [GitHub Docs - GitHub Flow](https://docs.github.com/ko/get-started/using-github/github-flow)
+- [Dave Lunny - Sane GitHub Labels](https://medium.com/@dave_lunny/sane-github-labels-c5d2e6004b63)
+- [Conventional Commits 1.0.0 Specification](https://www.conventionalcommits.org/ko/v1.0.0/)
+- [GitHub Docs - 이슈 및 풀 리퀘스트 템플릿 정보](https://docs.github.com/ko/communities/using-templates-to-encourage-useful-issues-and-pull-requests/about-issue-and-pull-request-templates)
+- [AGENTS.md Specification](https://agents.md/)
