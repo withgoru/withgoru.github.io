@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 540" width="820" height="540" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Git Submodule Gitlink 포인터 구조 및 Subtree/Monorepo, Bundle/Replace/Credential 비교</title>
+  <desc id="diagram-desc">상단은 Superproject가 서브모듈의 파일 대신 160000 commit Gitlink SHA-1 포인터만 저장하는 원리와 Submodule, Subtree, Monorepo 비교를 보여주고, 하단은 오프라인 전송 git bundle, 해시 보존 이력 접합 git replace, OS 키체인 기반 인증 헬퍼를 정리한다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .pill-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.1; rx: 6; }
+      .pill-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.1; rx: 6; }
+      .pill-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.1; rx: 6; }
+      .pill-indigo { fill: #eef2ff; stroke: #4f46e5; stroke-width: 1.1; rx: 6; }
+      .pill-red { fill: #fef2f2; stroke: #dc2626; stroke-width: 1.1; rx: 6; }
+      .pill-slate { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 6; }
+
+      .head-blue { fill: #0284c7; rx: 6; }
+      .head-amber { fill: #b45309; rx: 6; }
+      .head-green { fill: #15803d; rx: 6; }
+
+      .flow-blue { stroke: #0284c7; stroke-width: 2; fill: none; }
+
+      .head-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #ffffff; text-anchor: middle; }
+      .mono-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+      .mono-left { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; text-anchor: start; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: middle; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: start; }
+
+      .txt-blue { fill: #0369a1; }
+      .txt-amber { fill: #b45309; }
+      .txt-green { fill: #15803d; }
+      .txt-indigo { fill: #4338ca; }
+      .txt-red { fill: #b91c1c; }
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+    </style>
+
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect x="1" y="1" width="818" height="538" rx="12" class="bg" />
+
+  <!-- SECTION 1: SUBMODULE GITLINK AND ALTERNATIVES -->
+  <text x="26" y="34" class="section-title">1. Git Submodule 내부 구조(Gitlink 160000 포인터)와 현대적 대안 비교</text>
+
+  <!-- Left Panel: Gitlink Architecture -->
+  <rect x="24" y="46" width="388" height="232" class="panel-card" />
+  <text x="38" y="66" class="panel-title">A. Superproject는 파일이 아닌 40B 커밋 해시만 저장</text>
+
+  <rect x="38" y="76" width="360" height="68" class="pill-blue" />
+  <text x="48" y="94" class="mono-left txt-blue">Superproject (부모 저장소 Tree)</text>
+  <text x="48" y="111" class="mono-left txt-slate">100644 blob   ...   .gitmodules  (URL · 경로 매핑)</text>
+  <text x="48" y="128" class="mono-left txt-indigo">160000 commit a1b2c3d  libs/ui   (Gitlink 엔트리)</text>
+
+  <line x1="218" y1="144" x2="218" y2="176" class="flow-blue" marker-end="url(#arr-blue)" />
+  <rect x="228" y="150" width="166" height="20" class="pill-slate" />
+  <text x="311" y="164" class="sub-txt txt-slate">특정 커밋 스냅샷만 고정 핀</text>
+
+  <rect x="38" y="180" width="360" height="84" class="pill-amber" />
+  <text x="48" y="198" class="mono-left txt-amber">Submodule 저장소 (libs/ui 독립 .git)</text>
+  <text x="48" y="216" class="mono-left txt-red">HEAD detached at a1b2c3d  (브랜치 없음 주의!)</text>
+  <text x="48" y="233" class="sub-left txt-slate">· 외부 원격에 새 커밋(e4f5a6b)이 생겨도 부모가 자동 변경 안 됨</text>
+  <text x="48" y="249" class="sub-left txt-muted">· 하위 폴더에서 수정 후 체크아웃 없이 커밋하면 유실 위험(함정 1위)</text>
+
+  <!-- Right Panel: Submodule vs Subtree vs Monorepo -->
+  <rect x="426" y="46" width="370" height="232" class="panel-card" />
+  <text x="440" y="66" class="panel-title">B. 멀티 리포 관리: Submodule vs Subtree vs Monorepo</text>
+
+  <rect x="440" y="78" width="342" height="58" class="pill-amber" />
+  <text x="450" y="95" class="mono-left txt-amber">1. Git Submodule (외부 포인터 고정)</text>
+  <text x="450" y="111" class="sub-left txt-slate">저장소 분리 + 정확한 버전 핀 고정에 강점</text>
+  <text x="450" y="125" class="sub-left txt-muted">단점: Detached HEAD, --recurse-submodules 누락 함정</text>
+
+  <rect x="440" y="144" width="342" height="58" class="pill-blue" />
+  <text x="450" y="161" class="mono-left txt-blue">2. Git Subtree (단일 저장소 소스 병합)</text>
+  <text x="450" y="177" class="sub-left txt-slate">클론 시 추가 명령 없이 일반 폴더처럼 즉시 사용 가능</text>
+  <text x="450" y="191" class="sub-left txt-muted">단점: git subtree push/split 양방향 동기화 시 이력 복잡</text>
+
+  <rect x="440" y="210" width="342" height="58" class="pill-green" />
+  <text x="450" y="227" class="mono-left txt-green">3. 현대 권장: Monorepo 또는 패키지 매니저</text>
+  <text x="450" y="243" class="sub-left txt-slate">같은 조직 코드는 Monorepo(Turborepo · Nx · Bazel)</text>
+  <text x="450" y="257" class="sub-left txt-muted">외부 라이브러리는 npm · Maven · Go module 의존성 권장</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="294" x2="796" y2="294" class="divider" />
+
+  <!-- SECTION 2: SPECIAL TOOLS -->
+  <text x="26" y="320" class="section-title">2. 알아두면 결정적인 Git 특수 도구 3종: bundle · replace · credential</text>
+
+  <!-- Card 1: git bundle -->
+  <rect x="24" y="332" width="246" height="194" class="panel-card" />
+  <rect x="36" y="344" width="222" height="34" class="head-blue" />
+  <text x="147" y="366" class="head-txt">git bundle (오프라인 전송)</text>
+
+  <rect x="36" y="388" width="222" height="68" class="pill-blue" />
+  <text x="46" y="405" class="mono-left txt-blue">폐쇄망 · USB 이력 전달 도구</text>
+  <text x="46" y="422" class="sub-left txt-slate">git push로 보낼 모든 커밋 객체를</text>
+  <text x="46" y="437" class="sub-left txt-slate">단일 바이너리 .bundle 파일로 압축</text>
+
+  <rect x="36" y="464" width="222" height="50" class="pill-slate" />
+  <text x="46" y="481" class="mono-left txt-slate">$ git bundle create app.bundle</text>
+  <text x="46" y="497" class="mono-left txt-blue">$ git clone app.bundle app</text>
+
+  <!-- Card 2: git replace -->
+  <rect x="287" y="332" width="246" height="194" class="panel-card" />
+  <rect x="299" y="344" width="222" height="34" class="head-amber" />
+  <text x="410" y="366" class="head-txt">git replace (해시 보존 접합)</text>
+
+  <rect x="299" y="388" width="222" height="68" class="pill-amber" />
+  <text x="309" y="405" class="mono-left txt-amber">커밋 해시를 깨지 않는 이력 연결</text>
+  <text x="309" y="422" class="sub-left txt-slate">거대 레거시 히스토리를 얕게 자른 뒤</text>
+  <text x="309" y="437" class="sub-left txt-slate">필요 시 별도 과거 저장소를 투명 접합</text>
+
+  <rect x="299" y="464" width="222" height="50" class="pill-slate" />
+  <text x="309" y="481" class="mono-left txt-slate">.git/refs/replace/ 매핑 저장</text>
+  <text x="309" y="497" class="sub-left txt-muted">(rebase와 달리 기존 SHA-1 해시 불변)</text>
+
+  <!-- Card 3: Credential Helper -->
+  <rect x="550" y="332" width="246" height="194" class="panel-card" />
+  <rect x="562" y="344" width="222" height="34" class="head-green" />
+  <text x="673" y="366" class="head-txt">Credential Storage (인증 캐시)</text>
+
+  <rect x="562" y="388" width="222" height="68" class="pill-green" />
+  <text x="572" y="405" class="mono-left txt-green">안전한 HTTPS 토큰 캐싱 메커니즘</text>
+  <text x="572" y="422" class="sub-left txt-slate">macOS osxkeychain / Windows GCM</text>
+  <text x="572" y="437" class="sub-left txt-slate">OS 암호화 키체인에 토큰 자동 보관</text>
+
+  <rect x="562" y="464" width="222" height="50" class="pill-red" />
+  <text x="572" y="481" class="mono-left txt-red">주의: credential.helper store 금지</text>
+  <text x="572" y="497" class="sub-left txt-slate">~/.git-credentials 평문 저장 위험 회피</text>
+</svg>
