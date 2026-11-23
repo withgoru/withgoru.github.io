@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 540" width="820" height="540" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Git 3가지 트리와 git reset(--soft/--mixed/--hard) 동작 범위 및 --soft Squash</title>
+  <desc id="diagram-desc">상단은 HEAD, Index, Working Tree 3가지 트리에 대해 reset --soft, --mixed, --hard가 어디까지 상태를 되돌리는지 단계별로 비교하고, 하단은 파일 경로 지정 시 HEAD가 고정되는 원리와 reset --soft를 이용한 다중 커밋 Squash 흐름을 보여준다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .col-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.3; rx: 7; }
+      .col-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.3; rx: 7; }
+      .col-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.3; rx: 7; }
+
+      .bar-soft { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.3; rx: 6; }
+      .bar-mixed { fill: #fef3c7; stroke: #d97706; stroke-width: 1.3; rx: 6; }
+      .bar-hard { fill: #fee2e2; stroke: #dc2626; stroke-width: 1.5; rx: 6; }
+
+      .pill-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.1; rx: 6; }
+      .pill-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.1; rx: 6; }
+      .pill-red { fill: #fef2f2; stroke: #dc2626; stroke-width: 1.1; rx: 6; }
+      .pill-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.1; rx: 6; }
+      .pill-slate { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 6; }
+
+      .flow-slate { stroke: #475569; stroke-width: 1.8; fill: none; }
+
+      .mono-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+      .mono-left { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; text-anchor: start; }
+      .mono-sm { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; font-weight: 700; text-anchor: middle; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: middle; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: start; }
+
+      .txt-blue { fill: #0369a1; }
+      .txt-amber { fill: #b45309; }
+      .txt-green { fill: #15803d; }
+      .txt-red { fill: #b91c1c; }
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+    </style>
+
+    <marker id="arr-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect x="1" y="1" width="818" height="538" rx="12" class="bg" />
+
+  <!-- SECTION 1: THREE TREES AND RESET SCOPES -->
+  <text x="26" y="34" class="section-title">1. Git의 3가지 트리(HEAD · Index · Working Tree)와 git reset 3단계 도달 범위</text>
+  <rect x="24" y="46" width="772" height="222" class="panel-card" />
+
+  <!-- Three Tree Columns Background -->
+  <rect x="190" y="58" width="186" height="196" class="col-blue" />
+  <text x="283" y="77" class="mono-label txt-blue" style="font-size:12px;">1. HEAD (저장소 커밋)</text>
+  <text x="283" y="92" class="sub-txt txt-slate">현재 브랜치 마지막 스냅샷</text>
+
+  <rect x="392" y="58" width="186" height="196" class="col-amber" />
+  <text x="485" y="77" class="mono-label txt-amber" style="font-size:12px;">2. Index (Staging Area)</text>
+  <text x="485" y="92" class="sub-txt txt-slate">다음 커밋 후보 스냅샷</text>
+
+  <rect x="594" y="58" width="188" height="196" class="col-green" />
+  <text x="688" y="77" class="mono-label txt-green" style="font-size:12px;">3. Working Tree (디스크)</text>
+  <text x="688" y="92" class="sub-txt txt-slate">실제 편집 중인 파일</text>
+
+  <!-- Left Mode Labels -->
+  <text x="38" y="124" class="mono-left txt-blue" style="font-size:11.5px;">--soft</text>
+  <text x="38" y="139" class="sub-left txt-muted">가장 안전한 이동</text>
+
+  <text x="38" y="172" class="mono-left txt-amber" style="font-size:11.5px;">--mixed (기본)</text>
+  <text x="38" y="187" class="sub-left txt-muted">언스테이징 동작</text>
+
+  <text x="38" y="220" class="mono-left txt-red" style="font-size:11.5px;">--hard (위험)</text>
+  <text x="38" y="235" class="sub-left txt-red">미커밋 작업 파괴</text>
+
+  <!-- Horizontal Bars showing scope -->
+  <!-- soft covers Column 1 only -->
+  <rect x="198" y="106" width="170" height="38" class="bar-soft" />
+  <text x="283" y="123" class="mono-label txt-blue">STEP 1: HEAD 포인터 이동</text>
+  <text x="283" y="137" class="sub-txt txt-slate">(Index · Working Tree 유지)</text>
+
+  <!-- mixed covers Column 1 and 2 -->
+  <rect x="198" y="154" width="372" height="38" class="bar-mixed" />
+  <text x="384" y="171" class="mono-label txt-amber">STEP 1 + 2: HEAD 이동 후 Index까지 새 HEAD 스냅샷으로 덮어씀</text>
+  <text x="384" y="185" class="sub-txt txt-slate">(Working Tree 수정 내용은 그대로 남아 다시 Modified 상태로 보존)</text>
+
+  <!-- hard covers all 3 columns -->
+  <rect x="198" y="202" width="576" height="42" class="bar-hard" />
+  <text x="486" y="220" class="mono-label txt-red">STEP 1 + 2 + 3: HEAD 이동 + Index 덮어쓰기 + Working Tree 파일까지 강제 초기화</text>
+  <text x="486" y="236" class="sub-txt txt-red">(커밋되지 않은 로컬 수정 내역은 Reflog에도 남지 않아 영구 손실 위험)</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="282" x2="796" y2="282" class="divider" />
+
+  <!-- SECTION 2: PATH RESET VS RESTORE AND SOFT SQUASH -->
+  <text x="26" y="308" class="section-title">2. 파일 지정 reset vs restore/checkout 차이 및 --soft Squash 워크플로우</text>
+
+  <!-- Left Panel: Path Reset vs Restore -->
+  <rect x="24" y="320" width="424" height="204" class="panel-card" />
+  <text x="38" y="340" class="panel-title">A. 파일 경로(file.txt) 지정 시 HEAD는 움직이지 않는다</text>
+
+  <rect x="38" y="352" width="396" height="48" class="pill-blue" />
+  <text x="48" y="370" class="mono-left txt-blue">git reset HEAD file.txt  |  git restore --staged file.txt</text>
+  <text x="48" y="388" class="sub-left txt-slate">Step 1(HEAD 이동)을 건너뛰고 Step 2(Index 복원)만 실행 → 안전한 언스테이징</text>
+
+  <rect x="38" y="408" width="396" height="48" class="pill-red" />
+  <text x="48" y="426" class="mono-left txt-red">git checkout -- file.txt  |  git restore file.txt</text>
+  <text x="48" y="444" class="sub-left txt-red">Index의 파일로 Working Tree까지 덮어씀 → 미스테이징 수정 내용 즉시 소멸</text>
+
+  <rect x="38" y="464" width="396" height="48" class="pill-slate" />
+  <text x="236" y="482" class="mono-label txt-slate">현대 Git (2.23+) 권장 분리 원칙</text>
+  <text x="236" y="499" class="sub-txt txt-slate">브랜치 전환은 git switch · 파일 복원은 git restore로 역할을 분리해 실수 예방</text>
+
+  <!-- Right Panel: Soft Squash -->
+  <rect x="462" y="320" width="334" height="204" class="panel-card" />
+  <text x="476" y="340" class="panel-title">B. git reset --soft로 3개 커밋 즉시 압축하기</text>
+
+  <rect x="476" y="352" width="306" height="42" class="pill-slate" />
+  <text x="629" y="369" class="mono-label txt-slate">기존: C1 ← C2(WIP) ← C3(오타) ← C4(테스트)</text>
+  <text x="629" y="385" class="sub-txt txt-muted">자잘한 커밋 3개가 쌓인 상태 (HEAD = C4)</text>
+
+  <line x1="629" y1="394" x2="629" y2="410" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <rect x="476" y="412" width="306" height="44" class="pill-amber" />
+  <text x="629" y="429" class="mono-label txt-amber">git reset --soft HEAD~3</text>
+  <text x="629" y="446" class="sub-txt txt-slate">HEAD는 C1으로 후퇴 · C2~C4 변경분은 모두 Index에 보존</text>
+
+  <line x1="629" y1="456" x2="629" y2="472" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <rect x="476" y="474" width="306" height="38" class="pill-green" />
+  <text x="629" y="491" class="mono-label txt-green">git commit -m "feat: implement auth"</text>
+  <text x="629" y="505" class="sub-txt txt-slate">깔끔한 단일 커밋 C2'로 원클릭 Squash 완료</text>
+</svg>
