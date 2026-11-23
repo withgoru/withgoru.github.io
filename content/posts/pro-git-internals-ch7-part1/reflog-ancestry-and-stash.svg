@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 540" width="820" height="540" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Git 리비전 선택(^ vs ~, Reflog) 및 Stash 수명 주기와 검색(-S/-G/-L) 비교</title>
+  <desc id="diagram-desc">상단은 병합 커밋 M에서 ^와 ~ 조상 탐색 차이 및 HEAD@{n} Reflog 복구 원리를 보여주고, 하단은 git stash push/apply/pop/branch 스택 흐름과 git grep, log -S, -G, -L 검색 차이를 정리한다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .pill-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.1; rx: 6; }
+      .pill-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.1; rx: 6; }
+      .pill-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.1; rx: 6; }
+      .pill-indigo { fill: #eef2ff; stroke: #4f46e5; stroke-width: 1.1; rx: 6; }
+      .pill-red { fill: #fef2f2; stroke: #dc2626; stroke-width: 1.1; rx: 6; }
+      .pill-slate { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 6; }
+
+      .c-slate { fill: #64748b; stroke: #334155; stroke-width: 2; }
+      .c-blue { fill: #0284c7; stroke: #0369a1; stroke-width: 2; }
+      .c-green { fill: #22c55e; stroke: #15803d; stroke-width: 2; }
+      .c-amber { fill: #f59e0b; stroke: #b45309; stroke-width: 2.2; }
+
+      .flow-blue { stroke: #0284c7; stroke-width: 2; fill: none; }
+      .flow-green { stroke: #16a34a; stroke-width: 2; fill: none; }
+      .flow-slate { stroke: #475569; stroke-width: 1.8; fill: none; }
+      .flow-red { stroke: #dc2626; stroke-width: 1.8; stroke-dasharray: 4 2; fill: none; }
+
+      .mono-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+      .mono-left { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; text-anchor: start; }
+      .mono-sm { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; font-weight: 700; text-anchor: middle; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: middle; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: start; }
+      .c-txt { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; fill: #ffffff; text-anchor: middle; }
+
+      .txt-blue { fill: #0369a1; }
+      .txt-green { fill: #15803d; }
+      .txt-amber { fill: #b45309; }
+      .txt-indigo { fill: #4338ca; }
+      .txt-red { fill: #b91c1c; }
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+    </style>
+
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+    <marker id="arr-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+    <marker id="arr-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+    </marker>
+    <marker id="arr-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect x="1" y="1" width="818" height="538" rx="12" class="bg" />
+
+  <!-- SECTION 1: ANCESTRY AND REFLOG -->
+  <text x="26" y="34" class="section-title">1. 리비전 선택: 조상 탐색(^ vs ~)과 Reflog(HEAD@{n}) 안전망</text>
+
+  <!-- Left Panel: Merge Ancestry -->
+  <rect x="24" y="46" width="416" height="218" class="panel-card" />
+  <text x="38" y="66" class="panel-title">A. 병합 커밋(M) 기준 부모 탐색: 캐럿(^) vs 틸드(~)</text>
+
+  <!-- Edges (pointing right to parent or child-to-parent convention, arrows toward M from parents shown cleanly left-to-right history) -->
+  <line x1="72" y1="112" x2="146" y2="112" class="flow-blue" marker-end="url(#arr-blue)" />
+  <line x1="170" y1="112" x2="250" y2="112" class="flow-blue" marker-end="url(#arr-blue)" />
+  <line x1="274" y1="112" x2="352" y2="112" class="flow-blue" marker-end="url(#arr-blue)" />
+
+  <path d="M 164 122 L 204 166" class="flow-green" marker-end="url(#arr-green)" />
+  <line x1="224" y1="174" x2="282" y2="174" class="flow-green" marker-end="url(#arr-green)" />
+  <path d="M 304 168 L 358 122" class="flow-green" marker-end="url(#arr-green)" />
+
+  <!-- Commits -->
+  <circle cx="62" cy="112" r="12" class="c-slate" />
+  <text x="62" y="116" class="c-txt">C1</text>
+
+  <circle cx="158" cy="112" r="12" class="c-blue" />
+  <text x="158" y="116" class="c-txt">C2</text>
+
+  <circle cx="262" cy="112" r="12" class="c-blue" />
+  <text x="262" y="116" class="c-txt">C3</text>
+
+  <circle cx="368" cy="112" r="13" class="c-amber" />
+  <text x="368" y="116" class="c-txt">M</text>
+
+  <circle cx="212" cy="174" r="11" class="c-green" />
+  <text x="212" y="178" class="c-txt">B1</text>
+
+  <circle cx="294" cy="174" r="11" class="c-green" />
+  <text x="294" y="178" class="c-txt">B2</text>
+
+  <!-- Annotations -->
+  <text x="62" y="92" class="mono-sm txt-slate">M~3</text>
+  <text x="158" y="92" class="mono-sm txt-blue">M~2 (M^^)</text>
+  <text x="262" y="92" class="mono-sm txt-blue">M^ (M^1)</text>
+  <text x="368" y="91" class="mono-sm txt-amber">HEAD (Merge)</text>
+  <text x="294" y="199" class="mono-sm txt-green">M^2 (두 번째 부모)</text>
+
+  <rect x="38" y="212" width="388" height="40" class="pill-blue" />
+  <text x="232" y="229" class="sub-txt txt-slate">~N: 첫 번째 부모 라인을 N세대 거슬러 올라감 (M~2 = C2)</text>
+  <text x="232" y="244" class="sub-txt txt-slate">^N: 해당 커밋의 N번째 부모 선택 (머지된 브랜치 M^2 = B2)</text>
+
+  <!-- Right Panel: Reflog -->
+  <rect x="454" y="46" width="342" height="218" class="panel-card" />
+  <text x="468" y="66" class="panel-title">B. git reflog: HEAD 이동 기록(약 90일)</text>
+
+  <rect x="468" y="78" width="314" height="36" class="pill-red" />
+  <text x="478" y="94" class="mono-left txt-red">HEAD@{0}: reset: moving to HEAD~2</text>
+  <text x="478" y="108" class="sub-left txt-muted">(실수로 reset --hard 해서 커밋이 사라진 직후)</text>
+
+  <rect x="468" y="122" width="314" height="36" class="pill-green" />
+  <text x="478" y="138" class="mono-left txt-green">HEAD@{1}: commit: feat(auth) add JWT</text>
+  <text x="478" y="152" class="sub-left txt-slate">실제 객체는 .git/objects에 그대로 보존됨</text>
+
+  <rect x="468" y="166" width="314" height="30" class="pill-slate" />
+  <text x="478" y="185" class="mono-left txt-slate">HEAD@{2}: checkout: moving to main</text>
+
+  <rect x="468" y="206" width="314" height="46" class="pill-amber" />
+  <text x="625" y="224" class="mono-label txt-amber">git reset --hard HEAD@{1}</text>
+  <text x="625" y="241" class="sub-txt txt-slate">로컬 전용 안전망 (원격 저장소에는 전송되지 않음)</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="278" x2="796" y2="278" class="divider" />
+
+  <!-- SECTION 2: STASH AND SEARCH -->
+  <text x="26" y="304" class="section-title">2. git stash 작업 스택 수명 주기와 코드 · 히스토리 정밀 검색(-S / -G / -L)</text>
+
+  <!-- Left Panel: Stash Lifecycle -->
+  <rect x="24" y="316" width="388" height="208" class="panel-card" />
+  <text x="38" y="336" class="panel-title">A. git stash 임시 저장 스택 흐름</text>
+
+  <rect x="38" y="350" width="112" height="58" class="pill-amber" />
+  <text x="94" y="370" class="mono-label txt-amber">Working Tree</text>
+  <text x="94" y="385" class="sub-txt txt-slate">+ Index 수정 중</text>
+  <text x="94" y="399" class="sub-txt txt-muted">(Untracked: -u)</text>
+
+  <line x1="150" y1="379" x2="180" y2="379" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <rect x="184" y="348" width="214" height="64" class="pill-blue" />
+  <text x="291" y="366" class="mono-label txt-blue">Stash Stack (.git/refs/stash)</text>
+  <text x="291" y="384" class="mono-sm txt-slate">stash@{0}: WIP on main: a1b2c3d</text>
+  <text x="291" y="400" class="mono-sm txt-muted">stash@{1}: old config backup</text>
+
+  <rect x="38" y="424" width="112" height="44" class="pill-slate" />
+  <text x="94" y="442" class="mono-label txt-slate">stash apply</text>
+  <text x="94" y="458" class="sub-txt txt-muted">복원 + 스택 유지</text>
+
+  <rect x="160" y="424" width="112" height="44" class="pill-green" />
+  <text x="216" y="442" class="mono-label txt-green">stash pop</text>
+  <text x="216" y="458" class="sub-txt txt-slate">복원 + 즉시 drop</text>
+
+  <rect x="282" y="424" width="116" height="44" class="pill-indigo" />
+  <text x="340" y="442" class="mono-label txt-indigo">stash branch</text>
+  <text x="340" y="458" class="sub-txt txt-slate">충돌 시 안전 분기</text>
+
+  <rect x="38" y="478" width="360" height="34" class="pill-red" />
+  <text x="218" y="499" class="sub-txt txt-red">Untracked 파일 정리는 git clean -n -d (드라이런) 확인 후 git clean -fd 실행</text>
+
+  <!-- Right Panel: Search Methods -->
+  <rect x="426" y="316" width="370" height="208" class="panel-card" />
+  <text x="440" y="336" class="panel-title">B. git grep 및 git log 고급 검색 4종 비교</text>
+
+  <rect x="440" y="348" width="342" height="38" class="pill-slate" />
+  <text x="450" y="364" class="mono-left txt-slate">git grep -n -p "Token"</text>
+  <text x="450" y="379" class="sub-left txt-muted">현재 워킹 트리(또는 특정 커밋) 내 문자열 · 소속 함수명 초고속 검색</text>
+
+  <rect x="440" y="392" width="342" height="38" class="pill-blue" />
+  <text x="450" y="408" class="mono-left txt-blue">git log -S "verifyJWT" --oneline</text>
+  <text x="450" y="423" class="sub-left txt-slate">Pickaxe 검색: 문자열 등장 횟수 자체가 추가·삭제된 커밋만 탐색</text>
+
+  <rect x="440" y="436" width="342" height="38" class="pill-amber" />
+  <text x="450" y="452" class="mono-left txt-amber">git log -G "JWT_.*_EXPIRE"</text>
+  <text x="450" y="467" class="sub-left txt-slate">정규식 패턴이 Diff 추가/삭제 줄에 한 번이라도 걸린 커밋 모두 탐색</text>
+
+  <rect x="440" y="480" width="342" height="36" class="pill-green" />
+  <text x="450" y="495" class="mono-left txt-green">git log -L :parseConfig:config.go</text>
+  <text x="450" y="510" class="sub-left txt-slate">특정 함수 또는 줄 범위의 태초부터 현재까지 변경 이력 전체 추적</text>
+</svg>
