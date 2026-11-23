@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 560" width="820" height="560" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">zdiff3 충돌 스타일, 머지 커밋 revert -m 1 함정, 그리고 git bisect 이진 탐색</title>
+  <desc id="diagram-desc">상단은 merge.conflictstyle zdiff3의 공통 조상(base) 비교 구조와 git revert -m 1 실행 후 feature 브랜치 재병합 시 커밋이 누락되는 원리 및 해결책을 보여주고, 하단은 7개 커밋 구간에서 git bisect 및 bisect run으로 최초 버그 커밋을 O(log N) 만에 찾는 흐름을 정리한다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .code-box { fill: #1e293b; stroke: #0f172a; stroke-width: 1.2; rx: 7; }
+      .pill-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.1; rx: 6; }
+      .pill-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.1; rx: 6; }
+      .pill-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.1; rx: 6; }
+      .pill-red { fill: #fef2f2; stroke: #dc2626; stroke-width: 1.1; rx: 6; }
+      .pill-slate { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 6; }
+
+      .c-green { fill: #22c55e; stroke: #15803d; stroke-width: 2; }
+      .c-amber { fill: #f59e0b; stroke: #b45309; stroke-width: 2; }
+      .c-red { fill: #ef4444; stroke: #b91c1c; stroke-width: 2.3; }
+      .c-blue { fill: #0284c7; stroke: #0369a1; stroke-width: 2; }
+      .c-slate { fill: #64748b; stroke: #334155; stroke-width: 2; }
+
+      .flow-blue { stroke: #0284c7; stroke-width: 2; fill: none; }
+      .flow-slate { stroke: #475569; stroke-width: 1.8; fill: none; }
+      .flow-red { stroke: #dc2626; stroke-width: 1.8; fill: none; }
+      .flow-green { stroke: #16a34a; stroke-width: 1.8; fill: none; }
+
+      .mono-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+      .mono-left { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; text-anchor: start; }
+      .mono-sm { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; font-weight: 700; text-anchor: middle; }
+      .code-txt { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; fill: #e2e8f0; text-anchor: start; }
+      .code-ours { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; fill: #38bdf8; text-anchor: start; }
+      .code-base { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; fill: #fbbf24; text-anchor: start; }
+      .code-theirs { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; fill: #4ade80; text-anchor: start; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: middle; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: start; }
+      .c-txt { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; fill: #ffffff; text-anchor: middle; }
+
+      .txt-blue { fill: #0369a1; }
+      .txt-green { fill: #15803d; }
+      .txt-amber { fill: #b45309; }
+      .txt-red { fill: #b91c1c; }
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+    </style>
+
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+    <marker id="arr-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+    <marker id="arr-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+    </marker>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect x="1" y="1" width="818" height="558" rx="12" class="bg" />
+
+  <!-- SECTION 1: ZDIFF3 AND REVERT -M 1 -->
+  <text x="26" y="34" class="section-title">1. zdiff3 충돌 맥락 복원과 머지 커밋 되돌리기(git revert -m 1)의 함정</text>
+
+  <!-- Left Panel: zdiff3 -->
+  <rect x="24" y="46" width="366" height="246" class="panel-card" />
+  <text x="38" y="66" class="panel-title">A. git config --global merge.conflictstyle zdiff3</text>
+
+  <rect x="38" y="76" width="338" height="140" class="code-box" />
+  <text x="50" y="96" class="code-ours">[HEAD (ours) 블록]</text>
+  <text x="50" y="112" class="code-txt">  timeout_ms = 5000  (2초 증가)</text>
+  <text x="50" y="132" class="code-base">[||||||| 공통 조상 base (zdiff3 핵심)]</text>
+  <text x="50" y="148" class="code-txt">  timeout_ms = 3000  (분기 전 원래 값)</text>
+  <text x="50" y="168" class="code-theirs">[feature (theirs) 블록]</text>
+  <text x="50" y="184" class="code-txt">  timeout_ms = 8000  (5초 증가)</text>
+  <text x="50" y="204" class="code-txt" style="fill:#94a3b8;"># zdiff3는 공통 앞뒤 줄을 정리하고 순수 차이만 표시</text>
+
+  <rect x="38" y="224" width="338" height="56" class="pill-blue" />
+  <text x="207" y="242" class="mono-label txt-blue">왜 기본 2단 충돌보다 zdiff3가 필수인가?</text>
+  <text x="207" y="259" class="sub-txt txt-slate">원래 값(3000)을 봐야 양쪽이 어떤 의도로 수정했는지</text>
+  <text x="207" y="273" class="sub-txt txt-slate">정확히 파악해 올바른 최종 값(예: 10000)을 결정 가능</text>
+
+  <!-- Right Panel: revert -m 1 trap -->
+  <rect x="404" y="46" width="392" height="246" class="panel-card" />
+  <text x="418" y="66" class="panel-title">B. git revert -m 1 M 후 재병합 시 벌어지는 함정</text>
+
+  <!-- Timeline -->
+  <line x1="444" y1="108" x2="516" y2="108" class="flow-blue" marker-end="url(#arr-blue)" />
+  <line x1="540" y1="108" x2="626" y2="108" class="flow-blue" marker-end="url(#arr-blue)" />
+  <line x1="650" y1="108" x2="736" y2="108" class="flow-blue" marker-end="url(#arr-blue)" />
+
+  <path d="M 448 118 L 490 156" class="flow-slate" marker-end="url(#arr-slate)" />
+  <path d="M 510 156 L 526 120" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <circle cx="436" cy="108" r="11" class="c-blue" />
+  <text x="436" y="112" class="c-txt">C1</text>
+
+  <circle cx="528" cy="108" r="12" class="c-amber" />
+  <text x="528" y="112" class="c-txt">M</text>
+  <text x="528" y="90" class="mono-sm txt-amber">Merge (-m 1=C1)</text>
+
+  <circle cx="638" cy="108" r="12" class="c-red" />
+  <text x="638" y="112" class="c-txt">^M</text>
+  <text x="638" y="90" class="mono-sm txt-red">revert -m 1 M</text>
+
+  <circle cx="748" cy="108" r="12" class="c-green" />
+  <text x="748" y="112" class="c-txt">^^M</text>
+  <text x="748" y="90" class="mono-sm txt-green">재병합 해법</text>
+
+  <circle cx="500" cy="164" r="11" class="c-slate" />
+  <text x="500" y="168" class="c-txt">F1</text>
+  <text x="564" y="168" class="sub-left txt-muted">feature 추가 커밋 F1 · F2</text>
+
+  <rect x="418" y="186" width="364" height="44" class="pill-red" />
+  <text x="428" y="203" class="mono-left txt-red">함정: ^M 상태에서 git merge feature 다시 실행 시</text>
+  <text x="428" y="219" class="sub-left txt-slate">F1은 이미 M 조상에 속하므로 Already up to date! (신규 커밋만 반영)</text>
+
+  <rect x="418" y="236" width="364" height="44" class="pill-green" />
+  <text x="428" y="253" class="mono-left txt-green">올바른 해법: git revert ^M (Revert 커밋을 다시 Revert)</text>
+  <text x="428" y="269" class="sub-left txt-slate">^M을 되돌려 F1·F2 코드를 복원한 뒤 feature 추가 작업을 통합</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="304" x2="796" y2="304" class="divider" />
+
+  <!-- SECTION 2: GIT BISECT BINARY SEARCH -->
+  <text x="26" y="330" class="section-title">2. O(log N) 이진 탐색 디버깅(git bisect)과 git bisect run 완전 자동화</text>
+  <rect x="24" y="342" width="772" height="204" class="panel-card" />
+
+  <!-- 7 Commit Track -->
+  <line x1="78" y1="406" x2="178" y2="406" class="flow-green" />
+  <line x1="178" y1="406" x2="486" y2="406" class="flow-slate" />
+  <line x1="486" y1="406" x2="726" y2="406" class="flow-red" />
+
+  <circle cx="78" cy="406" r="13" class="c-green" />
+  <text x="78" y="410" class="c-txt">C1</text>
+  <text x="78" y="384" class="mono-sm txt-green">good (v1.0)</text>
+
+  <circle cx="186" cy="406" r="12" class="c-green" />
+  <text x="186" y="410" class="c-txt">C2</text>
+
+  <circle cx="294" cy="406" r="12" class="c-green" />
+  <text x="294" y="410" class="c-txt">C3</text>
+
+  <circle cx="402" cy="406" r="13" class="c-green" />
+  <text x="402" y="410" class="c-txt">C4</text>
+  <text x="402" y="384" class="mono-sm txt-green">1차 중간점: good</text>
+
+  <circle cx="510" cy="406" r="14" class="c-red" />
+  <text x="510" y="410" class="c-txt">C5</text>
+  <text x="510" y="366" class="mono-sm txt-red">최초 버그 유입 (범인!)</text>
+  <text x="510" y="381" class="mono-sm txt-red">first bad commit</text>
+
+  <circle cx="618" cy="406" r="13" class="c-amber" />
+  <text x="618" y="410" class="c-txt">C6</text>
+  <text x="618" y="384" class="mono-sm txt-amber">2차 중간점: bad</text>
+
+  <circle cx="726" cy="406" r="13" class="c-red" />
+  <text x="726" y="410" class="c-txt">C7</text>
+  <text x="726" y="384" class="mono-sm txt-red">bad (HEAD)</text>
+
+  <!-- Step Annotations Under Track -->
+  <text x="402" y="438" class="sub-txt txt-green">C1..C4 구간 제거 → C5..C7 탐색</text>
+  <text x="618" y="438" class="sub-txt txt-amber">C6도 실패 → 범인 C5 즉시 특정!</text>
+
+  <!-- 3 Bottom Cards -->
+  <rect x="38" y="454" width="236" height="78" class="pill-blue" />
+  <text x="48" y="472" class="mono-left txt-blue">1. 이진 탐색 범위 선언</text>
+  <text x="48" y="490" class="mono-left txt-slate">$ git bisect start HEAD v1.0</text>
+  <text x="48" y="508" class="sub-left txt-muted">1,000개 커밋도 단 10번 만에 색출</text>
+  <text x="48" y="522" class="sub-left txt-muted">(수동: bisect good / bisect bad)</text>
+
+  <rect x="288" y="454" width="256" height="78" class="pill-green" />
+  <text x="298" y="472" class="mono-left txt-green">2. 테스트 스크립트로 완전 자동화</text>
+  <text x="298" y="490" class="mono-left txt-slate">$ git bisect run ./test.sh</text>
+  <text x="298" y="508" class="sub-left txt-slate">exit 0 → good · exit 1~127 → bad</text>
+  <text x="298" y="522" class="sub-left txt-red">(빌드 깨진 커밋 건너뛰기: exit 125)</text>
+
+  <rect x="558" y="454" width="224" height="78" class="pill-slate" />
+  <text x="568" y="472" class="mono-left txt-slate">3. 원위치 복귀 (필수)</text>
+  <text x="568" y="490" class="mono-left txt-blue">$ git bisect reset</text>
+  <text x="568" y="508" class="sub-left txt-slate">탐색 중 머물렀던 Detached HEAD를</text>
+  <text x="568" y="522" class="sub-left txt-slate">원래 작업 브랜치 HEAD로 되돌림</text>
+</svg>
