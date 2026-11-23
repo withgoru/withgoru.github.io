@@ -1,8 +1,8 @@
 +++
 date = '2026-11-27T09:00:00+09:00'
 draft = false
-title = '[Pro Git 톺아보기 #8] 중앙 집중형(CVCS) vs 분산형(DVCS) 아키텍처와 3대 분산 워크플로우, 그리고 프로젝트 기여의 정석'
-description = 'Pro Git 5장 전반부(5.1~5.2)를 바탕으로 중앙 집중형 저장소와 분산형 저장소의 구조적 차이, 3대 분산 워크플로우(Centralized · Integration-Manager · Dictator and Lieutenants), 50/72 커밋 규율, 그리고 사내 팀과 공개 Fork 프로젝트의 브랜치 기여 전략을 깊게 정리한다.'
+title = '분산형 Git 워크플로우 #8: CVCS vs DVCS와 커밋 규약'
+description = 'Pro Git 5장 전반부를 바탕으로 CVCS vs DVCS 차이, 3대 분산 워크플로우, 50/72 및 Conventional Commits 규약과 Fork PR 기여 전략을 정리한다.'
 tags = ['Git', 'ProGit', 'VCS', 'Internals', 'Workflow', 'OpenSource', 'Engineering']
 categories = ['Engineering']
 ShowToc = true

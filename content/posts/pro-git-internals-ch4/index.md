@@ -1,8 +1,8 @@
 +++
 date = '2026-11-26T09:00:00+09:00'
 draft = false
-title = '[Pro Git 톺아보기 #7] Git 서버의 내부 원리(Bare 저장소·4대 프로토콜·git-shell)와 현대 GitHub이 HTTPS를 권장하는 이유'
-description = 'Pro Git 4장(Git on the Server) 전체를 현대적 관점으로 재해석하여 Bare 저장소의 본질, Dumb HTTP에서 Smart HTTP(git-http-backend)로의 진화, 단일 git 계정과 git-shell의 보안 구조, 그리고 현대 GitHub이 HTTPS와 Fine-grained 토큰을 권장하는 이유까지 깊게 정리한다.'
+title = 'Git 서버 원리 #7: Bare 저장소와 HTTPS vs SSH'
+description = 'Pro Git 4장을 바탕으로 Bare 저장소 구조, Smart HTTP와 SSH 프로토콜의 동작 원리, 현대 GitHub이 HTTPS와 Fine-grained 토큰을 권장하는 이유를 정리한다.'
 tags = ['Git', 'ProGit', 'VCS', 'Internals', 'GitHub', 'Security', 'Engineering']
 categories = ['Engineering']
 ShowToc = true

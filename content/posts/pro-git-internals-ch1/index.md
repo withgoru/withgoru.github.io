@@ -1,8 +1,8 @@
 +++
 date = '2026-11-18T12:40:19+09:00'
 draft = false
-title = '[Pro Git 톺아보기 #1] Git의 탄생 배경과 스냅샷 기반 내부 철학'
-description = 'Pro Git 1장을 레퍼런스로 삼아, 버전 관리 시스템의 진화부터 리누스 토르발스의 설계 목표, Delta와 Snapshot의 차이, SHA-1 무결성, 그리고 3가지 상태와 영역까지 Git의 핵심 원리를 깊게 정리한다.'
+title = 'Git 내부 원리 #1: 스냅샷 모델과 3가지 상태·영역'
+description = 'Pro Git 1장을 바탕으로 Delta와 Snapshot의 차이, SHA-1 무결성, Working Tree·Staging Area·.git 디렉토리의 3가지 영역 동작 원리를 정리한다.'
 tags = ['Git', 'ProGit', 'VCS', 'Internals', 'Engineering']
 categories = ['Engineering']
 ShowToc = true

@@ -1,8 +1,8 @@
 +++
 date = '2026-11-21T14:20:00+09:00'
 draft = false
-title = '[Pro Git 톺아보기 #2] 파일의 생명주기와 상태 전이, 히스토리 추적과 되돌리기의 원리'
-description = 'Pro Git 2장 전반부(2.1~2.4)를 바탕으로 저장소 생성과 클론의 내부 동작, 파일 상태 생명주기, git add와 diff의 정확한 비교 기준, git log 고급 필터링(Pickaxe -S), 그리고 reset과 restore를 통한 되돌리기 원리를 정리한다.'
+title = 'Git 내부 원리 #2: 파일 상태와 diff·reset·restore'
+description = 'Pro Git 2장 전반부를 바탕으로 파일 상태 생명주기, git add·diff의 비교 기준, git log 필터링(-S), reset·restore 되돌리기 원리를 정리한다.'
 tags = ['Git', 'ProGit', 'VCS', 'Internals', 'Engineering']
 categories = ['Engineering']
 ShowToc = true

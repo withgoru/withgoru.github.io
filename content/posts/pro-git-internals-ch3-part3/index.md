@@ -1,8 +1,8 @@
 +++
 date = '2026-11-24T09:00:00+09:00'
 draft = false
-title = '[Pro Git 톺아보기 #6] Rebase 내부 동작 원리(--onto, patch-id)와 Golden Rule, 그리고 Merge vs Rebase 철학'
-description = 'Pro Git 3장 후반부(3.6)를 바탕으로 git rebase의 패치 추출·재적용 메커니즘, --onto를 활용한 다중 토픽 브랜치 분리, 공개 커밋 Rebase 참사와 patch-id 기반 복구(git pull --rebase), 그리고 Merge와 Rebase의 히스토리 철학을 깊게 정리한다.'
+title = 'Git Rebase 원리 #6: 패치 재적용과 Merge 비교'
+description = 'Pro Git 3장 후반부를 바탕으로 git rebase의 패치 재적용 원리, --onto 분기 이식, 공개 커밋 Rebase 금지 원칙과 Merge vs Rebase 철학을 정리한다.'
 tags = ['Git', 'ProGit', 'VCS', 'Internals', 'Engineering']
 categories = ['Engineering']
 ShowToc = true

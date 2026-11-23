@@ -1,8 +1,8 @@
 +++
 date = '2026-11-23T09:00:00+09:00'
 draft = false
-title = '[Pro Git 톺아보기 #5] 브랜치 관리와 브랜칭 워크플로우, 그리고 리모트 트래킹 브랜치의 동작 원리'
-description = 'Pro Git 3장 중반부(3.3~3.5)를 바탕으로 브랜치 병합 상태 필터링(--merged, --no-merged)과 이름 변경, Long-Running 및 Topic 브랜치 전략, 그리고 리모트 트래킹 브랜치(origin/master)와 업스트림 추적(-vv, @{u})의 내부 원리를 깊게 정리한다.'
+title = 'Git 브랜치 원리 #5: 리모트 트래킹 브랜치와 업스트림 추적'
+description = 'Pro Git 3장 중반부를 바탕으로 git branch --merged 필터링, Long-Running·Topic 브랜치, 리모트 트래킹 브랜치(origin)와 업스트림 추적을 정리한다.'
 tags = ['Git', 'ProGit', 'VCS', 'Internals', 'Engineering']
 categories = ['Engineering']
 ShowToc = true

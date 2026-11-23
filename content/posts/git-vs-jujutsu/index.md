@@ -1,7 +1,7 @@
 +++
 date = '2026-11-04T16:06:56+09:00'
 draft = false
-title = 'Git vs Jujutsu (jj): 차세대 버전 관리 도구 완벽 정리'
+title = 'Git vs Jujutsu(jj) 비교: 차세대 버전 관리 도구'
 description = 'Git 호환성을 완벽하게 유지하면서도 스테이징 영역 제거, First-class 충돌 처리, Change ID, 원클릭 undo를 제공하는 Jujutsu(jj)의 핵심과 실전 워크플로우를 정리합니다.'
 tags = ['Git', 'Jujutsu', 'VCS', 'DevTools']
 categories = ['Engineering']

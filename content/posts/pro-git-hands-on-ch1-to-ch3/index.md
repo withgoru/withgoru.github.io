@@ -1,8 +1,8 @@
 +++
 date = '2026-11-25T09:00:00+09:00'
 draft = false
-title = '[Pro Git 실습편] 설치부터 브랜치·리베이스·원격 동기화까지: 터미널과 Vim으로 직접 확인하는 Git 내부 원리 (Ch 1~3 총정리)'
-description = 'Pro Git 1~3장 시리즈(#1~#6)에서 다룬 스냅샷, 3가지 영역, 파일 생명주기, 41바이트 브랜치 포인터, Fast-forward 및 3-Way Merge 충돌 해결, Rebase, 리모트 트래킹 브랜치와 태그까지 터미널과 Vim 실습 코드로 직접 따라 하며 눈으로 확인한다.'
+title = 'Git 명령어 실습 가이드: 설치부터 브랜치·Rebase까지'
+description = 'Git 설치와 Vim 기초부터 스냅샷, 41바이트 브랜치 포인터, 3-Way Merge 충돌 해결, Rebase, 원격 저장소 동기화까지 터미널 실습으로 직접 확인한다.'
 tags = ['Git', 'ProGit', 'VCS', 'Internals', 'HandsOn', 'Vim', 'Engineering']
 categories = ['Engineering']
 ShowToc = true
