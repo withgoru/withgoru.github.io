@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 540" width="820" height="540" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Pro Git 6장 PR 특수 참조(refs/pull) 및 3대 클라우드 원격 저장소 비교</title>
+  <desc id="diagram-desc">상단은 GitHub/GitLab Pull Request의 서버 숨은 참조(refs/pull/123/head, merge)와 Webhook 자동화 파이프라인을 설명하고, 하단은 GitHub, GitLab, Bitbucket 3대 매니지드 원격 Git 서비스의 CI/CD, 핵심 강점, 적합 팀을 비교한다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .pill-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.1; rx: 6; }
+      .pill-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.1; rx: 6; }
+      .pill-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.1; rx: 6; }
+      .pill-indigo { fill: #eef2ff; stroke: #4f46e5; stroke-width: 1.1; rx: 6; }
+      .pill-slate { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 6; }
+
+      .head-blue { fill: #0284c7; rx: 6; }
+      .head-amber { fill: #d97706; rx: 6; }
+      .head-indigo { fill: #4f46e5; rx: 6; }
+
+      .flow-slate { stroke: #475569; stroke-width: 1.8; fill: none; }
+
+      .mono-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+      .mono-left { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: start; }
+      .head-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #ffffff; text-anchor: middle; }
+      .head-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; fill: #e2e8f0; text-anchor: middle; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: middle; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: start; }
+
+      .txt-blue { fill: #0369a1; }
+      .txt-green { fill: #15803d; }
+      .txt-amber { fill: #b45309; }
+      .txt-indigo { fill: #4338ca; }
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+    </style>
+
+    <marker id="arr-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect x="1" y="1" width="818" height="538" rx="12" class="bg" />
+
+  <!-- SECTION 1: PRO GIT CH6 INTERNALS -->
+  <text x="26" y="34" class="section-title">1. Pro Git 6장 핵심 메커니즘: refs/pull/* 특수 참조와 Webhook 이벤트 파이프라인</text>
+
+  <!-- Left Panel: Hidden Server PR Refs -->
+  <rect x="24" y="46" width="380" height="172" class="panel-card" />
+  <text x="38" y="66" class="panel-title">A. 서버에 자동 생성되는 PR 숨은 참조 (.git/refs/pull/)</text>
+
+  <rect x="38" y="76" width="352" height="62" class="pill-blue" />
+  <text x="48" y="94" class="mono-left txt-blue">refs/pull/123/head</text>
+  <text x="48" y="111" class="sub-left txt-slate">기여자가 Push한 123번 PR 브랜치의 정확한 최신 커밋 포인터</text>
+  <text x="48" y="127" class="sub-left txt-muted">(git fetch origin pull/123/head:pr-123 으로 로컬 점검 가능)</text>
+
+  <rect x="38" y="146" width="352" height="62" class="pill-green" />
+  <text x="48" y="164" class="mono-left txt-green">refs/pull/123/merge</text>
+  <text x="48" y="181" class="sub-left txt-slate">서버가 base(main)와 head를 가상 3-Way Merge해 둔 테스트 커밋</text>
+  <text x="48" y="197" class="sub-left txt-muted">(충돌 유무 판정 및 CI가 병합 후 상태 미리 테스트할 때 사용)</text>
+
+  <!-- Right Panel: Webhook and API -->
+  <rect x="418" y="46" width="378" height="172" class="panel-card" />
+  <text x="432" y="66" class="panel-title">B. Webhook · REST/GraphQL API 이벤트 파이프라인</text>
+
+  <rect x="432" y="80" width="88" height="68" class="pill-amber" />
+  <text x="476" y="100" class="mono-label txt-amber">Git 이벤트</text>
+  <text x="476" y="118" class="sub-txt txt-slate">Push · PR 생성</text>
+  <text x="476" y="133" class="sub-txt txt-muted">Tag · Comment</text>
+
+  <line x1="520" y1="114" x2="536" y2="114" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <rect x="540" y="80" width="114" height="68" class="pill-blue" />
+  <text x="597" y="100" class="mono-label txt-blue">Git 호스팅 서버</text>
+  <text x="597" y="118" class="sub-txt txt-slate">JSON Payload</text>
+  <text x="597" y="133" class="sub-txt txt-muted">HTTP POST 발송</text>
+
+  <line x1="654" y1="114" x2="670" y2="114" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <rect x="674" y="80" width="108" height="68" class="pill-green" />
+  <text x="728" y="100" class="mono-label txt-green">외부 자동화</text>
+  <text x="728" y="118" class="sub-txt txt-slate">CI 빌드 · 배포</text>
+  <text x="728" y="133" class="sub-txt txt-muted">Slack 알림 기록</text>
+
+  <rect x="432" y="162" width="350" height="44" class="pill-slate" />
+  <text x="607" y="180" class="mono-label txt-slate">양방향 API + Status Checks</text>
+  <text x="607" y="196" class="sub-txt txt-slate">CI 통과 결과를 Commit Status API로 전달해 Merge 버튼 활성화 제어</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="232" x2="796" y2="232" class="divider" />
+
+  <!-- SECTION 2: 3 MAJOR CLOUD PLATFORMS -->
+  <text x="26" y="258" class="section-title">2. 3대 매니지드 원격 Git 플랫폼 비교: GitHub vs GitLab vs Bitbucket</text>
+
+  <!-- Card 1: GitHub -->
+  <rect x="24" y="272" width="246" height="254" class="panel-card" />
+  <rect x="36" y="284" width="222" height="44" class="head-blue" />
+  <text x="147" y="303" class="head-txt">GitHub</text>
+  <text x="147" y="320" class="head-sub">글로벌 오픈소스 · AI 개발 생태계 표준</text>
+
+  <rect x="36" y="338" width="222" height="50" class="pill-blue" />
+  <text x="147" y="355" class="mono-label txt-blue">CI/CD: GitHub Actions</text>
+  <text x="147" y="372" class="sub-txt txt-slate">방대한 마켓플레이스 워크플로우 재사용</text>
+
+  <rect x="36" y="396" width="222" height="56" class="pill-slate" />
+  <text x="147" y="413" class="mono-label txt-slate">핵심 차별화 강점</text>
+  <text x="147" y="429" class="sub-txt txt-slate">Copilot · Codespaces 클라우드 IDE</text>
+  <text x="147" y="443" class="sub-txt txt-muted">Dependabot · CodeQL 보안 분석</text>
+
+  <rect x="36" y="460" width="222" height="54" class="pill-green" />
+  <text x="147" y="477" class="mono-label txt-green">가장 적합한 상황</text>
+  <text x="147" y="493" class="sub-txt txt-slate">오픈소스 · SaaS 스타트업 · 범용 제품 팀</text>
+  <text x="147" y="507" class="sub-txt txt-muted">풍부한 서드파티 연동과 채용 친화성 우선</text>
+
+  <!-- Card 2: GitLab -->
+  <rect x="287" y="272" width="246" height="254" class="panel-card" />
+  <rect x="299" y="284" width="222" height="44" class="head-amber" />
+  <text x="410" y="303" class="head-txt">GitLab</text>
+  <text x="410" y="320" class="head-sub">단일 앱 기반 올인원 DevSecOps 플랫폼</text>
+
+  <rect x="299" y="338" width="222" height="50" class="pill-amber" />
+  <text x="410" y="355" class="mono-label txt-amber">CI/CD: GitLab CI/CD</text>
+  <text x="410" y="372" class="sub-txt txt-slate">내장 Runner · Auto DevOps · 레지스트리</text>
+
+  <rect x="299" y="396" width="222" height="56" class="pill-slate" />
+  <text x="410" y="413" class="mono-label txt-slate">핵심 차별화 강점</text>
+  <text x="410" y="429" class="sub-txt txt-slate">SaaS와 동일한 기능을 사내 온프레미스</text>
+  <text x="410" y="443" class="sub-txt txt-muted">자체 서버(CE/EE)로 100% 동일하게 구축</text>
+
+  <rect x="299" y="460" width="222" height="54" class="pill-green" />
+  <text x="410" y="477" class="mono-label txt-green">가장 적합한 상황</text>
+  <text x="410" y="493" class="sub-txt txt-slate">금융 · 공공 · 보안 폐쇄망 엔터프라이즈</text>
+  <text x="410" y="507" class="sub-txt txt-muted">단일 플랫폼에서 이슈·CI·배포 일원화 필요</text>
+
+  <!-- Card 3: Bitbucket -->
+  <rect x="550" y="272" width="246" height="254" class="panel-card" />
+  <rect x="562" y="284" width="222" height="44" class="head-indigo" />
+  <text x="673" y="303" class="head-txt">Bitbucket</text>
+  <text x="673" y="320" class="head-sub">Atlassian 엔터프라이즈 워크플로우 허브</text>
+
+  <rect x="562" y="338" width="222" height="50" class="pill-indigo" />
+  <text x="673" y="355" class="mono-label txt-indigo">CI/CD: Bitbucket Pipelines</text>
+  <text x="673" y="372" class="sub-txt txt-slate">컨테이너 기반 파이프라인 + Jira 배포 추적</text>
+
+  <rect x="562" y="396" width="222" height="56" class="pill-slate" />
+  <text x="673" y="413" class="mono-label txt-slate">핵심 차별화 강점</text>
+  <text x="673" y="429" class="sub-txt txt-slate">Jira · Confluence 네이티브 깊은 통합</text>
+  <text x="673" y="443" class="sub-txt txt-muted">(커밋 · 브랜치와 PROJ-123 티켓 자동 연동)</text>
+
+  <rect x="562" y="460" width="222" height="54" class="pill-green" />
+  <text x="673" y="477" class="mono-label txt-green">가장 적합한 상황</text>
+  <text x="673" y="493" class="sub-txt txt-slate">Jira · Confluence 중심 대기업 조직</text>
+  <text x="673" y="507" class="sub-txt txt-muted">기존 Atlassian 라이선스 · 계정 통제 통합</text>
+</svg>

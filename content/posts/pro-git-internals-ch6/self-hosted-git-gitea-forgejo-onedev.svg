@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 560" width="820" height="560" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">차세대 셀프호스팅 Git 서버 3종(Gitea, Forgejo, OneDev) 아키텍처 및 리소스 비교</title>
+  <desc id="diagram-desc">상단은 Gitea, Forgejo, OneDev의 언어 스택, 거버넌스/라이선스, CI/CD 및 코드 인텔리전스 특징을 나란히 비교하고, 하단은 GitLab CE 대비 메모리(RAM) 발자국 스펙트럼과 인프라 조건별 선택 가이드를 보여준다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .head-green { fill: #15803d; rx: 6; }
+      .head-amber { fill: #b45309; rx: 6; }
+      .head-indigo { fill: #4338ca; rx: 6; }
+
+      .pill-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.1; rx: 6; }
+      .pill-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.1; rx: 6; }
+      .pill-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.1; rx: 6; }
+      .pill-red { fill: #fef2f2; stroke: #dc2626; stroke-width: 1.1; rx: 6; }
+      .pill-slate { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 6; }
+
+      .bar-track { fill: #e2e8f0; rx: 4; }
+      .bar-green { fill: #16a34a; rx: 4; }
+      .bar-blue { fill: #0284c7; rx: 4; }
+      .bar-red { fill: #dc2626; rx: 4; }
+
+      .head-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #ffffff; text-anchor: middle; }
+      .head-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; fill: #f1f5f9; text-anchor: middle; }
+      .mono-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+      .mono-left { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; text-anchor: start; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: middle; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: start; }
+
+      .txt-green { fill: #15803d; }
+      .txt-amber { fill: #b45309; }
+      .txt-blue { fill: #0369a1; }
+      .txt-indigo { fill: #4338ca; }
+      .txt-red { fill: #b91c1c; }
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+    </style>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect x="1" y="1" width="818" height="558" rx="12" class="bg" />
+
+  <!-- SECTION 1: SELF-HOSTED TRIO -->
+  <text x="26" y="34" class="section-title">1. 차세대 셀프호스팅 Git 서버 3대장: Gitea vs Forgejo vs OneDev</text>
+
+  <!-- Card 1: Gitea -->
+  <rect x="24" y="46" width="246" height="256" class="panel-card" />
+  <rect x="36" y="56" width="222" height="42" class="head-green" />
+  <text x="147" y="74" class="head-txt">Gitea</text>
+  <text x="147" y="90" class="head-sub">Go 단일 바이너리 · 초경량 대중 표준</text>
+
+  <rect x="36" y="106" width="222" height="42" class="pill-green" />
+  <text x="147" y="123" class="mono-label txt-green">기술 스택 / 메모리: Go (~50-100 MB)</text>
+  <text x="147" y="139" class="sub-txt txt-slate">DB 외 단일 바이너리로 수 초 내 기동</text>
+
+  <rect x="36" y="156" width="222" height="48" class="pill-slate" />
+  <text x="147" y="172" class="mono-label txt-slate">거버넌스: Gitea Ltd. 상업 법인</text>
+  <text x="147" y="187" class="sub-txt txt-slate">MIT + CLA (오픈코어 · 상용 EE 옵션)</text>
+  <text x="147" y="200" class="sub-txt txt-muted">체계적인 엔터프라이즈 지원 로드맵</text>
+
+  <rect x="36" y="212" width="222" height="78" class="pill-slate" style="fill:#ffffff;" />
+  <text x="46" y="229" class="mono-left txt-green">핵심 기능 및 특징</text>
+  <text x="46" y="246" class="sub-left txt-slate">· Gitea Actions (GitHub Actions 호환)</text>
+  <text x="46" y="262" class="sub-left txt-slate">· 내장 Docker/npm/PyPI 패키지 레지스트리</text>
+  <text x="46" y="278" class="sub-left txt-muted">· 라즈베리 파이 · NAS 환경에서도 즉시 구동</text>
+
+  <!-- Card 2: Forgejo -->
+  <rect x="287" y="46" width="246" height="256" class="panel-card" />
+  <rect x="299" y="56" width="222" height="42" class="head-amber" />
+  <text x="410" y="74" class="head-txt">Forgejo</text>
+  <text x="410" y="90" class="head-sub">비영리 재단 주도 · 순수 FOSS 하드 포크</text>
+
+  <rect x="299" y="106" width="222" height="42" class="pill-amber" />
+  <text x="410" y="123" class="mono-label txt-amber">기술 스택 / 메모리: Go (~50-100 MB)</text>
+  <text x="410" y="139" class="sub-txt txt-slate">Gitea 기반 하드 포크 · 동일한 초경량 구조</text>
+
+  <rect x="299" y="156" width="222" height="48" class="pill-slate" />
+  <text x="410" y="172" class="mono-label txt-slate">거버넌스: Codeberg e.V. 비영리 재단</text>
+  <text x="410" y="187" class="sub-txt txt-slate">GPLv3+ 카피레프트 · CLA 없는 순수 오픈소스</text>
+  <text x="410" y="200" class="sub-txt txt-muted">상용 사유 기능 잠금(Lock-in) 원천 배제</text>
+
+  <rect x="299" y="212" width="222" height="78" class="pill-slate" style="fill:#ffffff;" />
+  <text x="309" y="229" class="mono-left txt-amber">핵심 기능 및 특징</text>
+  <text x="309" y="246" class="sub-left txt-slate">· Forgejo Actions 자체 CI 런너 생태계</text>
+  <text x="309" y="262" class="sub-left txt-slate">· ActivityPub 기반 서버 간 연합(Federation)</text>
+  <text x="309" y="278" class="sub-left txt-muted">· 독립 보안 권고와 프라이버시 최우선 설계</text>
+
+  <!-- Card 3: OneDev -->
+  <rect x="550" y="46" width="246" height="256" class="panel-card" />
+  <rect x="562" y="56" width="222" height="42" class="head-indigo" />
+  <text x="673" y="74" class="head-txt">OneDev</text>
+  <text x="673" y="90" class="head-sub">Java/JVM 올인원 · 코드 인텔리전스 강자</text>
+
+  <rect x="562" y="106" width="222" height="42" class="pill-blue" />
+  <text x="673" y="123" class="mono-label txt-indigo">기술 스택 / 메모리: Java (~0.4-2 GB)</text>
+  <text x="673" y="139" class="sub-txt txt-slate">GitLab(4-8GB+) 대비 훨씬 가벼운 올인원</text>
+
+  <rect x="562" y="156" width="222" height="48" class="pill-slate" />
+  <text x="673" y="172" class="mono-label txt-slate">거버넌스: 독립 오픈소스 (MIT)</text>
+  <text x="673" y="187" class="sub-txt txt-slate">핵심 코드 검색·CI 통합 (EE 확장 모듈 구분)</text>
+  <text x="673" y="200" class="sub-txt txt-muted">Git·CI·이슈보드를 단일 서버에 깊게 내장</text>
+
+  <rect x="562" y="212" width="222" height="78" class="pill-slate" style="fill:#ffffff;" />
+  <text x="572" y="229" class="mono-left txt-indigo">핵심 기능 및 특징</text>
+  <text x="572" y="246" class="sub-left txt-slate">· ANTLR · Lucene 웹 IDE급 심볼 정의 점프</text>
+  <text x="572" y="262" class="sub-left txt-slate">· GUI + YAML 하이브리드 CI/CD + K8s 빌드 팜</text>
+  <text x="572" y="278" class="sub-left txt-muted">· 상태 머신 기반 고도화 칸반 이슈 트래커</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="316" x2="796" y2="316" class="divider" />
+
+  <!-- SECTION 2: RAM FOOTPRINT AND SELECTION -->
+  <text x="26" y="342" class="section-title">2. 리소스 발자국(RAM) 스펙트럼과 셀프호스팅 플랫폼 선택 기준</text>
+
+  <!-- Left Panel: RAM Comparison Bars -->
+  <rect x="24" y="354" width="366" height="190" class="panel-card" />
+  <text x="38" y="374" class="panel-title">인프라 메모리 요구량(RAM) 비교 스펙트럼</text>
+
+  <!-- Bar 1 -->
+  <text x="38" y="400" class="mono-left txt-green">Gitea / Forgejo</text>
+  <text x="376" y="400" class="mono-left txt-muted" style="text-anchor:end;">~50 - 100 MB (초경량)</text>
+  <rect x="38" y="407" width="338" height="14" class="bar-track" />
+  <rect x="38" y="407" width="24" height="14" class="bar-green" />
+
+  <!-- Bar 2 -->
+  <text x="38" y="446" class="mono-left txt-indigo">OneDev (코드 인덱싱 + CI)</text>
+  <text x="376" y="446" class="mono-left txt-muted" style="text-anchor:end;">~0.4 - 2 GB (중량 올인원)</text>
+  <rect x="38" y="453" width="338" height="14" class="bar-track" />
+  <rect x="38" y="453" width="88" height="14" class="bar-blue" />
+
+  <!-- Bar 3 -->
+  <text x="38" y="492" class="mono-left txt-red">GitLab CE/EE (풀스택 설치형)</text>
+  <text x="376" y="492" class="mono-left txt-muted" style="text-anchor:end;">4 - 8 GB+ (다중 프로세스)</text>
+  <rect x="38" y="499" width="338" height="14" class="bar-track" />
+  <rect x="38" y="499" width="290" height="14" class="bar-red" />
+
+  <text x="207" y="532" class="sub-txt txt-muted">GitLab 자체 구축이 무거울 때, 목적에 따라 Gitea·Forgejo 또는 OneDev가 훌륭한 대안이 됨</text>
+
+  <!-- Right Panel: Selection Pills -->
+  <rect x="404" y="354" width="392" height="190" class="panel-card" />
+  <text x="418" y="374" class="panel-title">인프라 규모 및 팀 가치관별 선택 가이드</text>
+
+  <rect x="418" y="386" width="364" height="46" class="pill-green" />
+  <text x="428" y="403" class="mono-left txt-green">Gitea: 빠른 구축 · 저비용 · 상용 지원 옵션</text>
+  <text x="428" y="421" class="sub-left txt-slate">최소 사양 VM/NAS에서 안정적인 GitHub 유사 UI + Actions가 필요할 때</text>
+
+  <rect x="418" y="439" width="364" height="46" class="pill-amber" />
+  <text x="428" y="456" class="mono-left txt-amber">Forgejo: 100% FOSS · 비영리 거버넌스 중시</text>
+  <text x="428" y="474" class="sub-left txt-slate">GPLv3+ 라이선스와 연합 기능(Federation) 기반의 탈중앙 협업을 원할 때</text>
+
+  <rect x="418" y="492" width="364" height="46" class="pill-blue" />
+  <text x="428" y="509" class="mono-left txt-indigo">OneDev: 코드 심볼 탐색 + K8s 빌드 + 칸반 보드</text>
+  <text x="428" y="527" class="sub-left txt-slate">GitLab은 너무 무겁지만, 웹 IDE급 검색과 강력한 동적 CI를 1개 서버로 원할 때</text>
+</svg>
