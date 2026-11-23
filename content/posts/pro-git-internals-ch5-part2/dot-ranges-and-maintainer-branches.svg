@@ -1,0 +1,192 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 540" width="820" height="540" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">이중 점(A..B)과 삼중 점(A...B) 범위 비교 및 대규모 메인테이너 4단계 통합 브랜치</title>
+  <desc id="diagram-desc">상단은 공통 조상 C2에서 분기한 master(C3, C5)와 feature(C4, C6) 그래프에서 git log와 git diff의 이중 점 및 삼중 점 해석 차이를 비교하고, 하단은 토픽 브랜치가 seen, next, master, maint 4단계 통합 브랜치를 거쳐 승격되는 대규모 유지보수 파이프라인을 보여준다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .pill-indigo { fill: #eef2ff; stroke: #4f46e5; stroke-width: 1.1; rx: 6; }
+      .pill-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.1; rx: 6; }
+      .pill-red { fill: #fef2f2; stroke: #dc2626; stroke-width: 1.1; rx: 6; }
+      .pill-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.1; rx: 6; }
+      .pill-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.1; rx: 6; }
+      .pill-slate { fill: #f1f5f9; stroke: #64748b; stroke-width: 1.1; rx: 6; }
+
+      .tag-blue { fill: #0369a1; rx: 4; }
+      .tag-green { fill: #15803d; rx: 4; }
+      .tag-amber { fill: #b45309; rx: 4; }
+
+      .c-slate { fill: #64748b; stroke: #334155; stroke-width: 2; }
+      .c-amber { fill: #f59e0b; stroke: #b45309; stroke-width: 2.3; }
+      .c-blue { fill: #0284c7; stroke: #0369a1; stroke-width: 2; }
+      .c-green { fill: #22c55e; stroke: #15803d; stroke-width: 2; }
+
+      .flow-slate { stroke: #475569; stroke-width: 2; fill: none; }
+      .flow-blue { stroke: #0284c7; stroke-width: 2.2; fill: none; }
+      .flow-green { stroke: #16a34a; stroke-width: 2.2; fill: none; }
+      .flow-amber { stroke: #d97706; stroke-width: 2; fill: none; }
+      .flow-dash { stroke: #b45309; stroke-width: 1.5; stroke-dasharray: 4 2; fill: none; }
+
+      .mono-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+      .mono-left { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; text-anchor: start; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: middle; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: start; }
+      .tag-txt { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; font-weight: 700; fill: #ffffff; text-anchor: middle; }
+      .c-txt { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; fill: #ffffff; text-anchor: middle; }
+
+      .txt-blue { fill: #0369a1; }
+      .txt-indigo { fill: #4338ca; }
+      .txt-red { fill: #b91c1c; }
+      .txt-green { fill: #15803d; }
+      .txt-amber { fill: #b45309; }
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+    </style>
+
+    <marker id="arr-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+    <marker id="arr-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+    <marker id="arr-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706" />
+    </marker>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect x="1" y="1" width="818" height="538" rx="12" class="bg" />
+
+  <!-- SECTION 1: DOT RANGES (A..B vs A...B) -->
+  <text x="26" y="34" class="section-title">1. git log vs git diff에서의 이중 점(A..B)과 삼중 점(A...B) 동작 비교</text>
+
+  <!-- Left Panel: Branching DAG -->
+  <rect x="24" y="46" width="348" height="222" class="panel-card" />
+  <text x="38" y="66" class="panel-title">분기 커밋 그래프 (merge-base = C2)</text>
+
+  <!-- merge-base label -->
+  <rect x="44" y="88" width="118" height="32" class="pill-amber" />
+  <text x="103" y="102" class="mono-label txt-amber">merge-base</text>
+  <text x="103" y="115" class="sub-txt txt-slate">가장 가까운 공통 조상</text>
+  <line x1="126" y1="120" x2="134" y2="140" class="flow-dash" marker-end="url(#arr-amber)" />
+
+  <!-- Edges -->
+  <line x1="66" y1="158" x2="120" y2="158" class="flow-slate" marker-end="url(#arr-slate)" />
+  <path d="M 144 150 L 204 114" class="flow-blue" marker-end="url(#arr-blue)" />
+  <line x1="226" y1="108" x2="284" y2="108" class="flow-blue" marker-end="url(#arr-blue)" />
+  <path d="M 144 166 L 204 202" class="flow-green" marker-end="url(#arr-green)" />
+  <line x1="226" y1="208" x2="284" y2="208" class="flow-green" marker-end="url(#arr-green)" />
+
+  <!-- Nodes -->
+  <circle cx="62" cy="158" r="12" class="c-slate" />
+  <text x="62" y="162" class="c-txt">C1</text>
+
+  <circle cx="134" cy="158" r="13" class="c-amber" />
+  <text x="134" y="162" class="c-txt">C2</text>
+
+  <circle cx="216" cy="108" r="12" class="c-blue" />
+  <text x="216" y="112" class="c-txt">C3</text>
+
+  <circle cx="298" cy="108" r="12" class="c-blue" />
+  <text x="298" y="112" class="c-txt">C5</text>
+
+  <circle cx="216" cy="208" r="12" class="c-green" />
+  <text x="216" y="212" class="c-txt">C4</text>
+
+  <circle cx="298" cy="208" r="12" class="c-green" />
+  <text x="298" y="212" class="c-txt">C6</text>
+
+  <!-- Branch Refs -->
+  <rect x="270" y="72" width="56" height="19" class="tag-blue" />
+  <text x="298" y="85" class="tag-txt">master</text>
+
+  <rect x="267" y="226" width="62" height="19" class="tag-green" />
+  <text x="298" y="239" class="tag-txt">feature</text>
+
+  <text x="198" y="260" class="sub-txt txt-muted">master 고유 커밋: C3, C5  ·  feature 고유 커밋: C4, C6</text>
+
+  <!-- Right Panel: 4 Command Boxes -->
+  <rect x="386" y="46" width="410" height="222" class="panel-card" />
+  <text x="400" y="66" class="panel-title">명령어별 점(..) · 삼중 점(...) 범위 해석 비교</text>
+
+  <rect x="400" y="76" width="382" height="41" class="pill-indigo" />
+  <text x="410" y="92" class="mono-left txt-indigo">git log master..feature</text>
+  <text x="410" y="108" class="sub-left txt-slate">feature에만 존재하는 커밋 목록 조회: {C4, C6} (^master feature)</text>
+
+  <rect x="400" y="122" width="382" height="41" class="pill-blue" />
+  <text x="410" y="138" class="mono-left txt-blue">git log --left-right master...feature</text>
+  <text x="410" y="154" class="sub-left txt-slate">공통 조상 C2 이후 양쪽 고유 커밋 대조: (M) C3, C5 vs (F) C4, C6</text>
+
+  <rect x="400" y="168" width="382" height="41" class="pill-red" />
+  <text x="410" y="184" class="mono-left txt-red">git diff master..feature (리뷰 왜곡 주의)</text>
+  <text x="410" y="200" class="sub-left txt-slate">양 끝점(C5 vs C6) 직접 비교 → master의 C3·C5 수정분까지 뒤섞임</text>
+
+  <rect x="400" y="214" width="382" height="41" class="pill-green" />
+  <text x="410" y="230" class="mono-left txt-green">git diff master...feature (PR Files changed 원리)</text>
+  <text x="410" y="246" class="sub-left txt-slate">merge-base(C2) vs C6 비교 → feature의 순수 변경분만 정확히 추출</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="282" x2="796" y2="282" class="divider" />
+
+  <!-- SECTION 2: MAINTAINER 4-TIER BRANCHING MODEL -->
+  <text x="26" y="308" class="section-title">2. 대규모 프로젝트 메인테이너의 4단계 통합 파이프라인 (Git 코어 모델)</text>
+  <rect x="24" y="320" width="772" height="206" class="panel-card" />
+
+  <!-- Left Incoming Topics -->
+  <text x="122" y="340" class="panel-title" style="text-anchor:middle;">외부 기여 Topic 브랜치</text>
+
+  <rect x="38" y="350" width="168" height="38" class="pill-red" />
+  <text x="122" y="366" class="mono-label txt-red">topic/experimental</text>
+  <text x="122" y="380" class="sub-txt txt-slate">실험적 제안 (선행 충돌 탐색)</text>
+
+  <rect x="38" y="400" width="168" height="38" class="pill-green" />
+  <text x="122" y="416" class="mono-label txt-green">sc/ruby_client</text>
+  <text x="122" y="430" class="sub-txt txt-slate">로컬 격리 테스트 및 리뷰 완료</text>
+
+  <rect x="38" y="468" width="168" height="40" class="pill-slate" />
+  <text x="122" y="484" class="mono-label txt-slate">jc/security-fix</text>
+  <text x="122" y="499" class="sub-txt txt-slate">구버전 긴급 버그 · 보안 패치</text>
+
+  <!-- Integration Stages -->
+  <rect x="244" y="342" width="156" height="106" class="pill-amber" />
+  <text x="322" y="362" class="mono-label txt-amber" style="font-size:12px;">seen (구 pu)</text>
+  <text x="322" y="382" class="sub-txt txt-slate">미완성·제안 토픽 전원 합류</text>
+  <text x="322" y="399" class="sub-txt txt-slate">주기적 Rewind · Rebase 재구축</text>
+  <text x="322" y="416" class="sub-txt txt-muted">다중 PR 간 충돌 조기 탐지</text>
+  <text x="322" y="435" class="sub-txt txt-red">(기반 브랜치 분기 절대 금지)</text>
+
+  <rect x="424" y="342" width="162" height="106" class="pill-indigo" />
+  <text x="505" y="362" class="mono-label txt-indigo" style="font-size:12px;">next</text>
+  <text x="505" y="382" class="sub-txt txt-slate">차기 릴리즈 후보 통합 검증</text>
+  <text x="505" y="399" class="sub-txt txt-slate">자동 CI 및 커뮤니티 베타 QA</text>
+  <text x="505" y="416" class="sub-txt txt-muted">git rerere 충돌 해결 재사용</text>
+  <text x="505" y="435" class="sub-txt txt-indigo">(안정성 검증 완료 시 승격)</text>
+
+  <rect x="610" y="342" width="170" height="106" class="pill-blue" />
+  <text x="695" y="362" class="mono-label txt-blue" style="font-size:12px;">master</text>
+  <text x="695" y="382" class="sub-txt txt-slate">항상 릴리즈 가능한 안정 상태</text>
+  <text x="695" y="399" class="sub-txt txt-slate">완전히 검증된 토픽만 진급</text>
+  <text x="695" y="416" class="sub-txt txt-muted">서명 태그 · git archive 배포</text>
+  <text x="695" y="435" class="sub-txt txt-blue">(정식 릴리즈 스냅샷 기준선)</text>
+
+  <!-- maint track bottom -->
+  <rect x="244" y="466" width="536" height="44" class="pill-slate" />
+  <text x="512" y="484" class="mono-label txt-slate">maint (장기 유지보수 · 백포팅 트랙)</text>
+  <text x="512" y="500" class="sub-txt txt-slate">이전 정식 릴리즈 지점을 유지하며 보안 패치와 치명적 버그 수정만 cherry-pick으로 후방 지원</text>
+
+  <!-- Promotion Arrows -->
+  <line x1="206" y1="369" x2="238" y2="369" class="flow-slate" marker-end="url(#arr-slate)" />
+  <path d="M 206 419 L 226 419 L 226 456 L 414 456 L 414 419 L 420 419" class="flow-green" marker-end="url(#arr-green)" />
+  <line x1="400" y1="395" x2="418" y2="395" class="flow-amber" marker-end="url(#arr-amber)" />
+  <line x1="586" y1="395" x2="604" y2="395" class="flow-blue" marker-end="url(#arr-blue)" />
+  <line x1="206" y1="488" x2="238" y2="488" class="flow-slate" marker-end="url(#arr-slate)" />
+  <path d="M 695 448 L 695 462" class="flow-slate" marker-end="url(#arr-slate)" />
+</svg>
