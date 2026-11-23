@@ -1,8 +1,8 @@
 +++
 date = '2026-11-22T16:35:00+09:00'
 draft = false
-title = '[Pro Git 톺아보기 #4] 브랜치의 내부 실체(41바이트 포인터)와 Fast-forward vs 3-Way Merge 메커니즘'
-description = 'Pro Git 3장 전반부(3.1~3.2)를 바탕으로 커밋·트리·블롭 객체 그래프에서 브랜치와 HEAD 포인터가 동작하는 원리, 41바이트 파일로서의 브랜치, 그리고 Fast-forward 병합과 3-Way Merge 및 충돌 해결 과정을 깊게 정리한다.'
+title = 'Git 브랜치 원리 #4: 41바이트 포인터와 3-Way Merge'
+description = 'Pro Git 3장 전반부를 바탕으로 .git/refs/heads 41바이트 브랜치와 HEAD 포인터의 동작 원리, Fast-forward 및 3-Way Merge 메커니즘을 정리한다.'
 tags = ['Git', 'ProGit', 'VCS', 'Internals', 'Engineering']
 categories = ['Engineering']
 ShowToc = true

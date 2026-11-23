@@ -1,8 +1,8 @@
 +++
 date = '2026-11-22T13:10:00+09:00'
 draft = false
-title = '[Pro Git 톺아보기 #3] 원격 저장소 동기화, 태그(Annotated vs Lightweight)의 내부 구조, 그리고 실전 Git Alias'
-description = 'Pro Git 2장 후반부(2.5~2.7)를 바탕으로 원격 저장소와 리모트 트래킹 브랜치의 동작 원리, fetch와 pull의 차이, Annotated 태그와 Lightweight 태그의 객체 구조 차이, 그리고 전설적인 git lg Alias 해부까지 깊게 정리한다.'
+title = 'Git 내부 원리 #3: fetch vs pull과 태그 내부 구조'
+description = 'Pro Git 2장 후반부를 바탕으로 원격 저장소 동기화, git fetch와 pull의 차이, Annotated·Lightweight 태그 객체 구조와 Git Alias를 정리한다.'
 tags = ['Git', 'ProGit', 'VCS', 'Internals', 'Engineering']
 categories = ['Engineering']
 ShowToc = true

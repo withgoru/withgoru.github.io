@@ -1,7 +1,7 @@
 +++
 date = '2026-11-03T13:27:23+09:00'
 draft = false
-title = '대 딸깍 AI 시대, 코딩은 안 해도 Git은 알아야 하는 이유 (버전 관리 생존 전략)'
+title = 'AI 시대에도 Git을 알아야 하는 이유: 버전 관리 전략'
 description = '터미널에 직접 git 명령어를 치지 않더라도, GitHub Flow, Issue 백로그, Conventional Commits, 템플릿으로 AI 에이전트를 완벽하게 통제하는 4가지 핵심 전략을 알아봅니다.'
 tags = ['Git', 'AI', 'Workflow', 'Development']
 categories = ['Engineering']

@@ -1,7 +1,7 @@
 +++
 date = '2026-11-17T12:11:07+09:00'
 draft = false
-title = 'No AI Slop 선언문과 Hacker News의 논쟁: AI 시대, 우리는 왜 슬롭과 싸우는가'
+title = 'No AI Slop 선언문 정리: AI 코드 품질과 엔지니어링'
 description = 'AIE Code Summit 2026에서 발표된 No AI Slop 선언문의 핵심 가치와 원문·번역본 내용, 그리고 Hacker News 커뮤니티의 날카로운 찬반 논의를 정리한다.'
 tags = ['AI', 'Slop', 'Manifesto', 'Engineering', 'Workflow']
 categories = ['Engineering']
