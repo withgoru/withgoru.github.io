@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 560" width="820" height="560" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Git Hooks 클라이언트·서버 실행 생명주기와 pre-commit 프레임워크 및 2중 방어 아키텍처</title>
+  <desc id="diagram-desc">상단은 로컬 커밋부터 원격 Push 수신까지 클라이언트 훅(pre-commit, prepare-commit-msg, commit-msg, post-commit, pre-push)과 서버 훅(pre-receive, update, post-receive)의 실행 순서를 보여주고, 하단은 pre-commit.com 프레임워크의 동작과 Husky, Lefthook, 서버 측 정책(Rulesets/CI) 2중 방어선을 비교한다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .pill-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.1; rx: 6; }
+      .pill-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.1; rx: 6; }
+      .pill-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.1; rx: 6; }
+      .pill-indigo { fill: #eef2ff; stroke: #4f46e5; stroke-width: 1.1; rx: 6; }
+      .pill-red { fill: #fef2f2; stroke: #dc2626; stroke-width: 1.1; rx: 6; }
+      .pill-slate { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 6; }
+
+      .flow-slate { stroke: #475569; stroke-width: 1.7; fill: none; }
+
+      .mono-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; text-anchor: middle; }
+      .mono-sm { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; font-weight: 700; text-anchor: middle; }
+      .mono-left { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; text-anchor: start; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 9.5px; text-anchor: middle; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: start; }
+
+      .txt-green { fill: #15803d; }
+      .txt-blue { fill: #0369a1; }
+      .txt-amber { fill: #b45309; }
+      .txt-indigo { fill: #4338ca; }
+      .txt-red { fill: #b91c1c; }
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+    </style>
+
+    <marker id="arr-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect x="1" y="1" width="818" height="558" rx="12" class="bg" />
+
+  <!-- SECTION 1: HOOKS LIFECYCLE -->
+  <text x="26" y="34" class="section-title">1. Git Hooks 실행 생명주기: 클라이언트(로컬) vs 서버(원격 수신) (Pro Git 8.3)</text>
+  <rect x="24" y="46" width="772" height="222" class="panel-card" />
+
+  <!-- Row A: Client Hooks -->
+  <rect x="36" y="60" width="98" height="72" class="pill-slate" />
+  <text x="85" y="90" class="mono-label txt-slate">로컬 클라이언트</text>
+  <text x="85" y="106" class="sub-txt txt-muted">(개발자 PC)</text>
+
+  <rect x="144" y="60" width="114" height="72" class="pill-green" />
+  <text x="201" y="80" class="mono-sm txt-green">1. pre-commit</text>
+  <text x="201" y="98" class="sub-txt txt-slate">포맷 · 린트 · 시크릿</text>
+  <text x="201" y="114" class="sub-txt txt-muted">(Staged 변경 검사)</text>
+
+  <line x1="258" y1="96" x2="266" y2="96" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <rect x="268" y="60" width="138" height="72" class="pill-blue" />
+  <text x="337" y="80" class="mono-sm txt-blue">2. prepare-commit-msg</text>
+  <text x="337" y="98" class="sub-txt txt-slate">기본 템플릿 · 브랜치명</text>
+  <text x="337" y="114" class="sub-txt txt-muted">(이슈 키 자동 삽입)</text>
+
+  <line x1="406" y1="96" x2="414" y2="96" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <rect x="416" y="60" width="120" height="72" class="pill-amber" />
+  <text x="476" y="80" class="mono-sm txt-amber">3. commit-msg</text>
+  <text x="476" y="98" class="sub-txt txt-slate">Conventional Commits</text>
+  <text x="476" y="114" class="sub-txt txt-muted">(commitlint 검증)</text>
+
+  <line x1="536" y1="96" x2="544" y2="96" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <rect x="546" y="60" width="106" height="72" class="pill-slate" />
+  <text x="599" y="80" class="mono-sm txt-slate">4. post-commit</text>
+  <text x="599" y="98" class="sub-txt txt-slate">커밋 완료 후 알림</text>
+  <text x="599" y="114" class="sub-txt txt-muted">(종료코드 영향 없음)</text>
+
+  <line x1="652" y1="96" x2="660" y2="96" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <rect x="662" y="60" width="120" height="72" class="pill-indigo" />
+  <text x="722" y="80" class="mono-sm txt-indigo">5. pre-push</text>
+  <text x="722" y="98" class="sub-txt txt-slate">Push 직전 통합 테스트</text>
+  <text x="722" y="114" class="sub-txt txt-muted">(원격 전송 전 차단)</text>
+
+  <!-- Row B: Server Hooks -->
+  <rect x="36" y="146" width="98" height="72" class="pill-slate" />
+  <text x="85" y="176" class="mono-label txt-slate">원격 Git 서버</text>
+  <text x="85" y="192" class="sub-txt txt-muted">(Push 수신)</text>
+
+  <rect x="144" y="146" width="196" height="72" class="pill-red" />
+  <text x="242" y="166" class="mono-label txt-red">1. pre-receive (전체 일괄)</text>
+  <text x="242" y="185" class="sub-txt txt-slate">push로 온 모든 ref 목록 한 번에 검증</text>
+  <text x="242" y="201" class="sub-txt txt-muted">(non-zero 시 push 전체 거절)</text>
+
+  <line x1="340" y1="182" x2="352" y2="182" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <rect x="354" y="146" width="208" height="72" class="pill-amber" />
+  <text x="458" y="166" class="mono-label txt-amber">2. update (브랜치별 검증 · 8.4)</text>
+  <text x="458" y="185" class="sub-txt txt-slate">각 브랜치(ref)마다 1회씩 개별 실행</text>
+  <text x="458" y="201" class="sub-txt txt-muted">(폴더 ACL 권한 · 커밋 메시지 정책 강제)</text>
+
+  <line x1="562" y1="182" x2="574" y2="182" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <rect x="576" y="146" width="206" height="72" class="pill-green" />
+  <text x="679" y="166" class="mono-label txt-green">3. post-receive (수신 완료 후)</text>
+  <text x="679" y="185" class="sub-txt txt-slate">CI 빌드 · 이메일 · Slack 알림 트리거</text>
+  <text x="679" y="201" class="sub-txt txt-muted">(Push 완료 후 후속 파이프라인 실행)</text>
+
+  <rect x="36" y="228" width="746" height="28" class="pill-red" style="fill:#fff1f2;" />
+  <text x="409" y="246" class="sub-txt txt-red">핵심 규칙: 종료 코드(Exit Code) 0 = 통과 / 0 아님 = 즉시 중단  |  단, 로컬 훅은 --no-verify로 우회 가능하므로 서버 게이트가 최종 보루</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="282" x2="796" y2="282" class="divider" />
+
+  <!-- SECTION 2: PRE-COMMIT FRAMEWORK AND POLICY DEFENSE -->
+  <text x="26" y="308" class="section-title">2. pre-commit 프레임워크 구조 및 현대 2중 품질 방어선</text>
+
+  <!-- Left Panel: pre-commit framework -->
+  <rect x="24" y="320" width="408" height="226" class="panel-card" />
+  <text x="38" y="340" class="panel-title">A. pre-commit 프레임워크 (pre-commit.com) 핵심</text>
+
+  <rect x="38" y="352" width="380" height="52" class="pill-green" />
+  <text x="48" y="369" class="mono-left txt-green">1. 다언어 격리 환경 + Staged 변경분만 초고속 검사</text>
+  <text x="48" y="385" class="sub-left txt-slate">.pre-commit-config.yaml 선언만으로 Python·Go·Node 린터를</text>
+  <text x="48" y="398" class="sub-left txt-muted">격리 캐시에 자동 설치해 팀원 PC마다 동일한 버전으로 실행</text>
+
+  <rect x="38" y="412" width="380" height="58" class="pill-amber" />
+  <text x="48" y="429" class="mono-left txt-amber">2. 필수 함정 주의: --hook-type commit-msg 명시</text>
+  <text x="48" y="445" class="sub-left txt-slate">pre-commit install만 실행하면 commit-msg 훅은 설치 안 됨!</text>
+  <text x="48" y="459" class="sub-left txt-red">default_install_hook_types: [pre-commit, commit-msg] 권장</text>
+
+  <rect x="38" y="478" width="380" height="54" class="pill-blue" />
+  <text x="48" y="495" class="mono-left txt-blue">3. pre-commit + commit-msg 조합의 실무 효과</text>
+  <text x="48" y="511" class="sub-left txt-slate">포맷·린트는 커밋 시 자동 수정/차단하고 메시지 규약까지 사전 강제해</text>
+  <text x="48" y="524" class="sub-left txt-muted">Pull Request 리뷰 시 사소한 스타일 피드백 피로도를 획기적으로 감소</text>
+
+  <!-- Right Panel: Managers and 2-Layer Defense -->
+  <rect x="446" y="320" width="350" height="226" class="panel-card" />
+  <text x="460" y="340" class="panel-title">B. 팀 훅 도구 선택 및 서버 2중 방어 전략</text>
+
+  <rect x="460" y="352" width="322" height="40" class="pill-blue" />
+  <text x="470" y="368" class="mono-left txt-blue">pre-commit (pre-commit.com)</text>
+  <text x="470" y="383" class="sub-left txt-slate">Python · AI · 다언어 모노레포 표준 · 방대한 공식 훅 생태계</text>
+
+  <rect x="460" y="398" width="322" height="40" class="pill-slate" />
+  <text x="470" y="414" class="mono-left txt-slate">Husky + lint-staged</text>
+  <text x="470" y="429" class="sub-left txt-slate">Node.js · 프론트엔드 생태계 표준 · npm install 시 자동 연동</text>
+
+  <rect x="460" y="444" width="322" height="40" class="pill-green" />
+  <text x="470" y="460" class="mono-left txt-green">Lefthook</text>
+  <text x="470" y="475" class="sub-left txt-slate">Go 단일 바이너리 · 병렬 실행 지원으로 대규모 저장소 초고속</text>
+
+  <rect x="460" y="492" width="322" height="42" class="pill-red" />
+  <text x="470" y="509" class="mono-left txt-red">2중 방어선 (로컬 --no-verify 무력화)</text>
+  <text x="470" y="525" class="sub-left txt-slate">로컬 훅(빠른 피드백) + 서버(Rulesets · CI commitlint/린트 필수)</text>
+</svg>
