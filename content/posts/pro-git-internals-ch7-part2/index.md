@@ -39,7 +39,7 @@ TocOpen = true
 
 `git reset HEAD file.txt`처럼 **커밋 뒤에 특정 파일 경로를 붙이면**, Git은 **Step 1(`HEAD` 포인터 이동)을 건너뛰고** 해당 파일의 `Index`만 지정 커밋 스냅샷으로 복원한다(Step 2). 브랜치 자체를 되돌리지 않고 특정 파일만 언스테이징하는 가장 안전한 방법이다.
 
-오늘날 Git `2.23+`에서는 역할 혼동을 막기 위해 `checkout`을 **`switch`(브랜치 이동)** 와 **`restore`(파일 복원)** 로 분리했다.
+오늘날 Git `2.23+`에서는 역할 혼동을 막기 위해 `checkout`을 **`switch`(브랜치 이동)** 와 **`restore`(파일 복원)** 로 분리했으며, **Git 2.51(2025.08)** 부터는 두 명령 모두 실험적(experimental) 꼬리표를 떼고 정식 안정 핵심 명령어로 승격되었다.
 
 ```bash
 # 1. Index만 되돌리기 (안전한 언스테이징 · 구 git reset HEAD file.txt와 동일)
@@ -94,6 +94,8 @@ $ git rebase -i HEAD~4
 
 물론 이 모든 작업은 커밋의 SHA-1 해시를 새로 굽는 행위이므로 [Rebase Golden Rule]({{< ref "/posts/pro-git-internals-ch3-part3" >}})에 따라 **원격 공유 브랜치에 Push하기 전 로컬 Topic 브랜치에서만 실행**해야 한다.
 
+> **최신 Git 참고 (Git 2.54~2.55 `git history`)**: **Git 2.54~2.55(2026)** 에서는 전체 `rebase -i` 를 열지 않고도 Working Tree와 Index를 건드리지 않은 채 과거 특정 커밋만 정교하게 손보는 실험적 **`git history`** 명령군이 도입되었다. 커밋 메시지만 고치는 **`git history reword`**, 하나의 커밋을 헝크 단위로 쪼개는 **`git history split`**, 작업 중 수정분을 과거 커밋에 즉시 합치는 **`git history fixup`** 으로 안전하게 이력을 다듬을 수 있다.
+
 ---
 
 ## 3. 전체 이력 영구 정화: `filter-branch` 폐기와 `git filter-repo` (7.6 현대화)
@@ -121,7 +123,7 @@ $ git filter-repo --subdirectory-filter packages/auth
 
 이번 **7장 2부(`#12`)** 를 통해 `git reset`이 마법의 되돌리기 버튼이 아니라 **`HEAD`, `Index`, `Working Tree` 중 어디까지를 갱신할지 결정하는 3단계 포인터 연산**이라는 점을 명확히 잡았다. 여기에 `git rebase -i`와 `git filter-repo`까지 손에 익히면, 실수로 엉킨 로컬 이력이나 보안 파일 유출 사고 앞에서도 저장소 내부 구조를 망가뜨리지 않고 깔끔하게 정돈할 수 있다.
 
-이어지는 [7장 3부(#13)](/posts/pro-git-internals-ch7-part3/)에서는 **`merge.conflictstyle = zdiff3`** 을 활용한 정밀 충돌 분석, **머지 커밋을 `git revert -m 1`로 되돌릴 때 빠지기 쉬운 치명적 함정**, 그리고 버그가 처음 심어진 커밋을 $O(\log N)$ 만에 찾아내는 **`git bisect` 자동화 디버깅**을 다룬다.
+이어지는 [7장 3부(#13)](/posts/pro-git-internals-ch7-part3/)에서는 **`merge.conflictstyle = zdiff3`** 을 활용한 정밀 충돌 분석, **머지 커밋을 `git revert -m 1`로 되돌릴 때 빠지기 쉬운 치명적 함정**, 그리고 버그가 처음 심어진 커밋을 `O(log N)` 만에 찾아내는 **`git bisect` 자동화 디버깅**을 다룬다.
 
 ---
 

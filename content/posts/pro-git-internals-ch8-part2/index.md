@@ -42,9 +42,28 @@ Git은 커밋이나 푸시 같은 주요 사건이 일어날 때마다 `.git/hoo
 기본 `.git/hooks/` 디렉토리는 Git 저장소의 추적 대상이 아니므로, 다른 팀원이 `git clone`을 받아도 **내가 공들여 만든 훅 스크립트가 자동으로 복제되지 않는다.** 팀 전체에 동일한 훅을 배포하려면 다음 방법 중 하나를 택해야 한다.
 
 - **Git 네이티브 `core.hooksPath`**: 저장소 안에 `.githooks/` 폴더를 만들어 커밋해 두고, 팀원이 `git config core.hooksPath .githooks`를 실행해 연결한다. 별도 도구 설치 없이 가장 단순하다.
+- **Git 네이티브 Config-Based & Parallel Hooks (Git 2.54~2.55)**: **Git 2.54(2026.04)** 부터 `.gitconfig`·`.git/config`에 `[hook "<name>"]` 블록으로 여러 훅을 직접 선언하는 설정 기반 훅이 도입되었고, **Git 2.55(2026.06)** 에서는 `parallel = true`와 `[hook] jobs` 옵션으로 독립 훅의 **네이티브 병렬 실행**까지 지원한다.
 - **`pre-commit` (`pre-commit.com`)**: Python 기반이지만 Node, Go, Rust, Docker 등 **모든 언어의 린터를 격리 환경에 자동 설치해 주는 다언어 표준 도구**다.
 - **`Husky` + `lint-staged`**: Node.js/프론트엔드 생태계의 사실상 표준이다. `npm install`(`prepare` 스크립트)만으로 팀원 모두에게 자동으로 훅이 설치된다.
-- **`Lefthook`**: Go 단일 바이너리로 제작되어 실행 속도가 압도적으로 빠르며, 여러 훅 검사를 병렬(Parallel)로 돌려 대규모 모노레포에 강하다.
+- **`Lefthook`**: Go 단일 바이너리로 제작되어 실행 속도가 압도적으로 빠르며, 저장소 내 YAML 선언 기반 병렬 훅 실행으로 대규모 모노레포에 강하다.
+
+```ini
+# Git 2.54~2.55 네이티브 Config-Based & Parallel Hooks 예시 (.gitconfig 또는 .git/config)
+[hook]
+    jobs = -1    # 사용 가능한 CPU 코어 수만큼 병렬 실행 (Git 2.55+)
+
+[hook "linter"]
+    event = pre-commit
+    command = ruff check --fix
+    parallel = true
+
+[hook "typecheck"]
+    event = pre-commit
+    command = mypy src/
+    parallel = true
+```
+
+*(다만 Git 네이티브 Config-Based Hooks는 언어별 런타임/린터 자동 설치나 저장소 단위 단일 설정 배포 기능까지는 포함하지 않으므로, 팀 온보딩 자동화가 중요하다면 아래 `pre-commit`이나 Husky·Lefthook과 함께 비교해 선택하는 것이 좋다.)*
 
 ---
 
@@ -177,3 +196,5 @@ Git을 단순히 남이 정해 준 대로 쓰는 단계를 넘어 저장소의 �
 - [Scott Chacon & Ben Straub, *Pro Git* 2nd Edition - 8.4 An Example Git-Enforced Policy](https://git-scm.com/book/en/v2/Customizing-Git-An-Example-Git-Enforced-Policy)
 - [pre-commit Official Documentation (pre-commit.com)](https://pre-commit.com/)
 - [Git Hooks 제대로 쓰기: pre-commit & commit-msg로 품질 지키기 (Velog)](https://velog.io/@leeunduck/Git-Hooks-%EC%A0%9C%EB%8C%80%EB%A1%9C-%EC%93%B0%EA%B8%B0-pre-commit-commit-msg%EB%A1%9C-%ED%92%88%EC%A7%88-%EC%A7%80%ED%82%A4%EA%B8%B0)
+- [GitHub Blog - Highlights from Git 2.54 (Config-Based Hooks)](https://github.blog/2026-04-20-highlights-from-git-2.54/)
+- [GitHub Blog - Highlights from Git 2.55 (Parallel Hooks)](https://github.blog/2026-06-29-highlights-from-git-2.55/)

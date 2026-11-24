@@ -81,6 +81,8 @@ $ git blame -L 69,82 Makefile
 $ git blame -C -L 141,153 auth_service.go
 ```
 
+> **최신 Git 참고 (`git last-modified` · `blame --diff-algorithm`)**: 개별 줄이 아니라 "특정 폴더 안의 각 파일이 마지막으로 언제 바뀌었는가(트리 단위 Blame)"만 빠르게 보고 싶다면 **Git 2.52(2025.11)** 에 도입된 **`git last-modified`** 가 기존 방식 대비 약 5배 빠르다. 또한 **Git 2.54(2026.04)** 부터는 `git blame --diff-algorithm=histogram` 처럼 diff 알고리즘을 직접 지정해 코드 이동 추적 정확도를 높일 수 있다.
+
 ### ② 1,000개 커밋도 10번 만에 잡는 이진 탐색 디버깅: `git bisect`
 
 "지난주 `v1.0` 태그에서는 분명히 정상 작동했는데 오늘 `HEAD`에서는 테스트가 깨진다"는 장애를 만났을 때, 수백 개의 커밋을 하나씩 체크아웃해 보는 대신 **`git bisect`** 를 쓰면 `O(log N)` 횟수만으로 정확히 **버그를 처음 심은 단 1개의 커밋**을 찾아낸다. (`1,024`개 커밋도 `2^10`이므로 최대 `10`번 검사면 끝난다.)

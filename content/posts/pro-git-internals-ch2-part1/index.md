@@ -304,7 +304,7 @@ $ git commit --amend
   - Unstaging (Index → Modified): `git reset HEAD CONTRIBUTING.md` (워킹 디렉토리의 파일 내용은 건드리지 않고 Index 상태만 직전 커밋 상태로 되돌린다. `--hard` 플래그를 주지 않는 한 비교적 안전하다.)
   - Unmodifying (Modified → 직전 커밋 상태로 폐기): `git checkout -- CONTRIBUTING.md`
 
-하지만 `checkout`이 브랜치 전환과 파일 복원을 동시에 맡고, `reset` 역시 여러 용도로 쓰여 혼란이 컸기 때문에 **Git 2.23.0부터는 역할을 명확히 분리한 `git restore` 명령어가 도입**되었다. 최신 Git에서 `git status` 역시 `git restore` 사용을 권장한다.
+하지만 `checkout`이 브랜치 전환과 파일 복원을 동시에 맡고, `reset` 역시 여러 용도로 쓰여 혼란이 컸기 때문에 **Git 2.23.0부터는 역할을 명확히 분리한 `git restore` 명령어가 도입**되었고, **Git 2.51(2025.08)** 에 이르러 `git switch`와 함께 공식적으로 실험적(experimental) 꼬리표를 떼고 정식 안정 명령어로 승격되었다. 최신 Git에서 `git status` 역시 `git restore` 사용을 권장한다.
 
 ```bash
 # 1. 실수로 스테이징한 파일들 확인
