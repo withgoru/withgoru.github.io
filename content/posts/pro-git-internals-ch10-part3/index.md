@@ -24,7 +24,7 @@ Git은 커밋, 리베이스, 체리픽, 스테이징 취소 같은 작업이 일
 1. **Loose Object 팩킹**: 흩어진 개별 객체 파일들을 `.pack` + `.idx` 파일로 압축 통합한다(`git repack`).
 2. **참조 압축 (`pack-refs`)**: 흩어진 브랜치·태그 Ref 파일을 `.git/packed-refs` 로 모아 조회 속도를 높인다.
 3. **만료된 Reflog 정리**: 기본 90일이 지난 `unreachable` Reflog 엔트리(도달 가능한 이력은 90일, 도달 불가능한 고립 이력은 30일)를 제거한다.
-4. **고립 객체 영구 삭제 (`prune`)**: 어떤 Ref나 Reflog에서도 참조하지 않는 Unreachable 객체 중 유예 기간(`gc.pruneExpire`, **기본값 2주**)이 지난 객체를 디스크에서 완전히 지운다.
+4. **고립 객체 영구 삭제 (`prune`)**: 어떤 Ref나 Reflog에서도 참조하지 않는 Unreachable 객체 중 유예 기간(`gc.pruneExpire`, **기본값 2주**)이 지난 객체를 디스크에서 완전히 지운다. *(현대 Git에서는 고립 객체를 수많은 Loose 파일로 방치하지 않고 수정 시각(`.mtimes`)을 함께 기록한 **Cruft Pack**으로 묶어 관리하며, **Git 2.50(2025.06)** 에서는 다중 Cruft Pack 관리 효율과 도구가 크게 개선되었다.)*
 
 ### `git gc --auto` vs 현대적 백그라운드 유지보수 `git maintenance`
 
@@ -38,7 +38,7 @@ Git은 커밋, 리베이스, 체리픽, 스테이징 취소 같은 작업이 일
 $ git maintenance start
 ```
 
-`git maintenance`는 개발자가 커밋을 치는 순간을 방해하지 않고 백그라운드에서 **매시간** `prefetch`(원격 미리 가져오기)·`loose-objects`·`incremental-repack`을, **매일** `commit-graph` 갱신·`pack-refs`를 나누어 실행해 대규모 모노레포에서도 쾌적한 반응 속도를 유지해 준다.
+`git maintenance`는 개발자가 커밋을 치는 순간을 방해하지 않고 백그라운드에서 **매시간** `prefetch`(원격 미리 가져오기)·`loose-objects`·`incremental-repack`을, **매일** `commit-graph` 갱신·`pack-refs`를 나누어 실행해 대규모 모노레포에서도 쾌적한 반응 속도를 유지해 준다. 특히 **Git 2.54(2026.04)** 부터는 `git maintenance run`의 기본 리패킹 전략이 크기 구간별로 Pack을 계층 통합하는 **Geometric Repacking**으로 전환되었고, 유지보수 실행 필요 여부를 사전 점검하는 **`git maintenance is-needed`** 서브커맨드도 추가되었다.
 
 ---
 
