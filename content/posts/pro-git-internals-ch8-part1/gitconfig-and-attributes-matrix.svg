@@ -1,0 +1,152 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 540" width="820" height="540" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">git config 3계층 우선순위, includeIf 다중 계정 분리, 그리고 Python·iOS 실무 .gitattributes 분류</title>
+  <desc id="diagram-desc">상단은 --system, --global, --local 설정 계층 및 includeIf 조건부 프로필 전환 구조를 보여주고, 하단은 공통(개행, Lock), iOS/Xcode, Python/AI 프로젝트에서 반드시 바이너리나 특수 속성을 지정해야 하는 실전 .gitattributes 패턴을 정리한다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .pill-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.1; rx: 6; }
+      .pill-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.1; rx: 6; }
+      .pill-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.1; rx: 6; }
+      .pill-indigo { fill: #eef2ff; stroke: #4f46e5; stroke-width: 1.1; rx: 6; }
+      .pill-slate { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 6; }
+
+      .head-slate { fill: #475569; rx: 6; }
+      .head-blue { fill: #0284c7; rx: 6; }
+      .head-green { fill: #15803d; rx: 6; }
+
+      .flow-slate { stroke: #475569; stroke-width: 1.8; fill: none; }
+
+      .head-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #ffffff; text-anchor: middle; }
+      .mono-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+      .mono-left { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; text-anchor: start; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: middle; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: start; }
+
+      .txt-blue { fill: #0369a1; }
+      .txt-green { fill: #15803d; }
+      .txt-amber { fill: #b45309; }
+      .txt-indigo { fill: #4338ca; }
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+    </style>
+
+    <marker id="arr-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect x="1" y="1" width="818" height="538" rx="12" class="bg" />
+
+  <!-- SECTION 1: GIT CONFIG HIERARCHY AND INCLUDEIF -->
+  <text x="26" y="34" class="section-title">1. git config 3계층 우선순위와 includeIf 다중 계정 자동 전환 (8.1)</text>
+
+  <!-- Left Panel: 3-tier hierarchy -->
+  <rect x="24" y="46" width="388" height="178" class="panel-card" />
+  <text x="38" y="66" class="panel-title">A. 설정 오버라이드 우선순위 (하위가 상위를 덮어씀)</text>
+
+  <rect x="38" y="76" width="360" height="38" class="pill-slate" />
+  <text x="48" y="92" class="mono-left txt-slate">1. --system (/etc/gitconfig)</text>
+  <text x="48" y="106" class="sub-left txt-muted">OS 내 모든 사용자와 모든 저장소 공통 적용</text>
+
+  <rect x="38" y="120" width="360" height="42" class="pill-blue" />
+  <text x="48" y="136" class="mono-left txt-blue">2. --global (~/.gitconfig)</text>
+  <text x="48" y="152" class="sub-left txt-slate">현재 사용자 기본값 (user.name, editor, alias, zdiff3)</text>
+
+  <rect x="38" y="168" width="360" height="44" class="pill-green" />
+  <text x="48" y="185" class="mono-left txt-green">3. --local (.git/config)  [최우선 적용]</text>
+  <text x="48" y="201" class="sub-left txt-slate">해당 저장소 전용 오버라이드 (git config --show-origin 조회)</text>
+
+  <!-- Right Panel: includeIf -->
+  <rect x="426" y="46" width="370" height="178" class="panel-card" />
+  <text x="440" y="66" class="panel-title">B. includeIf 폴더 경로 기반 회사 · 개인 계정 자동 분리</text>
+
+  <rect x="440" y="76" width="342" height="40" class="pill-slate" />
+  <text x="611" y="93" class="mono-label txt-slate">~/.gitconfig (루트 설정)</text>
+  <text x="611" y="108" class="sub-txt txt-muted">[includeIf "gitdir:~/work/"] path = .gitconfig-work</text>
+
+  <line x1="526" y1="116" x2="526" y2="140" class="flow-slate" marker-end="url(#arr-slate)" />
+  <line x1="696" y1="116" x2="696" y2="140" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <rect x="440" y="144" width="166" height="68" class="pill-amber" />
+  <text x="523" y="162" class="mono-label txt-amber">~/personal/ 경로</text>
+  <text x="523" y="179" class="mono-left txt-slate" style="text-anchor:middle;">dev@gmail.com</text>
+  <text x="523" y="196" class="sub-txt txt-muted">개인 SSH 서명 키 자동 적용</text>
+
+  <rect x="616" y="144" width="166" height="68" class="pill-indigo" />
+  <text x="699" y="162" class="mono-label txt-indigo">~/work/ 경로 진입 시</text>
+  <text x="699" y="179" class="mono-left txt-indigo" style="text-anchor:middle;">name@company.com</text>
+  <text x="699" y="196" class="sub-txt txt-slate">사내 이메일 · 키 자동 전환</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="238" x2="796" y2="238" class="divider" />
+
+  <!-- SECTION 2: PRACTICAL GITATTRIBUTES MATRIX -->
+  <text x="26" y="264" class="section-title">2. 실무 환경별 .gitattributes 필수 설정: 공통 · iOS(Xcode) · Python(AI/데이터)</text>
+
+  <!-- Column 1: Common / EOL / Lock -->
+  <rect x="24" y="278" width="246" height="248" class="panel-card" />
+  <rect x="36" y="290" width="222" height="34" class="head-slate" />
+  <text x="147" y="312" class="head-txt">공통 개행 · Lockfile 규칙</text>
+
+  <rect x="36" y="334" width="222" height="58" class="pill-slate" />
+  <text x="46" y="351" class="mono-left txt-slate">* text=auto eol=lf</text>
+  <text x="46" y="367" class="sub-left txt-slate">저장소 내부 줄바꿈을 LF로 통일</text>
+  <text x="46" y="381" class="sub-left txt-muted">(Windows/macOS 팀 개행 충돌 방지)</text>
+
+  <rect x="36" y="398" width="222" height="56" class="pill-amber" />
+  <text x="46" y="415" class="mono-left txt-amber">*.sh eol=lf | *.bat eol=crlf</text>
+  <text x="46" y="431" class="sub-left txt-slate">실행 스크립트는 OS별 강제 고정</text>
+  <text x="46" y="445" class="sub-left txt-muted">(Linux 컨테이너 쉘 오류 원천 차단)</text>
+
+  <rect x="36" y="460" width="222" height="54" class="pill-blue" />
+  <text x="46" y="477" class="mono-left txt-blue">*.lock linguist-generated=true</text>
+  <text x="46" y="493" class="sub-left txt-slate">GitHub PR에서 거대 Lockfile 접기</text>
+  <text x="46" y="507" class="sub-left txt-muted">(언어 통계 왜곡 방지 · 리뷰 효율화)</text>
+
+  <!-- Column 2: iOS / Xcode -->
+  <rect x="287" y="278" width="246" height="248" class="panel-card" />
+  <rect x="299" y="290" width="222" height="34" class="head-blue" />
+  <text x="410" y="312" class="head-txt">iOS / Xcode 프로젝트</text>
+
+  <rect x="299" y="334" width="222" height="58" class="pill-blue" />
+  <text x="309" y="351" class="mono-left txt-blue">*.pbxproj binary merge=union</text>
+  <text x="309" y="367" class="sub-left txt-slate">프로젝트 UUID 라인 단위 3-Way 손상</text>
+  <text x="309" y="381" class="sub-left txt-muted">방지 (또는 XcodeGen · Tuist 활용)</text>
+
+  <rect x="299" y="398" width="222" height="56" class="pill-amber" />
+  <text x="309" y="415" class="mono-left txt-amber">*.xcframework · *.a · *.dylib</text>
+  <text x="309" y="431" class="sub-left txt-slate">바이너리 프레임워크 · 정적/동적 라이브러리</text>
+  <text x="309" y="445" class="sub-left txt-muted">→ binary 지정 (대용량은 filter=lfs)</text>
+
+  <rect x="299" y="460" width="222" height="54" class="pill-slate" />
+  <text x="309" y="477" class="mono-left txt-slate">*.png · *.mobileprovision · *.p12</text>
+  <text x="309" y="493" class="sub-left txt-slate">에셋 카탈로그 · 프로비저닝 · 인증서</text>
+  <text x="309" y="507" class="sub-left txt-muted">→ CRLF 변환 절대 금지 (binary 필수)</text>
+
+  <!-- Column 3: Python / AI -->
+  <rect x="550" y="278" width="246" height="248" class="panel-card" />
+  <rect x="562" y="290" width="222" height="34" class="head-green" />
+  <text x="673" y="312" class="head-txt">Python / AI · 데이터 프로젝트</text>
+
+  <rect x="562" y="334" width="222" height="58" class="pill-green" />
+  <text x="572" y="351" class="mono-left txt-green">*.pt · *.onnx · *.safetensors</text>
+  <text x="572" y="367" class="sub-left txt-slate">모델 가중치 · *.pkl · *.parquet · *.h5</text>
+  <text x="572" y="381" class="sub-left txt-muted">→ binary + 대용량 Git LFS 위임</text>
+
+  <rect x="562" y="398" width="222" height="56" class="pill-amber" />
+  <text x="572" y="415" class="mono-left txt-amber">*.whl · *.so · *.pyd · *.sqlite</text>
+  <text x="572" y="431" class="sub-left txt-slate">오프라인 휠 · Cython 확장 · 내장 DB</text>
+  <text x="572" y="445" class="sub-left txt-muted">→ 개행/인코딩 변조 차단 (binary 지정)</text>
+
+  <rect x="562" y="460" width="222" height="54" class="pill-indigo" />
+  <text x="572" y="477" class="mono-left txt-indigo">*.ipynb filter=nbstripout</text>
+  <text x="572" y="493" class="sub-left txt-slate">Jupyter 노트북 실행 출력 셀 · 이미지</text>
+  <text x="572" y="507" class="sub-left txt-muted">커밋 시 자동 제거해 JSON 충돌 예방</text>
+</svg>
