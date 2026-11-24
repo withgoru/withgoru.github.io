@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 580" width="820" height="580" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Git Packfile 역방향 델타 압축, Refspec 매핑 및 Smart Protocol 패킷 협상 구조</title>
+  <desc id="diagram-desc">상단은 Loose Object가 git gc를 거쳐 최신 버전을 원본으로 두고 과거 버전을 역방향 델타로 압축한 .pack과 .idx 구조로 바뀌는 과정을, 중단은 +src:dst Refspec 매핑과 원격 브랜치 삭제 원리를, 하단은 Smart Protocol의 want와 have 협상 후 동적 Packfile 스트리밍을 보여준다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: 700; fill: #0f172a; }
+
+      .pill-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.2; rx: 6; }
+      .pill-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.2; rx: 6; }
+      .pill-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.2; rx: 6; }
+      .pill-indigo { fill: #eef2ff; stroke: #4f46e5; stroke-width: 1.2; rx: 6; }
+      .pill-red { fill: #fef2f2; stroke: #dc2626; stroke-width: 1.2; rx: 6; }
+      .pill-slate { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.1; rx: 6; }
+
+      .code-box { fill: #0f172a; rx: 5; }
+      .code-txt { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; fill: #e2e8f0; text-anchor: start; }
+      .code-green { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; fill: #4ade80; text-anchor: start; }
+      .code-amber { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; fill: #fbbf24; text-anchor: start; }
+      .code-accent { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; fill: #38bdf8; text-anchor: start; }
+
+      .flow-slate { stroke: #475569; stroke-width: 1.7; fill: none; }
+      .flow-green { stroke: #16a34a; stroke-width: 1.7; fill: none; }
+      .flow-amber { stroke: #d97706; stroke-width: 1.7; fill: none; }
+      .flow-blue { stroke: #0284c7; stroke-width: 1.7; fill: none; }
+
+      .mono-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; text-anchor: middle; }
+      .mono-sm { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; font-weight: 700; text-anchor: middle; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 9.5px; text-anchor: middle; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: start; }
+
+      .txt-green { fill: #15803d; }
+      .txt-blue { fill: #0369a1; }
+      .txt-amber { fill: #b45309; }
+      .txt-indigo { fill: #4338ca; }
+      .txt-red { fill: #b91c1c; }
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+    </style>
+
+    <marker id="arr-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+    <marker id="arr-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706" />
+    </marker>
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+    <marker id="arr-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+  </defs>
+
+  <rect x="1" y="1" width="818" height="578" rx="12" class="bg" />
+
+  <!-- SECTION 1: PACKFILE REVERSE DELTA -->
+  <text x="26" y="30" class="section-title">1. Packfile 역방향 델타 압축: 최신 본체는 그대로, 과거만 델타로 저장 (Pro Git 10.4)</text>
+  <rect x="24" y="42" width="772" height="156" class="panel-card" />
+
+  <!-- Left: Loose Objects -->
+  <rect x="38" y="56" width="218" height="128" class="pill-red" />
+  <text x="147" y="76" class="mono-label txt-red">Loose Objects (압축 전)</text>
+  <rect x="48" y="86" width="198" height="36" class="pill-slate" />
+  <text x="147" y="102" class="mono-sm txt-slate">v1 Blob (a854552): ~25 KB</text>
+  <text x="147" y="116" class="sub-txt txt-muted">1줄만 달라도 전체 통째로 저장</text>
+  <rect x="48" y="130" width="198" height="36" class="pill-slate" />
+  <text x="147" y="146" class="mono-sm txt-slate">v2 Blob (01384aa): ~25 KB</text>
+  <text x="147" y="160" class="sub-txt txt-muted">총 50 KB + 파일 여러 개 분산</text>
+
+  <line x1="256" y1="120" x2="296" y2="120" class="flow-amber" marker-end="url(#arr-amber)" />
+  <text x="276" y="108" class="mono-sm txt-amber">git gc</text>
+
+  <!-- Right: Packfile + Index -->
+  <rect x="298" y="56" width="484" height="128" class="pill-green" />
+  <text x="540" y="76" class="mono-label txt-green">Packfile (.pack + .idx + .rev)</text>
+
+  <rect x="312" y="88" width="206" height="82" class="pill-blue" />
+  <text x="415" y="107" class="mono-sm txt-blue">최신 v2 Blob (01384aa)</text>
+  <text x="415" y="125" class="sub-txt txt-slate">원본 전체 유지 (zlib 1,340 B)</text>
+  <text x="415" y="142" class="sub-txt txt-green" font-weight="700">checkout · diff 시 즉시 반환</text>
+  <text x="415" y="158" class="sub-txt txt-muted">non-delta (chain depth = 0)</text>
+
+  <line x1="556" y1="129" x2="520" y2="129" class="flow-amber" marker-end="url(#arr-amber)" />
+
+  <rect x="558" y="88" width="210" height="82" class="pill-amber" />
+  <text x="663" y="107" class="mono-sm txt-amber">과거 v1 Blob (a854552)</text>
+  <text x="663" y="125" class="sub-txt txt-slate">v2 기준 역방향 델타 (단 20 B)</text>
+  <text x="663" y="142" class="sub-txt txt-amber" font-weight="700">depth = 1, base = 01384aa</text>
+  <text x="663" y="158" class="sub-txt txt-muted">.idx 파일로 오프셋 O(log N) 탐색</text>
+
+  <!-- SECTION 2: REFSPEC -->
+  <text x="26" y="226" class="section-title">2. Refspec (+src:dst) 매핑 규칙과 원격 브랜치 삭제 (Pro Git 10.5)</text>
+  <rect x="24" y="238" width="772" height="140" class="panel-card" />
+
+  <rect x="38" y="252" width="236" height="112" class="pill-indigo" />
+  <text x="156" y="272" class="mono-label txt-indigo">기본 Fetch Refspec</text>
+  <rect x="46" y="282" width="220" height="28" class="code-box" />
+  <text x="53" y="300" class="code-accent">+refs/heads/*:refs/remotes/origin/*</text>
+  <text x="156" y="328" class="sub-txt txt-slate">+ 기호: Non-Fast-Forward도 강제 갱신</text>
+  <text x="156" y="346" class="sub-txt txt-muted">원격 heads를 로컬 remotes/origin에 동기화</text>
+
+  <rect x="288" y="252" width="244" height="112" class="pill-blue" />
+  <text x="410" y="272" class="mono-label txt-blue">PR · 네임스페이스 응용 Fetch</text>
+  <rect x="296" y="282" width="228" height="28" class="code-box" />
+  <text x="303" y="300" class="code-green">+refs/pull/*/head:refs/remotes/origin/pr/*</text>
+  <text x="410" y="328" class="sub-txt txt-slate">GitHub PR 브랜치를 로컬로 즉시 Fetch</text>
+  <text x="410" y="346" class="sub-txt txt-muted">예: git checkout origin/pr/42</text>
+
+  <rect x="546" y="252" width="236" height="112" class="pill-red" />
+  <text x="664" y="272" class="mono-label txt-red">Push 매핑 및 원격 삭제</text>
+  <rect x="554" y="282" width="220" height="28" class="code-box" />
+  <text x="574" y="300" class="code-amber">git push origin :topic</text>
+  <text x="664" y="328" class="sub-txt txt-slate">빈 src를 dst(refs/heads/topic)로 전송</text>
+  <text x="664" y="346" class="sub-txt txt-red">결과: 원격 topic 브랜치 삭제 동작</text>
+
+  <!-- SECTION 3: TRANSFER PROTOCOLS -->
+  <text x="26" y="406" class="section-title">3. Dumb HTTP vs Smart Protocol (upload-pack want/have 협상) (Pro Git 10.6)</text>
+  <rect x="24" y="418" width="772" height="148" class="panel-card" />
+
+  <!-- Left: Dumb HTTP -->
+  <rect x="38" y="432" width="228" height="120" class="pill-slate" />
+  <text x="152" y="452" class="mono-label txt-slate">Dumb HTTP (정적 웹 서버)</text>
+  <text x="152" y="472" class="sub-txt txt-slate">1. info/refs 정적 텍스트 조회</text>
+  <text x="152" y="490" class="sub-txt txt-slate">2. 필요한 객체·Packfile 하나씩 GET</text>
+  <text x="152" y="510" class="sub-txt txt-red">서버 연산 불가: 불필요 데이터 다량 전송</text>
+  <text x="152" y="528" class="sub-txt txt-red">읽기 전용 (Push 지원 불가)</text>
+
+  <!-- Right: Smart Protocol -->
+  <rect x="282" y="432" width="500" height="120" class="pill-green" />
+  <text x="532" y="452" class="mono-label txt-green">Smart Protocol (SSH / Smart HTTPS: git-upload-pack · receive-pack)</text>
+
+  <rect x="296" y="466" width="120" height="72" class="pill-blue" />
+  <text x="356" y="488" class="mono-sm txt-blue">로컬 Client</text>
+  <text x="356" y="506" class="sub-txt txt-slate">git fetch / pull</text>
+  <text x="356" y="522" class="sub-txt txt-muted">보유 커밋 목록</text>
+
+  <!-- Exchange arrows -->
+  <line x1="416" y1="484" x2="574" y2="484" class="flow-blue" marker-end="url(#arr-blue)" />
+  <text x="495" y="477" class="mono-sm txt-blue">1. want [필요] + have [보유]</text>
+
+  <line x1="574" y1="518" x2="416" y2="518" class="flow-green" marker-end="url(#arr-green)" />
+  <text x="495" y="534" class="mono-sm txt-green">2. 최소 Thin Packfile 스트리밍</text>
+
+  <rect x="576" y="466" width="192" height="72" class="pill-indigo" />
+  <text x="672" y="488" class="mono-sm txt-indigo">원격 git-upload-pack</text>
+  <text x="672" y="506" class="sub-txt txt-slate">공통 조상 계산 후 차이 객체만</text>
+  <text x="672" y="522" class="sub-txt txt-green" font-weight="700">즉석 압축하여 1회 전송</text>
+</svg>
