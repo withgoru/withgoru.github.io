@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 480" width="820" height="480" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Git Attributes의 clean/smudge 필터 파이프라인과 Git LFS 동작 원리</title>
+  <desc id="diagram-desc">상단은 체크아웃 시 실행되는 smudge 필터와 스테이징 시 실행되는 clean 필터의 양방향 변환 구조를 보여주고, 하단은 Git LFS가 .gitattributes의 filter=lfs 설정을 통해 대용량 바이너리를 130B 텍스트 포인터로 치환하는 내부 원리를 설명한다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .pill-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.2; rx: 6; }
+      .pill-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.2; rx: 6; }
+      .pill-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.2; rx: 6; }
+      .pill-indigo { fill: #eef2ff; stroke: #4f46e5; stroke-width: 1.2; rx: 6; }
+      .pill-slate { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; rx: 6; }
+      .code-box { fill: #1e293b; stroke: #0f172a; stroke-width: 1.2; rx: 7; }
+
+      .flow-blue { stroke: #0284c7; stroke-width: 2.2; fill: none; }
+      .flow-green { stroke: #16a34a; stroke-width: 2.2; fill: none; }
+
+      .mono-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+      .mono-left { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; text-anchor: start; }
+      .code-txt { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; fill: #e2e8f0; text-anchor: start; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: middle; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: start; }
+
+      .txt-blue { fill: #0369a1; }
+      .txt-amber { fill: #b45309; }
+      .txt-green { fill: #15803d; }
+      .txt-indigo { fill: #4338ca; }
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+    </style>
+
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+    <marker id="arr-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect x="1" y="1" width="818" height="478" rx="12" class="bg" />
+
+  <!-- SECTION 1: CLEAN AND SMUDGE PIPELINE -->
+  <text x="26" y="34" class="section-title">1. .gitattributes의 clean · smudge 필터 양방향 파이프라인 (Pro Git 8.2)</text>
+  <rect x="24" y="46" width="772" height="178" class="panel-card" />
+
+  <!-- Left box: Git Object DB -->
+  <rect x="44" y="72" width="206" height="126" class="pill-blue" />
+  <text x="147" y="96" class="mono-label txt-blue" style="font-size:12px;">Git Repository (.git)</text>
+  <text x="147" y="114" class="sub-txt txt-slate">Index (Staging) / Commit Object</text>
+  <rect x="58" y="128" width="178" height="54" class="pill-slate" style="fill:#ffffff;" />
+  <text x="147" y="146" class="sub-txt txt-slate">저장소에 안전하게 보관될 정규 형태</text>
+  <text x="147" y="162" class="sub-txt txt-muted">(예: 출력 제거된 .ipynb / LFS 포인터)</text>
+
+  <!-- Center Top: smudge arrow (Left -> Right) -->
+  <line x1="254" y1="104" x2="562" y2="104" class="flow-blue" marker-end="url(#arr-blue)" />
+  <rect x="308" y="64" width="204" height="34" class="pill-indigo" />
+  <text x="410" y="80" class="mono-label txt-indigo">git checkout → smudge 필터</text>
+  <text x="410" y="93" class="sub-txt txt-slate">디스크로 꺼낼 때 실사용 형태로 복원/치환</text>
+
+  <!-- Center Bottom: clean arrow (Right -> Left) -->
+  <line x1="566" y1="166" x2="258" y2="166" class="flow-green" marker-end="url(#arr-green)" />
+  <rect x="308" y="172" width="204" height="36" class="pill-green" />
+  <text x="410" y="188" class="mono-label txt-green">git add → clean 필터</text>
+  <text x="410" y="202" class="sub-txt txt-slate">스테이징 시 노이즈·비밀·대용량 정제</text>
+
+  <!-- Right box: Working Tree -->
+  <rect x="570" y="72" width="206" height="126" class="pill-amber" />
+  <text x="673" y="96" class="mono-label txt-amber" style="font-size:12px;">Working Tree (로컬 디스크)</text>
+  <text x="673" y="114" class="sub-txt txt-slate">개발자가 실제로 열어 작업하는 파일</text>
+  <rect x="584" y="128" width="178" height="54" class="pill-slate" style="fill:#ffffff;" />
+  <text x="673" y="146" class="sub-txt txt-slate">작업 편의성 · 원본 바이너리 상태</text>
+  <text x="673" y="162" class="sub-txt txt-muted">(예: 실체 .pt 모델 파일 / 로컬 실행 셀)</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="238" x2="796" y2="238" class="divider" />
+
+  <!-- SECTION 2: GIT LFS UNDER THE HOOD -->
+  <text x="26" y="264" class="section-title">2. Git LFS는 마법이 아니다: filter=lfs가 만드는 포인터 치환 구조</text>
+  <rect x="24" y="276" width="772" height="186" class="panel-card" />
+
+  <!-- Left: .gitattributes + Pointer content -->
+  <rect x="38" y="290" width="350" height="158" class="code-box" />
+  <text x="50" y="310" class="code-txt" style="fill:#38bdf8;font-weight:700;"># 1. .gitattributes (git lfs track "*.safetensors")</text>
+  <text x="50" y="328" class="code-txt">*.safetensors filter=lfs diff=lfs merge=lfs -text</text>
+  <text x="50" y="354" class="code-txt" style="fill:#4ade80;font-weight:700;"># 2. clean 필터가 .git에 실제로 저장하는 130B 포인터</text>
+  <text x="50" y="372" class="code-txt">version https://git-lfs.github.com/spec/v1</text>
+  <text x="50" y="388" class="code-txt">oid sha256:4d7a214614ab2935c943f9e0ff69d22ead...</text>
+  <text x="50" y="404" class="code-txt">size 2489120400  (실제 2.4GB 파일은 LFS 서버로 분리)</text>
+  <text x="50" y="430" class="code-txt" style="fill:#94a3b8;"># -text 플래그로 LF/CRLF 바이너리 손상까지 동시 차단</text>
+
+  <!-- Right: Explanation cards -->
+  <rect x="404" y="290" width="378" height="48" class="pill-green" />
+  <text x="414" y="308" class="mono-left txt-green">스테이징 · 커밋 시 (clean 필터 작동)</text>
+  <text x="414" y="325" class="sub-left txt-slate">2.4GB 모델 파일 대신 130바이트 SHA-256 텍스트 포인터만 Git DB에 커밋</text>
+
+  <rect x="404" y="346" width="378" height="48" class="pill-blue" />
+  <text x="414" y="364" class="mono-left txt-blue">Push · Fetch 시 (LFS Object Storage 분리 전송)</text>
+  <text x="414" y="381" class="sub-left txt-slate">원본 대용량 바이너리는 pre-push 훅을 통해 별도 LFS HTTP 서버에 업로드</text>
+
+  <rect x="404" y="402" width="378" height="46" class="pill-amber" />
+  <text x="414" y="420" class="mono-left txt-amber">Checkout 시 (smudge 필터 작동)</text>
+  <text x="414" y="436" class="sub-left txt-slate">포인터 파일의 oid를 읽어 LFS 서버에서 실제 바이너리를 내려받아 워킹 트리 복원</text>
+</svg>
