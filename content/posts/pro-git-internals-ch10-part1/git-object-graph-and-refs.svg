@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" width="820" height="520" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Git References, HEAD 심볼릭 참조 및 객체 그래프와 참조 저장소 진화</title>
+  <desc id="diagram-desc">상단은 HEAD 심볼릭 참조와 Detached HEAD, refs/heads, refs/tags, refs/remotes가 Commit, Tree, Blob 객체 그래프를 가리키는 구조를 보여주고, 하단은 Loose 파일에서 packed-refs를 거쳐 현대 Git Reftable로 진화한 참조 저장소를 비교한다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15.5px; font-weight: 700; fill: #0f172a; }
+
+      .pill-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.2; rx: 6; }
+      .pill-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.2; rx: 6; }
+      .pill-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.2; rx: 6; }
+      .pill-indigo { fill: #eef2ff; stroke: #4f46e5; stroke-width: 1.2; rx: 6; }
+      .pill-red { fill: #fef2f2; stroke: #dc2626; stroke-width: 1.2; rx: 6; }
+      .pill-slate { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.1; rx: 6; }
+
+      .flow-slate { stroke: #475569; stroke-width: 1.7; fill: none; }
+      .flow-green { stroke: #16a34a; stroke-width: 1.7; fill: none; }
+      .flow-indigo { stroke: #4f46e5; stroke-width: 1.7; fill: none; }
+      .flow-amber { stroke: #d97706; stroke-width: 1.6; fill: none; }
+      .flow-dashed { stroke: #dc2626; stroke-width: 1.5; stroke-dasharray: 5 3; fill: none; }
+
+      .mono-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+      .mono-sm { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; font-weight: 700; text-anchor: middle; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 9.5px; text-anchor: middle; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: start; }
+
+      .txt-green { fill: #15803d; }
+      .txt-blue { fill: #0369a1; }
+      .txt-amber { fill: #b45309; }
+      .txt-indigo { fill: #4338ca; }
+      .txt-red { fill: #b91c1c; }
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+    </style>
+
+    <marker id="arr-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+    <marker id="arr-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+    <marker id="arr-indigo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#4f46e5" />
+    </marker>
+    <marker id="arr-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706" />
+    </marker>
+    <marker id="arr-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+    </marker>
+  </defs>
+
+  <rect x="1" y="1" width="818" height="518" rx="12" class="bg" />
+
+  <!-- SECTION 1: REFS AND OBJECT GRAPH -->
+  <text x="26" y="32" class="section-title">1. Git References(.git/refs) · HEAD 심볼릭 참조 · Object Graph 연결</text>
+  <rect x="24" y="44" width="772" height="278" class="panel-card" />
+
+  <!-- Column 1: HEAD -->
+  <rect x="38" y="64" width="154" height="68" class="pill-green" />
+  <text x="115" y="84" class="mono-label txt-green">HEAD (Symbolic Ref)</text>
+  <text x="115" y="102" class="mono-sm txt-slate">ref: refs/heads/main</text>
+  <text x="115" y="120" class="sub-txt txt-muted">git symbolic-ref HEAD</text>
+
+  <rect x="38" y="156" width="154" height="62" class="pill-red" />
+  <text x="115" y="176" class="mono-label txt-red">Detached HEAD</text>
+  <text x="115" y="193" class="mono-sm txt-slate">d695e7464f4cb84b...</text>
+  <text x="115" y="209" class="sub-txt txt-muted">브랜치 없이 커밋 직접 참조</text>
+
+  <!-- Column 2: Refs -->
+  <rect x="232" y="60" width="166" height="50" class="pill-green" />
+  <text x="315" y="80" class="mono-sm txt-green">refs/heads/main</text>
+  <text x="315" y="97" class="mono-sm txt-slate">de47e47e... (41B)</text>
+
+  <rect x="232" y="124" width="166" height="50" class="pill-blue" />
+  <text x="315" y="144" class="mono-sm txt-blue">refs/remotes/origin/main</text>
+  <text x="315" y="161" class="mono-sm txt-slate">d695e746... (읽기 전용)</text>
+
+  <rect x="232" y="188" width="166" height="50" class="pill-amber" />
+  <text x="315" y="208" class="mono-sm txt-amber">refs/tags/v1.0.0</text>
+  <text x="315" y="225" class="mono-sm txt-slate">Tag Obj 경유 또는 Commit 직결</text>
+
+  <rect x="232" y="252" width="166" height="52" class="pill-slate" />
+  <text x="315" y="272" class="mono-sm txt-slate">git update-ref</text>
+  <text x="315" y="290" class="sub-txt txt-muted">직접 파일 편집 대신 안전 갱신</text>
+
+  <!-- Arrows HEAD -> Refs -->
+  <line x1="192" y1="88" x2="230" y2="85" class="flow-green" marker-end="url(#arr-green)" />
+  <path d="M 192 188 L 414 188 L 414 274 L 444 274" class="flow-dashed" marker-end="url(#arr-red)" />
+
+  <!-- Column 3: Commits -->
+  <rect x="446" y="60" width="144" height="58" class="pill-indigo" />
+  <text x="518" y="80" class="mono-sm txt-indigo">Commit C2 (de47e47)</text>
+  <text x="518" y="97" class="mono-sm txt-slate">second commit</text>
+  <text x="518" y="110" class="sub-txt txt-muted">parent: d695e74</text>
+
+  <rect x="446" y="190" width="144" height="58" class="pill-indigo" />
+  <text x="518" y="210" class="mono-sm txt-indigo">Commit C1 (d695e74)</text>
+  <text x="518" y="227" class="mono-sm txt-slate">first commit</text>
+  <text x="518" y="240" class="sub-txt txt-muted">root commit</text>
+
+  <!-- Arrows Refs -> Commits and C2 -> C1 -->
+  <line x1="398" y1="85" x2="444" y2="85" class="flow-green" marker-end="url(#arr-green)" />
+  <line x1="398" y1="149" x2="444" y2="210" class="flow-slate" marker-end="url(#arr-slate)" />
+  <line x1="398" y1="213" x2="444" y2="95" class="flow-amber" marker-end="url(#arr-amber)" />
+  <line x1="518" y1="118" x2="518" y2="188" class="flow-indigo" marker-end="url(#arr-indigo)" />
+
+  <!-- Column 4: Trees and Blobs -->
+  <rect x="630" y="60" width="150" height="52" class="pill-amber" />
+  <text x="705" y="80" class="mono-sm txt-amber">Tree T2 (b9c6a44)</text>
+  <text x="705" y="98" class="sub-txt txt-slate">bak/ + test.txt(v2)</text>
+
+  <rect x="630" y="132" width="150" height="50" class="pill-blue" />
+  <text x="705" y="152" class="mono-sm txt-blue">Blob (1f7a7a4)</text>
+  <text x="705" y="169" class="sub-txt txt-slate">"version 2\n"</text>
+
+  <rect x="630" y="196" width="150" height="52" class="pill-amber" />
+  <text x="705" y="216" class="mono-sm txt-amber">Tree T1 (d8329fc)</text>
+  <text x="705" y="234" class="sub-txt txt-slate">test.txt(v1)</text>
+
+  <rect x="630" y="262" width="150" height="46" class="pill-blue" />
+  <text x="705" y="281" class="mono-sm txt-blue">Blob (83baae6)</text>
+  <text x="705" y="297" class="sub-txt txt-slate">"version 1\n"</text>
+
+  <!-- Tree/Blob arrows -->
+  <line x1="590" y1="86" x2="628" y2="86" class="flow-amber" marker-end="url(#arr-amber)" />
+  <line x1="590" y1="222" x2="628" y2="222" class="flow-amber" marker-end="url(#arr-amber)" />
+  <line x1="705" y1="112" x2="705" y2="130" class="flow-slate" marker-end="url(#arr-slate)" />
+  <line x1="705" y1="248" x2="705" y2="260" class="flow-slate" marker-end="url(#arr-slate)" />
+  <path d="M 780 86 L 792 86 L 792 222 L 782 222" class="flow-amber" marker-end="url(#arr-amber)" />
+
+  <!-- SECTION 2: REF STORAGE EVOLUTION -->
+  <text x="26" y="350" class="section-title">2. Git 참조(Ref) 저장소 백엔드의 진화: Loose → packed-refs → Reftable</text>
+  <rect x="24" y="362" width="772" height="142" class="panel-card" />
+
+  <rect x="38" y="378" width="228" height="110" class="pill-slate" />
+  <text x="152" y="399" class="mono-label txt-slate">1단계: Loose Files (기본)</text>
+  <text x="152" y="420" class="sub-txt txt-slate">.git/refs/heads/feat/login 파일</text>
+  <text x="152" y="438" class="sub-txt txt-muted">브랜치·태그마다 파일 1개 생성</text>
+  <text x="152" y="456" class="sub-txt txt-red">대규모 저장소에서 I/O 병목 유발</text>
+  <text x="152" y="474" class="sub-txt txt-red">macOS 대소문자 미구분 충돌 위험</text>
+
+  <line x1="266" y1="433" x2="294" y2="433" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <rect x="296" y="378" width="228" height="110" class="pill-amber" />
+  <text x="410" y="399" class="mono-label txt-amber">2단계: packed-refs (pack-refs)</text>
+  <text x="410" y="420" class="sub-txt txt-slate">.git/packed-refs 단일 텍스트 통합</text>
+  <text x="410" y="438" class="sub-txt txt-muted">수만 개 태그·브랜치 조회 고속화</text>
+  <text x="410" y="456" class="sub-txt txt-muted">갱신 시 전체 파일 재작성 필요</text>
+  <text x="410" y="474" class="sub-txt txt-amber">Loose 파일과 혼재 관리</text>
+
+  <line x1="524" y1="433" x2="552" y2="433" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <rect x="554" y="378" width="228" height="110" class="pill-indigo" />
+  <text x="668" y="399" class="mono-label txt-indigo">3단계: Reftable (Git 2.45+)</text>
+  <text x="668" y="420" class="sub-txt txt-slate">--ref-format=reftable 바이너리 포맷</text>
+  <text x="668" y="438" class="sub-txt txt-green">이진 탐색 O(log N) 초고속 조회</text>
+  <text x="668" y="456" class="sub-txt txt-green">원자적 다중 Ref 트랜잭션 보장</text>
+  <text x="668" y="474" class="sub-txt txt-green">OS 파일시스템 대소문자 충돌 완전 해소</text>
+</svg>
