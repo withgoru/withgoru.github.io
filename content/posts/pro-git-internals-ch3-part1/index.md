@@ -92,7 +92,7 @@ $ git log --oneline --decorate --graph --all
 * 98ca9 Initial commit of my project
 ```
 
-> **Git 2.23+ `git switch` 도입**: 기존 `git checkout`은 브랜치 전환과 파일 복원 역할을 모두 맡아 혼란스럽다는 지적이 많았다. Git 2.23부터는 브랜치 전환 전용 명령어인 `git switch`가 추가되었다.
+> **Git 2.23+ `git switch` 도입 및 Git 2.51 정식 안정화**: 기존 `git checkout`은 브랜치 전환과 파일 복원 역할을 모두 맡아 혼란스럽다는 지적이 많았다. Git 2.23부터 브랜치 전환 전용 명령어인 `git switch`가 추가되었고, **Git 2.51(2025.08)** 부터는 오랜 `experimental` 꼬리표를 떼고 정식 안정 핵심 명령어로 승격되었다.
 > - 기존 브랜치로 전환: `git switch testing`
 > - 새 브랜치 생성과 동시에 전환(`git checkout -b` 대체): `git switch -c new-branch` (`--create`)
 > - 직전 브랜치로 즉시 복귀: `git switch -`
@@ -172,7 +172,7 @@ index.html |    1 +
 1 file changed, 1 insertion(+)
 ```
 
-> **참고 (`recursive` vs `ort`)**: Pro Git 집필 당시 Git의 기본 병합 전략은 `recursive`였으며, Git 2.34부터는 속도와 정확도를 개선한 **`ort`**("Ostensibly Recursive's Twin") 전략이 기본값으로 대체되었다. 3개의 스냅샷을 대조하는 3-Way Merge의 본질은 동일하다.
+> **참고 (`recursive` vs `ort`)**: Pro Git 집필 당시 Git의 기본 병합 전략은 `recursive`였으며, Git 2.34부터 속도와 정확도를 개선한 **`ort`**("Ostensibly Recursive's Twin") 전략이 기본값으로 대체되었다. 이후 **Git 2.50(2025.06)** 에서는 구형 `recursive` 머지 엔진 자체가 코드베이스에서 완전히 제거되어 이제 `ort`가 유일한 기본 3-Way 머지 엔진이다. 3개의 스냅샷을 대조하는 3-Way Merge의 본질은 동일하다.
 
 이번에는 아까의 핫픽스 병합과 출력이 다르다. `master`(`C4`)와 `iss53`(`C5`)이 공통 조상(`C2`)으로부터 **서로 다른 방향으로 분기**(Diverge)했기 때문에 포인터만 앞으로 밀어서는 통합할 수 없다. 이때 Git은 **3-Way Merge**를 수행한다.
 

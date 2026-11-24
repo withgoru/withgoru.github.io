@@ -41,11 +41,11 @@ $ xcode-select --install
 $ brew install git
 ```
 
-설치가 완료되었다면 버전 명령어로 정상 동작을 확인한다. (본 실습의 `git switch` 및 `git restore` 명령어는 **Git 2.23 이상**을 기준으로 한다.)
+설치가 완료되었다면 버전 명령어로 정상 동작을 확인한다. (본 실습의 `git switch` 및 `git restore` 명령어는 **Git 2.23 이상**에서 도입되어 **Git 2.51**부터 정식 안정 명령어로 승격되었다.)
 
 ```bash
 $ git --version
-git version 2.47.0
+git version 2.50.1
 ```
 
 ---
@@ -126,6 +126,7 @@ $ git config --global user.email "goru@example.com"
 $ git config --global core.editor "vim"
 
 # 3. git init 실행 시 생성되는 기본 브랜치 이름을 main으로 지정
+# (Git 2.52+에서는 Git 3.0부터 기본값이 main으로 바뀐다는 공식 안내도 함께 출력된다)
 $ git config --global init.defaultBranch main
 
 # 4. Pro Git 2.7에서 소개한 실전 한 줄 로그 Alias (git lg)
