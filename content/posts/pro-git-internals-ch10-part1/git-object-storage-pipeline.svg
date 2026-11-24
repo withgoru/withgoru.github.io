@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 580" width="820" height="580" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Git Object 바이너리 저장 파이프라인 및 4가지 객체 구조</title>
+  <desc id="diagram-desc">상단은 원본 데이터가 타입·크기·널 바이트 헤더와 결합한 뒤 SHA-1 해싱 및 zlib 압축을 거쳐 .git/objects 경로에 저장되는 파이프라인을 보여주고, 하단은 Blob, Tree, Commit, Annotated Tag 4가지 객체의 내부 구조와 참조 관계를 설명한다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15.5px; font-weight: 700; fill: #0f172a; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; }
+
+      .pill-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.2; rx: 6; }
+      .pill-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.2; rx: 6; }
+      .pill-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.2; rx: 6; }
+      .pill-indigo { fill: #eef2ff; stroke: #4f46e5; stroke-width: 1.2; rx: 6; }
+      .pill-red { fill: #fef2f2; stroke: #dc2626; stroke-width: 1.2; rx: 6; }
+      .pill-slate { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.1; rx: 6; }
+
+      .code-box { fill: #0f172a; rx: 5; }
+      .code-txt { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; fill: #e2e8f0; text-anchor: start; }
+      .code-accent { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; fill: #38bdf8; text-anchor: start; }
+      .code-green { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; fill: #4ade80; text-anchor: start; }
+      .code-amber { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; fill: #fbbf24; text-anchor: start; }
+
+      .flow-slate { stroke: #475569; stroke-width: 1.7; fill: none; }
+      .flow-indigo { stroke: #4f46e5; stroke-width: 1.6; fill: none; }
+      .flow-amber { stroke: #d97706; stroke-width: 1.6; fill: none; }
+      .flow-blue { stroke: #0284c7; stroke-width: 1.6; fill: none; }
+
+      .mono-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 700; text-anchor: middle; }
+      .mono-sm { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; font-weight: 700; text-anchor: middle; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 9.5px; text-anchor: middle; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: start; }
+
+      .txt-green { fill: #15803d; }
+      .txt-blue { fill: #0369a1; }
+      .txt-amber { fill: #b45309; }
+      .txt-indigo { fill: #4338ca; }
+      .txt-red { fill: #b91c1c; }
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+    </style>
+
+    <marker id="arr-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+    <marker id="arr-indigo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#4f46e5" />
+    </marker>
+    <marker id="arr-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706" />
+    </marker>
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+  </defs>
+
+  <rect x="1" y="1" width="818" height="578" rx="12" class="bg" />
+
+  <!-- SECTION 1: STORAGE PIPELINE -->
+  <text x="26" y="32" class="section-title">1. Git Object 바이너리 저장 파이프라인 (Content-Addressable Storage)</text>
+  <rect x="24" y="44" width="772" height="190" class="panel-card" />
+
+  <!-- Step 1: Raw Content -->
+  <rect x="38" y="60" width="132" height="92" class="pill-slate" />
+  <text x="104" y="80" class="mono-label txt-slate">1. 원본 데이터</text>
+  <text x="104" y="98" class="mono-sm txt-blue">"what is up, doc?\n"</text>
+  <text x="104" y="118" class="sub-txt txt-muted">길이: 17바이트</text>
+  <text x="104" y="135" class="sub-txt txt-muted">파일명·시간 정보 없음</text>
+
+  <line x1="170" y1="106" x2="188" y2="106" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <!-- Step 2: Header Concatenation -->
+  <rect x="190" y="60" width="176" height="92" class="pill-blue" />
+  <text x="278" y="80" class="mono-label txt-blue">2. 헤더 + 널 바이트 결합</text>
+  <rect x="200" y="90" width="156" height="28" class="code-box" />
+  <text x="208" y="108" class="code-accent">blob 17\0what is up...</text>
+  <text x="278" y="136" class="sub-txt txt-slate">타입 + 공백 + 바이트수 + \0</text>
+
+  <line x1="366" y1="106" x2="384" y2="106" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <!-- Step 3: SHA-1 Hash -->
+  <rect x="386" y="60" width="184" height="92" class="pill-amber" />
+  <text x="478" y="80" class="mono-label txt-amber">3. SHA-1 해싱 (40자리)</text>
+  <rect x="396" y="90" width="164" height="28" class="code-box" />
+  <text x="404" y="108" class="code-amber">7108f7ecb345ee9d...</text>
+  <text x="478" y="136" class="sub-txt txt-slate">앞 2자리(71) + 뒤 38자리</text>
+
+  <line x1="570" y1="106" x2="588" y2="106" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <!-- Step 4: zlib Compress and Store -->
+  <rect x="590" y="60" width="192" height="92" class="pill-green" />
+  <text x="686" y="80" class="mono-label txt-green">4. zlib 압축 후 디스크 저장</text>
+  <rect x="600" y="90" width="172" height="28" class="code-box" />
+  <text x="606" y="108" class="code-green">.git/objects/71/08f7...</text>
+  <text x="686" y="136" class="sub-txt txt-slate">deflate 압축 (33바이트)</text>
+
+  <!-- Bottom note inside Section 1 -->
+  <rect x="38" y="166" width="744" height="54" class="pill-indigo" />
+  <text x="52" y="187" class="sub-left txt-indigo" font-weight="700">불변성(Immutability)과 중복 제거(Deduplication)의 원리:</text>
+  <text x="52" y="206" class="sub-left txt-slate">동일한 내용의 파일은 이름이 달라도 항상 같은 SHA-1 해시를 생성해 1개 Blob으로 공유된다. 현대 Git은 SHA-256 모드(--object-format=sha256)도 지원한다.</text>
+
+  <!-- SECTION 2: 4 OBJECT TYPES -->
+  <text x="26" y="264" class="section-title">2. Git 4대 객체 타입의 내부 구조와 Merkle DAG 연결</text>
+  <rect x="24" y="276" width="772" height="284" class="panel-card" />
+
+  <!-- Card 1: Annotated Tag -->
+  <rect x="38" y="294" width="166" height="200" class="pill-red" />
+  <text x="121" y="314" class="mono-label txt-red">Annotated Tag (tag)</text>
+  <text x="121" y="330" class="sub-txt txt-muted">릴리즈 메타데이터·서명</text>
+  <rect x="46" y="340" width="150" height="114" class="code-box" />
+  <text x="53" y="357" class="code-accent">object de47e47e...</text>
+  <text x="53" y="373" class="code-txt">type commit</text>
+  <text x="53" y="389" class="code-txt">tag v1.0.0</text>
+  <text x="53" y="405" class="code-txt">tagger Goru ...</text>
+  <text x="53" y="423" class="code-green">Release v1.0.0</text>
+  <text x="53" y="439" class="code-txt">(GPG/SSH 서명 가능)</text>
+  <text x="121" y="476" class="sub-txt txt-red">독립 객체 (Lightweight와 차이)</text>
+
+  <line x1="204" y1="394" x2="226" y2="394" class="flow-indigo" marker-end="url(#arr-indigo)" />
+
+  <!-- Card 2: Commit -->
+  <rect x="228" y="294" width="174" height="200" class="pill-indigo" />
+  <text x="315" y="314" class="mono-label txt-indigo">Commit (commit)</text>
+  <text x="315" y="330" class="sub-txt txt-muted">시점 스냅샷 + 이력 연결</text>
+  <rect x="236" y="340" width="158" height="114" class="code-box" />
+  <text x="243" y="357" class="code-amber">tree b9c6a44a...</text>
+  <text x="243" y="373" class="code-accent">parent d695e746...</text>
+  <text x="243" y="389" class="code-txt">author Goru 1796...</text>
+  <text x="243" y="405" class="code-txt">committer Goru ...</text>
+  <text x="243" y="423" class="code-green">second commit</text>
+  <text x="243" y="439" class="code-txt">(머지 시 parent 2개+)</text>
+  <text x="315" y="476" class="sub-txt txt-indigo">루트 Tree 1개만 직접 가리킴</text>
+
+  <line x1="402" y1="394" x2="424" y2="394" class="flow-amber" marker-end="url(#arr-amber)" />
+
+  <!-- Card 3: Tree -->
+  <rect x="426" y="294" width="184" height="200" class="pill-amber" />
+  <text x="518" y="314" class="mono-label txt-amber">Tree (tree)</text>
+  <text x="518" y="330" class="sub-txt txt-muted">디렉토리 엔트리 매핑</text>
+  <rect x="434" y="340" width="168" height="114" class="code-box" />
+  <text x="441" y="357" class="code-amber">040000 tree d832 bak</text>
+  <text x="441" y="375" class="code-accent">100644 blob 1f7a test.txt</text>
+  <text x="441" y="395" class="code-txt">mode 규칙:</text>
+  <text x="441" y="411" class="code-txt"> 100644 일반 / 100755 실행</text>
+  <text x="441" y="427" class="code-txt"> 120000 링크 / 040000 폴더</text>
+  <text x="441" y="443" class="code-txt"> 160000 서브모듈 Gitlink</text>
+  <text x="518" y="476" class="sub-txt txt-amber">파일명·권한을 Tree가 보관</text>
+
+  <line x1="610" y1="394" x2="632" y2="394" class="flow-blue" marker-end="url(#arr-blue)" />
+
+  <!-- Card 4: Blob -->
+  <rect x="634" y="294" width="148" height="200" class="pill-blue" />
+  <text x="708" y="314" class="mono-label txt-blue">Blob (blob)</text>
+  <text x="708" y="330" class="sub-txt txt-muted">순수 파일 콘텐츠</text>
+  <rect x="642" y="340" width="132" height="114" class="code-box" />
+  <text x="649" y="362" class="code-green">version 2</text>
+  <text x="649" y="384" class="code-txt">(텍스트·이미지·바이너리</text>
+  <text x="649" y="400" class="code-txt"> 원시 바이트 그대로)</text>
+  <text x="649" y="424" class="code-txt">파일명 미포함</text>
+  <text x="649" y="440" class="code-txt">권한·수정시각 미포함</text>
+  <text x="708" y="476" class="sub-txt txt-blue">하위 참조 없는 리프 노드</text>
+
+  <!-- Merkle DAG Footer -->
+  <rect x="38" y="506" width="744" height="40" class="pill-slate" />
+  <text x="410" y="525" class="sub-txt txt-slate" font-weight="700">Merkle DAG 무결성: 하위 Blob 1바이트만 변해도 상위 Tree · Commit 해시가 연쇄 변경되어 위변조를 즉시 탐지한다.</text>
+  <text x="410" y="539" class="sub-txt txt-muted">디렉토리 비교 시 해시 40자리(20바이트)만 같으면 내부 모든 파일이 동일함을 O(1)에 확신할 수 있다.</text>
+</svg>
