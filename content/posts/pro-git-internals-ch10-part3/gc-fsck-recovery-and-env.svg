@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 560" width="820" height="560" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Git GC, fsck 기반 Dangling 커밋 복구 경로 및 핵심 환경 변수 3영역</title>
+  <desc id="diagram-desc">상단은 Reachable 커밋 그래프와 reset --hard로 고립된 Dangling 커밋, gc.pruneExpire 2주 유예 기간 및 git fsck --full 복구 경로를 보여주고, 하단은 저장소 제어, 메타데이터 주입, 프로토콜 및 성능 트레이싱용 Git 환경 변수 3개 영역을 정리한다.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .panel-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; rx: 8; }
+      .section-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: 700; fill: #0f172a; }
+
+      .pill-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.2; rx: 6; }
+      .pill-blue { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.2; rx: 6; }
+      .pill-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 1.2; rx: 6; }
+      .pill-indigo { fill: #eef2ff; stroke: #4f46e5; stroke-width: 1.2; rx: 6; }
+      .pill-red { fill: #fef2f2; stroke: #dc2626; stroke-width: 1.2; rx: 6; }
+      .pill-slate { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.1; rx: 6; }
+
+      .code-box { fill: #0f172a; rx: 5; }
+      .code-txt { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; fill: #e2e8f0; text-anchor: start; }
+      .code-green { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; fill: #4ade80; text-anchor: start; }
+      .code-amber { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; fill: #fbbf24; text-anchor: start; }
+      .code-accent { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; fill: #38bdf8; text-anchor: start; }
+
+      .flow-slate { stroke: #475569; stroke-width: 1.7; fill: none; }
+      .flow-green { stroke: #16a34a; stroke-width: 1.8; fill: none; }
+      .flow-red-dash { stroke: #dc2626; stroke-width: 1.6; stroke-dasharray: 5 3; fill: none; }
+      .flow-amber { stroke: #d97706; stroke-width: 1.7; fill: none; }
+
+      .mono-label { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; text-anchor: middle; }
+      .mono-sm { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; font-weight: 700; text-anchor: middle; }
+      .sub-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 9.5px; text-anchor: middle; }
+      .sub-left { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; text-anchor: start; }
+
+      .txt-green { fill: #15803d; }
+      .txt-blue { fill: #0369a1; }
+      .txt-amber { fill: #b45309; }
+      .txt-indigo { fill: #4338ca; }
+      .txt-red { fill: #b91c1c; }
+      .txt-slate { fill: #334155; }
+      .txt-muted { fill: #64748b; }
+    </style>
+
+    <marker id="arr-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+    <marker id="arr-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+    <marker id="arr-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706" />
+    </marker>
+    <marker id="arr-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+    </marker>
+  </defs>
+
+  <rect x="1" y="1" width="818" height="558" rx="12" class="bg" />
+
+  <!-- SECTION 1: GC AND FSCK RECOVERY -->
+  <text x="26" y="30" class="section-title">1. Reachable vs Dangling 객체 그래프와 git fsck 복구 수명 주기 (Pro Git 10.7)</text>
+  <rect x="24" y="42" width="772" height="272" class="panel-card" />
+
+  <!-- Left: Reachable Graph -->
+  <rect x="38" y="56" width="108" height="46" class="pill-green" />
+  <text x="92" y="76" class="mono-sm txt-green">HEAD -> main</text>
+  <text x="92" y="92" class="sub-txt txt-muted">현재 활성 브랜치</text>
+
+  <line x1="146" y1="79" x2="176" y2="79" class="flow-green" marker-end="url(#arr-green)" />
+
+  <rect x="178" y="56" width="132" height="46" class="pill-indigo" />
+  <text x="244" y="76" class="mono-sm txt-indigo">Commit (97fce17)</text>
+  <text x="244" y="92" class="sub-txt txt-slate">init app (Reachable)</text>
+
+  <!-- Right-Top: Dangling Commit after reset hard -->
+  <path d="M 390 79 L 312 79" class="flow-red-dash" marker-end="url(#arr-red)" />
+  <text x="351" y="71" class="sub-txt txt-red">parent</text>
+
+  <rect x="392" y="54" width="174" height="54" class="pill-red" />
+  <text x="479" y="74" class="mono-sm txt-red">Dangling Commit (b705156)</text>
+  <text x="479" y="92" class="sub-txt txt-slate">reset 후 어떤 Ref도 안 가리킴</text>
+
+  <!-- Recovery Branch -->
+  <rect x="598" y="54" width="184" height="54" class="pill-green" />
+  <text x="690" y="74" class="mono-sm txt-green">git branch recover b705156</text>
+  <text x="690" y="92" class="sub-txt txt-slate">새 Ref 연결 시 즉시 복구 완료</text>
+  <line x1="598" y1="81" x2="568" y2="81" class="flow-green" marker-end="url(#arr-green)" />
+
+  <!-- Bottom Timeline inside Section 1: Grace Period and Prune -->
+  <rect x="38" y="124" width="744" height="174" class="pill-slate" />
+  <text x="52" y="146" class="mono-label txt-slate" style="text-anchor:start;">Unreachable 객체 수명 주기 및 git fsck 복구 3단계</text>
+
+  <!-- Step 1 -->
+  <rect x="52" y="160" width="224" height="122" class="pill-amber" />
+  <text x="164" y="180" class="mono-label txt-amber">1. 유예 기간 (기본 2주)</text>
+  <text x="164" y="200" class="sub-txt txt-slate">reset · rebase 직후에도 객체는</text>
+  <text x="164" y="216" class="sub-txt txt-slate">디스크(.git/objects)에 살아 있음</text>
+  <text x="164" y="236" class="mono-sm txt-amber">gc.pruneExpire = 2.weeks.ago</text>
+  <text x="164" y="256" class="sub-txt txt-muted">1차 방어선: git reflog (기본 90일)</text>
+  <text x="164" y="271" class="sub-txt txt-muted">만료 시 아래 fsck 단계로 이동</text>
+
+  <line x1="276" y1="221" x2="298" y2="221" class="flow-amber" marker-end="url(#arr-amber)" />
+
+  <!-- Step 2 -->
+  <rect x="300" y="160" width="230" height="122" class="pill-blue" />
+  <text x="415" y="180" class="mono-label txt-blue">2. 최후의 보루: git fsck</text>
+  <rect x="308" y="192" width="214" height="42" class="code-box" />
+  <text x="315" y="209" class="code-accent">git fsck --full --no-reflogs</text>
+  <text x="315" y="225" class="code-green">dangling commit b705156...</text>
+  <text x="415" y="252" class="sub-txt txt-slate">모든 객체 전수 스캔 후 고립 커밋 탐지</text>
+  <text x="415" y="269" class="sub-txt txt-blue">git show b705156 로 내용 사전 확인</text>
+
+  <line x1="530" y1="221" x2="552" y2="221" class="flow-slate" marker-end="url(#arr-slate)" />
+
+  <!-- Step 3 -->
+  <rect x="554" y="160" width="214" height="122" class="pill-red" />
+  <text x="661" y="180" class="mono-label txt-red">3. 영구 소멸 (Prune)</text>
+  <text x="661" y="200" class="sub-txt txt-slate">유예 기간 만료 후 git gc 또는</text>
+  <text x="661" y="216" class="sub-txt txt-slate">git gc --prune=now 실행 시</text>
+  <text x="661" y="236" class="sub-txt txt-red" font-weight="700">Dangling 객체 디스크 영구 삭제</text>
+  <text x="661" y="256" class="sub-txt txt-muted">현대 권장: git maintenance start</text>
+  <text x="661" y="271" class="sub-txt txt-muted">(백그라운드 자동 최적화 수행)</text>
+
+  <!-- SECTION 2: ENVIRONMENT VARIABLES -->
+  <text x="26" y="344" class="section-title">2. 실무 · CI 디버깅을 위한 Git 핵심 환경 변수 3대 영역 (Pro Git 10.8)</text>
+  <rect x="24" y="356" width="772" height="190" class="panel-card" />
+
+  <!-- Col 1: Repo Structure -->
+  <rect x="38" y="370" width="240" height="162" class="pill-indigo" />
+  <text x="158" y="391" class="mono-label txt-indigo">저장소 경로 · 인덱스 제어</text>
+  <rect x="46" y="401" width="224" height="72" class="code-box" />
+  <text x="53" y="418" class="code-accent">GIT_DIR=/srv/dots.git</text>
+  <text x="53" y="434" class="code-accent">GIT_WORK_TREE=$HOME</text>
+  <text x="53" y="450" class="code-txt">GIT_INDEX_FILE=/tmp/idx</text>
+  <text x="53" y="466" class="code-txt">GIT_OBJECT_DIRECTORY=...</text>
+  <text x="158" y="494" class="sub-txt txt-slate">Bare 저장소로 dotfiles 관리 또는</text>
+  <text x="158" y="511" class="sub-txt txt-muted">원본 Index 건드리지 않는 CI 스크립트</text>
+
+  <!-- Col 2: Metadata -->
+  <rect x="290" y="370" width="240" height="162" class="pill-amber" />
+  <text x="410" y="391" class="mono-label txt-amber">커밋 메타데이터 · 인증 제어</text>
+  <rect x="298" y="401" width="224" height="72" class="code-box" />
+  <text x="305" y="418" class="code-amber">GIT_AUTHOR_NAME / EMAIL</text>
+  <text x="305" y="434" class="code-amber">GIT_COMMITTER_DATE=...</text>
+  <text x="305" y="450" class="code-txt">GIT_SSH_COMMAND="ssh -i .."</text>
+  <text x="305" y="466" class="code-txt">GIT_TERMINAL_PROMPT=0</text>
+  <text x="410" y="494" class="sub-txt txt-slate">자동화 봇 커밋 · 재현 가능 빌드 및</text>
+  <text x="410" y="511" class="sub-txt txt-muted">CI 무인 환경 프롬프트 차단(즉시 실패)</text>
+
+  <!-- Col 3: Tracing -->
+  <rect x="542" y="370" width="240" height="162" class="pill-green" />
+  <text x="662" y="391" class="mono-label txt-green">프로토콜 · 성능 디버깅</text>
+  <rect x="550" y="401" width="224" height="72" class="code-box" />
+  <text x="557" y="418" class="code-green">GIT_TRACE=1</text>
+  <text x="557" y="434" class="code-green">GIT_TRACE_PACKET=1</text>
+  <text x="557" y="450" class="code-txt">GIT_TRACE_CURL=1</text>
+  <text x="557" y="466" class="code-txt">GIT_TRACE2_PERF=1</text>
+  <text x="662" y="494" class="sub-txt txt-slate">내부 서브프로세스 · want/have 패킷 ·</text>
+  <text x="662" y="511" class="sub-txt txt-muted">병목 구간(ms) 터미널 실시간 관측</text>
+</svg>
