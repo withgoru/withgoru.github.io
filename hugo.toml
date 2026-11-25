@@ -67,3 +67,6 @@ buildExpired = false
   [[params.socialIcons]]
     name = 'rss'
     url = 'index.xml'
+
+  [params.analytics.google]
+    SiteVerificationTag = 'BGnV0pp7Q2694gFfFBJyrGV-pv5nHm9ig5ocUDl5tQA'
