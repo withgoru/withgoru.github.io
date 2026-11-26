@@ -33,6 +33,10 @@ summary = 'About me'
   <img src="https://shieldcn.dev/badge/Redis-DC382D.svg?logo=redis" alt="Redis" />
 </div>
 
+### Digital Badges
+
+{{< digital-badges >}}
+
 ### Professional Summary
 
 Versatile software engineer, NCS-certified IT educator, and owner of Kickcode Plus with over 11 years of hands-on experience bridging full-stack web development, agentic AI workflows, and digital business automation. Proven track record of architecting scalable systems with Go and Python, executing marketing engineering (GA4/GTM), and delivering high-impact corporate training for premier tech firms—including Samsung Electronics, Kakao Tech Campus, and 11st—as well as lecturing at Kookmin University's Digital Marketing MBA program. Adept at turning complex business challenges into production-ready software solutions with end-to-end ownership.
