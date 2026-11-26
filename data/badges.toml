@@ -29,3 +29,43 @@
   url = 'https://www.coursera.org/account/accomplishments/verify/YK86UDJG9BLV'
   image = '/cropped-android-chrome-512x512-1.png'
   provider = 'Coursera'
+
+[[items]]
+  name = 'Introduction to Cloud Computing'
+  issuer = 'IEEEx'
+  issued = '2015-07-30'
+  url = 'https://courses.edx.org/certificates/7a086e4c2964477e9791b69a14c70a24'
+  image = 'https://www.edx.org/images/logos/edx-logo-elm.svg'
+  provider = 'edX'
+
+[[items]]
+  name = 'Learn HTML5 from W3C'
+  issuer = 'W3Cx'
+  issued = '2015-07-27'
+  url = 'https://courses.edx.org/certificates/739440d77a8b429e936e133ddb92fe82'
+  image = 'https://www.edx.org/images/logos/edx-logo-elm.svg'
+  provider = 'edX'
+
+[[items]]
+  name = 'Querying with Transact-SQL'
+  issuer = 'Microsoft'
+  issued = '2015-05-19'
+  url = 'https://courses.edx.org/certificates/2792c683ce7b440caf27d8f3f0357ddb'
+  image = 'https://www.edx.org/images/logos/edx-logo-elm.svg'
+  provider = 'edX'
+
+[[items]]
+  name = 'Entrepreneurship 101: Who is your customer?'
+  issuer = 'MITx'
+  issued = '2015-04-03'
+  url = 'https://courses.edx.org/certificates/7f7ae1871dd346eaac99c2ee98a2dd01'
+  image = 'https://www.edx.org/images/logos/edx-logo-elm.svg'
+  provider = 'edX Verified'
+
+[[items]]
+  name = 'Introduction to Computer Science and Programming Using Python'
+  issuer = 'MITx'
+  issued = '2015-03-14'
+  url = 'https://courses.edx.org/certificates/cf4cff6774234870aa7d66425e5858bf'
+  image = 'https://www.edx.org/images/logos/edx-logo-elm.svg'
+  provider = 'edX'

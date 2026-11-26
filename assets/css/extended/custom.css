@@ -127,8 +127,9 @@ summary:focus-visible,
     align-items: center;
     justify-content: center;
     border-radius: calc(var(--radius) - 2px);
-    background: var(--theme);
-    padding: 0.25rem;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    padding: 0.4rem;
 }
 
 .digital-badge-media img {
