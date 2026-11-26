@@ -147,6 +147,21 @@
         updateActiveToc();
       }
     }
+
+    // 5. 디지털 배지 더보기 / 접기 토글
+    document.querySelectorAll("button.digital-badge-toggle[aria-controls]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var targetId = btn.getAttribute("aria-controls");
+        var list = targetId ? document.getElementById(targetId) : null;
+        if (!list) return;
+        var isCollapsed = list.getAttribute("data-collapsed") === "true";
+        var nextCollapsed = !isCollapsed;
+        list.setAttribute("data-collapsed", nextCollapsed ? "true" : "false");
+        btn.setAttribute("aria-expanded", nextCollapsed ? "false" : "true");
+        var label = btn.getAttribute(nextCollapsed ? "data-label-expand" : "data-label-collapse");
+        if (label) btn.textContent = label;
+      });
+    });
   })();
 </script>
 

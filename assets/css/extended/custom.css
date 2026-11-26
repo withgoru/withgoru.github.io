@@ -167,6 +167,63 @@ summary:focus-visible,
     margin-top: 0.1rem;
 }
 
+.post-content ul.digital-badge-grid[data-collapsed],
+.md-content ul.digital-badge-grid[data-collapsed] {
+    margin-bottom: 0.9rem;
+}
+
+.post-content ul.digital-badge-grid[data-collapsed="true"] > li.digital-badge-card.is-extra,
+.md-content ul.digital-badge-grid[data-collapsed="true"] > li.digital-badge-card.is-extra {
+    display: none;
+}
+
+.digital-badge-toggle-wrap {
+    margin: 0 0 1.6rem 0;
+    display: flex;
+    justify-content: center;
+}
+
+.digital-badge-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 40px;
+    min-width: 160px;
+    padding: 0.45rem 1.1rem;
+    background: var(--entry);
+    color: var(--primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.digital-badge-toggle:hover {
+    border-color: var(--secondary);
+    background: var(--code-bg);
+}
+
+.digital-badge-toggle[aria-expanded="false"]::after {
+    content: "▾";
+    font-size: 0.78rem;
+    color: var(--secondary);
+}
+
+.digital-badge-toggle[aria-expanded="true"]::after {
+    content: "▴";
+    font-size: 0.78rem;
+    color: var(--secondary);
+}
+
+@media (max-width: 640px) {
+    .digital-badge-toggle {
+        width: 100%;
+    }
+}
+
 /* 2. 본문 및 리스트 타이포그래피 & Line-height / 여백 개선 */
 .post-content,
 .md-content {

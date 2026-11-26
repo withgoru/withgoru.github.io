@@ -1,18 +1,27 @@
+{{- $limit := .Get "limit" | default 2 | int -}}
 {{- with hugo.Data.badges.items -}}
-<ul class="digital-badge-grid" role="list">
-{{- range . }}
-<li class="digital-badge-card">
-<a class="digital-badge-link" href="{{ .url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ .name }} ({{ .issuer }}, {{ .issued }}) 자격 증명 확인">
+{{- $extraCount := sub (len .) $limit -}}
+{{- $hasExtra := gt $extraCount 0 -}}
+<ul id="digital-badge-list" class="digital-badge-grid" role="list"{{ if $hasExtra }} data-collapsed="true"{{ end }}>
+{{- range $index, $item := . }}
+<li class="digital-badge-card{{ if and $hasExtra (ge $index $limit) }} is-extra{{ end }}">
+<a class="digital-badge-link" href="{{ $item.url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $item.name }} ({{ $item.issuer }}, {{ $item.issued }}) 자격 증명 확인">
 <div class="digital-badge-media">
-<img src="{{ .image | absURL }}" alt="{{ .name }} ({{ .provider }})" loading="lazy" decoding="async" width="76" height="76" />
+<img src="{{ $item.image | absURL }}" alt="{{ $item.name }} ({{ $item.provider }})" loading="lazy" decoding="async" width="76" height="76" />
 </div>
 <div class="digital-badge-info">
-<span class="digital-badge-title">{{ .name }}</span>
-<span class="digital-badge-issuer">{{ .issuer }}</span>
-<span class="digital-badge-meta">{{ .issued }} · {{ .provider }} ↗</span>
+<span class="digital-badge-title">{{ $item.name }}</span>
+<span class="digital-badge-issuer">{{ $item.issuer }}</span>
+<span class="digital-badge-meta">{{ $item.issued }} · {{ $item.provider }} ↗</span>
 </div>
 </a>
 </li>
 {{- end }}
 </ul>
+{{- if $hasExtra }}
+<div class="digital-badge-toggle-wrap">
+<button type="button" class="digital-badge-toggle" aria-expanded="false" aria-controls="digital-badge-list" data-label-expand="더보기 (+{{ $extraCount }})" data-label-collapse="접기">더보기 (+{{ $extraCount }})</button>
+</div>
+<noscript><style>.digital-badge-grid[data-collapsed="true"] > .digital-badge-card.is-extra{display:block}.digital-badge-toggle-wrap{display:none}</style></noscript>
+{{- end }}
 {{- end -}}
