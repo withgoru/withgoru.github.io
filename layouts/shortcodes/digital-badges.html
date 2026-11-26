@@ -4,7 +4,7 @@
 <li class="digital-badge-card">
 <a class="digital-badge-link" href="{{ .url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ .name }} ({{ .issuer }}, {{ .issued }}) 자격 증명 확인">
 <div class="digital-badge-media">
-<img src="{{ .image }}" alt="{{ .name }} 디지털 배지" loading="lazy" decoding="async" width="76" height="76" />
+<img src="{{ .image | absURL }}" alt="{{ .name }} ({{ .provider }})" loading="lazy" decoding="async" width="76" height="76" />
 </div>
 <div class="digital-badge-info">
 <span class="digital-badge-title">{{ .name }}</span>
