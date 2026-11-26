@@ -5,3 +5,27 @@
   url = 'https://www.credential.net/a4ddd06e-0fa4-4d4d-8f51-8ba853b02d9f'
   image = 'https://api.accredible.com/v1/credentials/084b45te/artifact/badge'
   provider = 'Accredible'
+
+[[items]]
+  name = 'From Likes to Leads: Interact with Customers Online'
+  issuer = 'Google'
+  issued = '2023-09'
+  url = 'https://www.coursera.org/account/accomplishments/verify/99CHWBVWQAC2'
+  image = '/cropped-android-chrome-512x512-1.png'
+  provider = 'Coursera'
+
+[[items]]
+  name = 'Attract and Engage Customers with Digital Marketing'
+  issuer = 'Google'
+  issued = '2023-08'
+  url = 'https://www.coursera.org/account/accomplishments/verify/LUC7454SJ8SG'
+  image = '/cropped-android-chrome-512x512-1.png'
+  provider = 'Coursera'
+
+[[items]]
+  name = 'Foundations of Digital Marketing and E-commerce'
+  issuer = 'Google'
+  issued = '2023-07'
+  url = 'https://www.coursera.org/account/accomplishments/verify/YK86UDJG9BLV'
+  image = '/cropped-android-chrome-512x512-1.png'
+  provider = 'Coursera'

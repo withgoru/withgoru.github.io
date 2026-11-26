@@ -33,7 +33,7 @@ summary = 'About me'
   <img src="https://shieldcn.dev/badge/Redis-DC382D.svg?logo=redis" alt="Redis" />
 </div>
 
-### Digital Badges
+### Digital Badges & Certificates
 
 {{< digital-badges >}}
 
