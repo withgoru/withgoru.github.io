@@ -31,6 +31,22 @@
   provider = 'Coursera'
 
 [[items]]
+  name = 'Essential Google Cloud Infrastructure: Foundation'
+  issuer = 'Google Cloud'
+  issued = '2019-02-09'
+  url = 'https://coursera.org/verify/A4UTPKGZA9NJ'
+  image = '/cropped-android-chrome-512x512-1.png'
+  provider = 'Coursera'
+
+[[items]]
+  name = 'Google Cloud Fundamentals: Core Infrastructure'
+  issuer = 'Google Cloud'
+  issued = '2019-02-04'
+  url = 'https://coursera.org/verify/JZFPVFWSNU32'
+  image = '/cropped-android-chrome-512x512-1.png'
+  provider = 'Coursera'
+
+[[items]]
   name = 'Introduction to Cloud Computing'
   issuer = 'IEEEx'
   issued = '2015-07-30'
