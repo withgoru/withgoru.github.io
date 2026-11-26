@@ -79,6 +79,93 @@ summary:focus-visible,
     text-decoration: none !important;
 }
 
+/* 디지털 자격 배지 단독 섹션 (추가 확장을 고려한 반응형 그리드) */
+.post-content ul.digital-badge-grid,
+.md-content ul.digital-badge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.9rem;
+    list-style: none;
+    margin: 0.8rem 0 1.6rem 0;
+    padding: 0;
+}
+
+.post-content li.digital-badge-card,
+.md-content li.digital-badge-card {
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
+}
+
+.post-content a.digital-badge-link,
+.md-content a.digital-badge-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: 100%;
+    padding: 0.9rem 1rem;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-decoration: none !important;
+    box-shadow: none !important;
+    transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.post-content a.digital-badge-link:hover,
+.md-content a.digital-badge-link:hover {
+    transform: translateY(-2px);
+    border-color: var(--secondary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+.digital-badge-media {
+    flex-shrink: 0;
+    width: 76px;
+    height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--theme);
+    padding: 0.25rem;
+}
+
+.digital-badge-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+
+.digital-badge-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.22rem;
+    min-width: 0;
+}
+
+.digital-badge-title {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.35;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+}
+
+.digital-badge-issuer {
+    font-size: 0.85rem;
+    color: var(--content);
+}
+
+.digital-badge-meta {
+    font-size: 0.78rem;
+    color: var(--secondary);
+    margin-top: 0.1rem;
+}
+
 /* 2. 본문 및 리스트 타이포그래피 & Line-height / 여백 개선 */
 .post-content,
 .md-content {
